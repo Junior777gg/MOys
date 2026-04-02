@@ -35,9 +35,10 @@ class Mother(
         if (!registerFile.exists()) {
             registerFile.createNewFile()
             registerFile.writeText(Json.encodeToString(Apps(mutableListOf())))
-        }
-
-        registryCleanup()
+        } else {
+	    registryCleanup()
+            registerFile = File(registerFolderPath, "register.json")
+	}
     }
 
     val systemLauncher = SystemLauncher(graphicService, deviceManager, this)
