@@ -31,11 +31,6 @@ data class ChildrenHeightCentering(val place: Int) : ModifierElements
 open class Modifier private constructor(
     val elements : List<ModifierElements> = listOf()
     ){
-    val CENTER = 0
-    val RIGHT = 1
-    val LEFT = 2
-    val TOP = 4
-    val BOTTOM = 5
 
     fun add(element: ModifierElements): Modifier {
         return Modifier(elements + element)
@@ -45,7 +40,13 @@ open class Modifier private constructor(
         return elements.filterIsInstance<T>().lastOrNull()
     }
 
-    companion object: Modifier(listOf())
+    companion object: Modifier(listOf()){
+        const val CENTER = 0
+        const val RIGHT = 1
+        const val LEFT = 2
+        const val TOP = 4
+        const val BOTTOM = 5
+    }
 }
 
 fun Modifier.height(height: Int) = add(Height(height))

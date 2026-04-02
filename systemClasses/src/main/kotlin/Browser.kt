@@ -1,16 +1,19 @@
-class РКН(
-    override val gs: GraphicServiceI,
-    override val storage: StorageServiceI,
-    override val deviceManager: DeviceManagerI
-): Activity{
-    override fun main() {
-        gs.setContent {
-            ОлегСогрешил_С_дровой_собакой()
-        }
-        gs.redraw()
-    }
+import javafx.application.Application
+import javafx.scene.Scene
+import javafx.scene.layout.BorderPane
+import javafx.scene.web.WebView
+import javafx.stage.Stage
 
-    fun MutableList<View>.ОлегСогрешил_С_дровой_собакой(){
-        Column
+class BrowserApp : Application() {
+    override fun start(primaryStage: Stage) {
+        val webView = WebView()
+        webView.engine.load("https://google.com")
+
+        val root = BorderPane()
+        root.center = webView
+
+        primaryStage.scene = Scene(root, 640.0, 960.0)
+        primaryStage.title = "Браузер"
+        primaryStage.show()
     }
 }

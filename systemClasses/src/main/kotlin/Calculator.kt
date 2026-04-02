@@ -14,18 +14,15 @@ class CalculatorApp(
     private var waitingForSecond = false
 
     override fun main() {
-        // Первый вызов — это НАВИГАЦИЯ, новый экран в стеке
         gs.setContent(itIsNewScreen = true) { buildUI() }
         gs.redraw()
     }
 
     private fun render() {
-        // Все последующие — просто ПЕРЕРИСОВКА, стек не трогаем
         gs.setContent(itIsNewScreen = false) { buildUI() }
         gs.redraw()
     }
 
-    // Один метод строит UI — используется и там, и там
     private fun MutableList<View>.buildUI() {
         Column(modifier = Modifier.fillMaxSize().background(Color(30, 30, 30)), this).layout {
 
@@ -94,7 +91,6 @@ class CalculatorApp(
             this
         ).layout {
             Text(
-                // ИСПРАВЛЕНИЕ: здесь должен быть textColor, а не bg!
                 modifier = Modifier.width(w - 4).height(136).background(textColor),
                 text = label,
                 textSize = 32,

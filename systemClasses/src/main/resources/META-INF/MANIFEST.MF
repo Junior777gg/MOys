@@ -1,20 +1,31 @@
 Manifest-Version: 1.0
 Main-Class: MainSystemServiceKt
-Class-Path: kotlinx-serialization-json-jvm-1.9.0.jar jogl-all-2.3.2-nati
- ves-windows-i586.jar gluegen-rt-2.3.2-natives-linux-amd64.jar jogl-all-
- 2.3.2-natives-linux-i586.jar jogl-all-2.3.2-natives-android-aarch64.jar
-  gluegen-rt-main-2.3.2.jar kotlinx-coroutines-core-jvm-1.9.0.jar gluege
- n-rt-2.3.2-natives-windows-amd64.jar jogl-all-2.3.2-natives-linux-armv6
- .jar kotlinx-serialization-core-jvm-1.9.0.jar gluegen-rt-2.3.2-natives-
- solaris-amd64.jar gluegen-rt-2.3.2-natives-linux-i586.jar jogl-all-main
- -2.3.2.jar jogl-all-2.3.2-natives-windows-amd64.jar gluegen-rt-2.3.2-na
- tives-solaris-i586.jar jogl-all-2.3.2-natives-linux-amd64.jar gluegen-r
- t-2.3.2-natives-linux-armv6hf.jar gluegen-rt-2.3.2-natives-linux-armv6.
- jar jogl-all-2.3.2-natives-linux-armv6hf.jar jogl-all-2.3.2.jar gluegen
- -rt-2.3.2-natives-android-armv6.jar annotations-23.0.0.jar gluegen-rt-2
- .3.2.jar kotlin-stdlib-2.2.20.jar jogl-all-2.3.2-natives-solaris-i586.j
- ar jogl-all-2.3.2-natives-android-armv6.jar gluegen-rt-2.3.2-natives-ma
- cosx-universal.jar jogl-all-2.3.2-natives-macosx-universal.jar gluegen-
- rt-2.3.2-natives-windows-i586.jar jogl-all-2.3.2-natives-solaris-amd64.
- jar gluegen-rt-2.3.2-natives-android-aarch64.jar
+Class-Path: jogl-all-2.3.2-natives-solaris-amd64.jar jogl-all-2.3.2-nati
+ ves-solaris-i586.jar gluegen-rt-2.3.2-natives-solaris-amd64.jar kotlin-
+ stdlib-jdk8-1.8.22.jar kotlin-stdlib-2.2.20.jar javafx-graphics-21.jar 
+ ktor-http-jvm-2.3.6.jar jsoup-1.17.2.jar jogl-all-2.3.2-natives-windows
+ -i586.jar kotlin-stdlib-jdk7-1.8.22.jar javafx-swing-21-linux.jar glueg
+ en-rt-2.3.2-natives-windows-amd64.jar gluegen-rt-2.3.2.jar jogl-all-2.3
+ .2-natives-windows-amd64.jar javafx-graphics-21-linux.jar slf4j-api-1.7
+ .36.jar jogl-all-2.3.2-natives-macosx-universal.jar javafx-base-21-linu
+ x.jar gluegen-rt-2.3.2-natives-linux-amd64.jar gluegen-rt-2.3.2-natives
+ -linux-armv6.jar gluegen-rt-2.3.2-natives-linux-armv6hf.jar jogl-all-2.
+ 3.2-natives-linux-amd64.jar kotlinx-coroutines-jdk8-1.9.0.jar gluegen-r
+ t-2.3.2-natives-macosx-universal.jar javafx-web-21-linux.jar javafx-bas
+ e-21.jar gluegen-rt-2.3.2-natives-linux-i586.jar jogl-all-main-2.3.2.ja
+ r ktor-io-jvm-2.3.6.jar jogl-all-2.3.2-natives-linux-i586.jar ktor-even
+ ts-jvm-2.3.6.jar kotlinx-coroutines-core-jvm-1.9.0.jar jogl-all-2.3.2-n
+ atives-android-aarch64.jar javafx-controls-21-linux.jar jogl-all-2.3.2.
+ jar jogl-all-2.3.2-natives-android-armv6.jar jogl-all-2.3.2-natives-lin
+ ux-armv6.jar ktor-utils-jvm-2.3.6.jar gluegen-rt-2.3.2-natives-android-
+ armv6.jar gluegen-rt-2.3.2-natives-android-aarch64.jar kotlinx-coroutin
+ es-slf4j-1.9.0.jar ktor-network-jvm-2.3.6.jar javafx-controls-21.jar gl
+ uegen-rt-main-2.3.2.jar kotlinx-serialization-json-jvm-1.9.0.jar ktor-w
+ ebsocket-serialization-jvm-2.3.6.jar ktor-network-tls-jvm-2.3.6.jar jav
+ afx-media-21.jar ktor-client-core-jvm-2.3.6.jar javafx-media-21-linux.j
+ ar ktor-http-cio-jvm-2.3.6.jar annotations-23.0.0.jar gluegen-rt-2.3.2-
+ natives-solaris-i586.jar ktor-client-cio-jvm-2.3.6.jar ktor-websockets-
+ jvm-2.3.6.jar gluegen-rt-2.3.2-natives-windows-i586.jar jogl-all-2.3.2-
+ natives-linux-armv6hf.jar kotlinx-serialization-core-jvm-1.9.0.jar ktor
+ -serialization-jvm-2.3.6.jar
 

@@ -1,3 +1,4 @@
+import javafx.application.Application
 import java.awt.Color
 import java.io.File
 
@@ -9,7 +10,7 @@ class SystemLauncher(
     val labels = mutableListOf<MutableList<View>.() -> Unit>()
     fun runLaunch() {
         mother.getRegisteredApps().forEach { app ->
-            val appIcon = File("MOys/Installation/${app.app_id}/${app.icon_file_name}")
+            val appIcon = File("/home/boot/MOys/Installation/${app.app_id}/${app.icon_file_name}")
             labels.add({
                 label(
                     appIcon, app.app_name,
@@ -34,6 +35,16 @@ class SystemLauncher(
             label(
                 run = {Storage(mother,graphicService,StorageService(), deviceManager).main()},
                 appName = "Проводник"
+            )
+        })
+        labels.add({
+            label(
+                run = {
+                    Thread {
+                        Application.launch(BrowserApp::class.java)
+                    }.start()
+                },
+                appName = "Браузер"
             )
         })
         graphicService.setContent(true) {

@@ -1,6 +1,5 @@
 import java.io.File
 
-
 class StorageService : StorageServiceI {
     private val MOUNTS_PATH = "/proc/mounts"
 
@@ -16,6 +15,10 @@ class StorageService : StorageServiceI {
             if (fileSystem[2] !in virtualFileSystems) {
                 rootDirs.add(fileSystem[1])
             }
+        }
+
+        if (!File(startDir).exists()) {
+            File(startDir).mkdirs()
         }
 
         if (rootDirs.isEmpty()) {

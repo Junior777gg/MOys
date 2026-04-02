@@ -11,12 +11,16 @@ import java.awt.Color
 import java.awt.Font
 import java.io.File
 
+/**
+ * Renderer. Traverses the View tree and renders elements using OpenGL.
+ * Caches fonts and textures for performance.
+ */
 class Renderer(
-    val gs: GraphicService?,
-    val bounds: MutableList<Bounds>?,
+    val gs: GraphicService,
+    val bounds: MutableList<Bounds>,
     val lazyColumn: MutableList<LazyColumn>,
-    val sheight: Int?,
-    val swidth: Int?,
+    val screenHeight: Int,
+    val screenWidth: Int,
 ) {
     private val textRenderers = mutableMapOf<Int, TextRenderer>()
     private val textures = mutableMapOf<File, Texture>()
@@ -32,13 +36,21 @@ class Renderer(
         }
     }
 
+    /**
+     * Recursively traverses the View-tree, calculates the coordinates (layout),
+     * and renders each element through OpenGL.
+     *
+     * @param avx1, avy1, avx2, avy2 — the available area for placing the View
+     * @param centeringWidth — the horizontal alignment of children (LEFT, CENTER, RIGHT)
+     * @param centeringHeight — the vertical alignment of children (TOP, CENTER, BOTTOM)
+     */
     fun parse(
         gl: GL2,
         view: View,
         avx1: Double = 0.0,
         avy1: Double = 0.0,
-        avx2: Double = 640.0,
-        avy2: Double = 960.0,
+        avx2: Double = screenWidth.toDouble(),
+        avy2: Double = screenHeight.toDouble(),
         centeringWidth: Int = LEFT,
         centeringHeight: Int = TOP
     ) {
@@ -110,12 +122,12 @@ class Renderer(
         x2 = x2 - paddingRight.toDouble() - padding.toDouble()
         y2 = y2 - paddingBottom.toDouble() - padding.toDouble()
         if (view is TextField) {
-            bounds!!.add(Bounds(x1, y1, x2, y2) {
+            bounds.add(Bounds(x1, y1, x2, y2) {
                 onClick?.invoke()
-                Keyboard(gs!!, view).main()
+                Keyboard(gs, view).main()
             })
         } else if (onClick != null) {
-            bounds!!.add(Bounds(x1, y1, x2, y2, onClick))
+            bounds.add(Bounds(x1, y1, x2, y2, onClick))
         }
         when (view) {
             is Button, is Box, is Column, is Row, is LazyColumn-> {
@@ -128,14 +140,14 @@ class Renderer(
                 gl.glEnd()
             }
             is TextField -> {
-                gl.glColor4f(0f, 0f, 0f, 255f)
+                gl.glColor4f(0f, 0f, 0f, 1f)
                 gl.glBegin(GL2.GL_QUADS)
                 gl.glVertex2f(x1.toFloat(), y1.toFloat())
                 gl.glVertex2f(x2.toFloat(), y1.toFloat())
                 gl.glVertex2f(x2.toFloat(), y2.toFloat())
                 gl.glVertex2f(x1.toFloat(), y2.toFloat())
                 gl.glEnd()
-                gl.glColor4f(255f, 255f, 255f, 255f)
+                gl.glColor4f(1f, 1f, 1f, 1f)
                 gl.glBegin(GL2.GL_QUADS)
                 gl.glVertex2f((x1 + 2).toFloat(), (y1 + 2).toFloat())
                 gl.glVertex2f((x2 - 2).toFloat(), (y1 + 2).toFloat())
@@ -143,21 +155,21 @@ class Renderer(
                 gl.glVertex2f((x1 + 2).toFloat(), (y2 - 2).toFloat())
                 gl.glEnd()
                 val textRenderer = getTextRenderer(view.textSize)
-                textRenderer.beginRendering(swidth!!, sheight!!)
+                textRenderer.beginRendering(screenWidth, screenHeight)
                 textRenderer.setColor(view.textColor)
                 val offsetx = (x2 - x1) - textRenderer.getBounds(view.text).bounds.width
                 val offsety = (y2 - y1) - textRenderer.getBounds(view.text).bounds.height
-                textRenderer.draw(view.text, (x1 + offsetx / 2).toInt(), sheight - (y2 - offsety / 2).toInt())
+                textRenderer.draw(view.text, (x1 + offsetx / 2).toInt(), screenHeight - (y2 - offsety / 2).toInt())
                 textRenderer.endRendering()
             }
 
             is Text -> {
                 val textRenderer = getTextRenderer(view.textSize)
-                textRenderer.beginRendering(swidth!!, sheight!!)
+                textRenderer.beginRendering(screenWidth, screenHeight)
                 textRenderer.setColor(view.textColor)
                 val offsetx = (x2 - x1) - textRenderer.getBounds(view.text).bounds.width
                 val offsety = (y2 - y1) - textRenderer.getBounds(view.text).bounds.height
-                textRenderer.draw(view.text, (x1 + offsetx / 2).toInt(), sheight - (y2 - offsety / 2).toInt())
+                textRenderer.draw(view.text, (x1 + offsetx / 2).toInt(), screenHeight - (y2 - offsety / 2).toInt())
                 textRenderer.endRendering()
             }
 
@@ -186,7 +198,7 @@ class Renderer(
             when (view) {
                 is LazyColumn -> {
                     gl.glEnable(GL2.GL_SCISSOR_TEST)
-                    gl.glScissor(x1.toInt(), sheight!! - y2.toInt(), (x2 - x1).toInt(), (y2 - y1).toInt())
+                    gl.glScissor(x1.toInt(), screenHeight - y2.toInt(), (x2 - x1).toInt(), (y2 - y1).toInt())
                     var currenty1 = y1 + view.offset
                     var childrenHeight = 0.0
                     view.children.forEach {

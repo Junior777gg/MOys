@@ -15,6 +15,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("org.jogamp.gluegen:gluegen-rt-main:2.3.2")
     implementation("org.jogamp.jogl:jogl-all-main:2.3.2")
+    implementation("org.jsoup:jsoup:1.17.2")
+    implementation("io.ktor:ktor-client-core:2.3.6")
+    implementation("io.ktor:ktor-client-cio:2.3.6")
     testImplementation(kotlin("test"))
 }
 
