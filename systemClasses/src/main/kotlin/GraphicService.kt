@@ -90,7 +90,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         viewTree.clear()
         lazyColumn.clear()
         viewTree.lambda()
-        viewTree.navigationLambda()
+        navigationLambda(viewTree)
         if (itIsNewScreen) {
             stack.push(lambda)
         }
@@ -119,7 +119,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         viewTreeUntilInject.clear()
         val lambda = stack.peek()
         viewTree.lambda()
-        viewTree.navigationLambda()
+        navigationLambda(viewTree)
         canvas.display()
     }
 
@@ -142,7 +142,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         val gl = p0!!.gl.gL2
         gl.glMatrixMode(GL2.GL_PROJECTION)
         gl.glLoadIdentity()
-        gl.glOrtho(0.0, SCREEN_HEIGHT.toDouble(), SCREEN_WIDTH.toDouble(), 0.0, -1.0, 1.0)
+        gl.glOrtho(0.0, SCREEN_WIDTH.toDouble(),SCREEN_HEIGHT.toDouble(),  0.0, -1.0, 1.0)
         gl.glMatrixMode(GL2.GL_MODELVIEW)
         gl.glEnable(GL2.GL_BLEND)
         gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA)

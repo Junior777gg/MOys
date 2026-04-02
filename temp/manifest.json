@@ -1,8 +1,0 @@
-{
-  "app_id": "com.example.ButtonApp*ea4d84514c3df98f2d199fb7a79fa7c9d14eaf50ed0d8b0b4a446e0e87f3ef95",
-  "app_name": "Игорь",
-  "version": "1.0.0",
-  "icon_file_name": "icon.jpg",
-  "jar_file_name": "ButtonApp.jar",
-  "activity_name": "MainActivity"
-}
