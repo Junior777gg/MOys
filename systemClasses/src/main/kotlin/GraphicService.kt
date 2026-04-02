@@ -38,7 +38,8 @@ class GraphicService : GLEventListener, GraphicServiceI {
 
     private var lastMouseY = 0.0
     fun initialize() {
-        val frame = JFrame("Graphics")
+        Log.dbg("Create JFRAME")
+        val frame = JFrame("MOys")
 
         frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         frame.setSize(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -48,7 +49,9 @@ class GraphicService : GLEventListener, GraphicServiceI {
 
         capabilities.sampleBuffers = true
         capabilities.numSamples = 4
+        Log.dbg("Done JFRAME")
 
+        Log.dbg("Create GL_CANVAS")
         canvas = GLCanvas(capabilities)
         canvas.addGLEventListener(this)
 
@@ -56,6 +59,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         frame.setLocationRelativeTo(null)
         frame.isVisible = true
         frame.background = Color(255, 255, 255)
+        Log.dbg("Done GL_CANVAS")
 
         canvas.requestFocusInWindow()
 
@@ -83,6 +87,8 @@ class GraphicService : GLEventListener, GraphicServiceI {
                 lastMouseY = e!!.y.toDouble()
             }
         })
+
+        Log.info("Graphical service initialized")
     }
 
     //Sets the content of the screen. If itIsNewScreen=true, adds the screen to the navigation stack
@@ -123,7 +129,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         canvas.display()
     }
 
-    // rerender screen must call after setContent or injectUI
+    //Rerender screen must call after setContent or injectUI
     override fun redraw() {
         canvas.display()
     }

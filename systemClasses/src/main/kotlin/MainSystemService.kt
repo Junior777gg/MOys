@@ -1,11 +1,11 @@
 fun main() {
-    println("Инициализация")
-
-    val graphicServiceInstance = GraphicService()
-    graphicServiceInstance.initialize()
+    Log.info("Initialization")
 
     val deviceManagerInstance = DeviceManager()
     deviceManagerInstance.initialize()
+
+    val graphicServiceInstance = GraphicService()
+    graphicServiceInstance.initialize()
 
     val storageServiceInstance = StorageService()
     storageServiceInstance.initialize()
@@ -16,5 +16,5 @@ fun main() {
         storageServiceInstance,
     )
     motherInstance.start()
-
+    Log.info("System ready")
 }

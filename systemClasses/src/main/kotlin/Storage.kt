@@ -34,9 +34,9 @@ class Storage(
             }
         }, this).layout {
             if (file.isFile) {
-                Image(modifier = Modifier.size(60), File("/mnt/c/Users/MSI/Desktop/MOys/file.png"),this)
+                Image(modifier = Modifier.size(60), File("/mnt/e/!Programming/!other/MOys/res/file.jpg"),this)
             }else if (file.isDirectory) {
-                Image(modifier = Modifier.size(60), File("/mnt/c/Users/MSI/Desktop/MOys/folder.jpg"),this)
+                Image(modifier = Modifier.size(60), File("/mnt/e/!Programming/!other/MOys/res/folder.png"),this)
             }
             Text(modifier = Modifier.height(60).width(640), file.name,17, Color.black,this)
         }
