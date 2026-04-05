@@ -118,8 +118,8 @@ class Mother(
         try {
             val jarFile = File("$installFolderPath/$appId/$jarName")
             val load = arrayOf(jarFile.toURI().toURL())
-            URLClassLoader(load, ClassLoader.getSystemClassLoader()).use { classLoader ->
-                val clazz = classLoader.loadClass(activityName)
+            SecurityClassLoader(load, ClassLoader.getSystemClassLoader()).use { classLoader ->
+                val clazz = classLoader.loadClass(activityName)!!
                 val constructor = clazz.getDeclaredConstructor(
                     GraphicServiceI::class.java,
                     StorageServiceI::class.java,
@@ -155,7 +155,7 @@ class Mother(
     private fun registryCleanup() {
         val registerFile = File(registerFolderPath, "system.json")
         var register = Json.decodeFromString<Apps>(registerFile.readText())
-        var newRegister=Apps(register.apps.toList().distinct().toMutableList())
+        var newRegister = Apps(register.apps.toList().distinct().toMutableList())
         registerFile.writeText(Json.encodeToString(newRegister))
     }
 }
