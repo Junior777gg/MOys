@@ -9,7 +9,7 @@ import javafx.stage.Stage
 class BrowserApp : Application() {
     override fun start(primaryStage: Stage) {
         val webView = WebView()
-        webView.engine.load("https://google.com")
+        webView.engine.load("https://duckduckgo.com")
 
         val root = BorderPane()
         root.center = webView

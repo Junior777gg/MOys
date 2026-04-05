@@ -1,6 +1,5 @@
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 data class App(
     val app_id: String,

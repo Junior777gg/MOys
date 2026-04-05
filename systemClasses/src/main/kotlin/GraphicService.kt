@@ -104,10 +104,6 @@ class GraphicService : GLEventListener, GraphicServiceI {
         Log.info("Graphical service initialized")
     }
 
-    override fun getSystemResource(path: String):String {
-        return Paths.get("").toAbsolutePath().parent.parent.parent.toString()+"/res/"+path
-    }
-
     //Sets the content of the screen. If itIsNewScreen=true, adds the screen to the navigation stack
     override fun setContent(itIsNewScreen: Boolean, lambda: MutableList<View>.() -> Unit) {
         viewTree.clear()
@@ -156,8 +152,8 @@ class GraphicService : GLEventListener, GraphicServiceI {
         val holdDuration=System.currentTimeMillis()-cursorHoldTimestamp
         for (bound in bounds.reversed()) {
             if (x in bound.x1..bound.x2 && y in bound.y1..bound.y2) {
-                if(holdDuration<cursorHoldThreshold) bound.onClick?.invoke()
-                else bound.onHold?.invoke()
+                if(holdDuration<cursorHoldThreshold||bound.onHold==null) bound.onClick?.invoke()
+                else bound.onHold.invoke()
                 return
             }
         }

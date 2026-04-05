@@ -27,7 +27,7 @@ class Storage(
     override val deviceManager: DeviceManagerI
 ) : Activity {
     private var currentPath = "/"
-    private val iconList= listOf("file.png","jarp.png")
+    private val iconList = listOf("folder.png","file.png","jarp.png")
     override fun main() {
         gs.setContent(true){
             buildUI()
@@ -59,17 +59,17 @@ class Storage(
             if (file.isDirectory){
                 currentPath = file.absolutePath
                 main()
-            }else if (file.name.contains(".jarp")){
-                mother.installApp(file)
-            }
+            } else if (file.extension.toString()=="jarp") mother.installApp(file)
         }, this).layout {
+            //Determine icon.
+            var iconId=0
             if (file.isFile) {
-                var iconId=0
-                if(file.extension.toString()=="jarp") iconId=1
-                Image(modifier = Modifier.Companion.size(60), File(gs.getSystemResource(iconList.get(iconId))),this)
-            } else if (file.isDirectory) {
-                Image(modifier = Modifier.size(60), File(gs.getSystemResource("folder.png")),this)
+                iconId=1
+                if(file.extension.toString()=="jarp") iconId=2
             }
+            //Place icon if the file is
+            if (file.isFile || file.isDirectory)
+                Image(modifier = Modifier.Companion.size(60), File("${mother.getSystemPath()}/data/storage/${iconList[iconId]}"),this)
             Text(modifier = Modifier.height(60).width(640), file.name,17, Color.black,this)
         }
     }
