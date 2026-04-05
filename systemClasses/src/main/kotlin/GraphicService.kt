@@ -9,6 +9,7 @@ import java.awt.Color
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionAdapter
+import java.nio.file.Paths
 import javax.swing.JFrame
 
 //The main graphical service. Controls the window, rendering, and input processing.
@@ -73,13 +74,13 @@ class GraphicService : GLEventListener, GraphicServiceI {
                 }
             }
         })
-        /*canvas.addMouseWheelListener(ev : Mouse) {
-            Log.dbg(ev.wheelRotation.toString()+" "+ev.scrollAmount.toString())
+        canvas.addMouseWheelListener{ev->
+            val rotation=ev.wheelRotation
             if (lazyColumn.isNotEmpty()) {
-                lazyColumn[0].offset += ev.wheelRotation*ev.scrollAmount
+                lazyColumn[0].offset += -20*rotation
                 redraw()
             }
-        }*/
+        }
         canvas.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(p0: MouseEvent?) {
                 super.mouseClicked(p0)
@@ -95,6 +96,10 @@ class GraphicService : GLEventListener, GraphicServiceI {
         })
 
         Log.info("Graphical service initialized")
+    }
+
+    fun getSystemResource(path: String):String {
+        return Paths.get("").toAbsolutePath().parent.parent.parent.toString()+"/res/"+path
     }
 
     //Sets the content of the screen. If itIsNewScreen=true, adds the screen to the navigation stack

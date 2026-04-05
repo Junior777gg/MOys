@@ -5,6 +5,7 @@ import app.TestApp
 import javafx.application.Application
 import java.awt.Color
 import java.io.File
+import java.nio.file.Paths
 
 class SystemLauncher(
     val graphicService: GraphicService,
@@ -25,30 +26,33 @@ class SystemLauncher(
         }
         labels.add({
             label(
+                icon = File(graphicService.getSystemResource("app/calculator.png")),
                 run = { CalculatorApp(graphicService, StorageService(), deviceManager).main() },
                 appName = "Калькулятор"
             )
         })
         labels.add({
             label(
-                run = { TestApp(graphicService, StorageService(), deviceManager).main()},
-                appName = "тестапп"
-            )
-        })
-        labels.add({
-            label(
+                icon = File(graphicService.getSystemResource("app/storage.png")),
                 run = { Storage(mother, graphicService, StorageService(), deviceManager).main()},
                 appName = "Проводник"
             )
         })
         labels.add({
             label(
+                icon = File(graphicService.getSystemResource("app/browser.png")),
                 run = {
                     Thread {
                         Application.launch(BrowserApp::class.java)
                     }.start()
                 },
                 appName = "Браузер"
+            )
+        })
+        labels.add({
+            label(
+                run = { TestApp(graphicService, StorageService(), deviceManager).main()},
+                appName = "Scroll Test"
             )
         })
         graphicService.setContent(true) {
@@ -58,7 +62,7 @@ class SystemLauncher(
     }
 
     fun MutableList<View>.screen() {
-        Image(modifier = Modifier.fillMaxSize(), File("/mnt/e/!Programming/!other/MOys/res/background.png"), this).layout {
+        Image(modifier = Modifier.fillMaxSize(), File(graphicService.getSystemResource("background.png")), this).layout {
             Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)), this).layout {
                 var count = 0
                 for (i in 0..6) {
@@ -86,7 +90,7 @@ class SystemLauncher(
             modifier = Modifier.padding(20).height(130).width(110)
                 .onClick { run() }.background(Color(0,0,0,0)), this
         ).layout {
-            Image(modifier = Modifier.size(70), icon ?: File("/mnt/e/!Programming/!other/MOys/res/basic.png"), this)
+            Image(modifier = Modifier.size(70), icon ?: File(graphicService.getSystemResource("basic.png")), this)
             Text(modifier = Modifier.width(70).height(20), appName, 15, parent = this)
         }
     }
