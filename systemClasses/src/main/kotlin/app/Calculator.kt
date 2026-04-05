@@ -1,12 +1,32 @@
+package app
+
+import Button
+import Column
+import Activity
+import GraphicServiceI
+import StorageServiceI
+import DeviceManagerI
+import View
 import Modifier.Companion.BOTTOM
 import Modifier.Companion.RIGHT
+import Row
+import Text
+import background
+import childrenHeightCentering
+import childrenWidthCentering
+import fillMaxSize
+import height
+import onClick
+import padding
+import paddingBottom
+import width
 import java.awt.Color
 
 class CalculatorApp(
     override val gs: GraphicServiceI,
     override val storage: StorageServiceI,
     override val deviceManager: DeviceManagerI
-) : Activity{
+) : Activity {
 
     private var display = "0"
     private var firstNumber = 0.0
@@ -24,10 +44,10 @@ class CalculatorApp(
     }
 
     private fun MutableList<View>.buildUI() {
-        Column(modifier = Modifier.fillMaxSize().background(Color(30, 30, 30)), this).layout {
+        Column(modifier = Modifier.Companion.fillMaxSize().background(Color(30, 30, 30)), this).layout {
 
             Column(
-                modifier = Modifier.width(640).height(200)
+                modifier = Modifier.Companion.width(640).height(200)
                     .background(Color(40, 40, 40))
                     .childrenWidthCentering(RIGHT)
                     .childrenHeightCentering(BOTTOM),

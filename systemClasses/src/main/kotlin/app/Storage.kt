@@ -1,5 +1,25 @@
+package app
+
+import Activity
+import GraphicServiceI
+import StorageServiceI
+import DeviceManagerI
+import View
+import Image
+import LazyColumn
+import Mother
+import Row
+import Text
+import fillMaxSize
+import height
+import onClick
+import paddingBottom
+import size
+import width
 import java.awt.Color
 import java.io.File
+import java.nio.file.Path
+import kotlin.io.path.Path
 
 class Storage(
     val mother: Mother,
@@ -17,7 +37,17 @@ class Storage(
 
     fun MutableList<View>.buildUI(){
         val files = File(currentPath).listFiles()
-        LazyColumn(modifier = Modifier.fillMaxSize().paddingBottom(60), this).layout {
+        LazyColumn(modifier = Modifier.Companion.fillMaxSize().paddingBottom(60), this).layout {
+            if(currentPath!="/") {
+                //Button to return back (may conflict with "back" button in nav)
+                Row(modifier = Modifier.Companion.height(80).width(640).onClick {
+                    currentPath = Path(currentPath).parent.toString()
+                    main()
+                }, this).layout {
+                    Text(modifier = Modifier.height(60).width(640), "...", 17, Color.black, this)
+                }
+            }
+            //Iterate files and folders
             files.forEach {
                 file(it)
             }
@@ -25,7 +55,7 @@ class Storage(
     }
 
     fun MutableList<View>.file(file: File){
-        Row(modifier = Modifier.height(80).width(640).onClick {
+        Row(modifier = Modifier.Companion.height(80).width(640).onClick {
             if (file.isDirectory){
                 currentPath = file.absolutePath
                 main()
@@ -34,7 +64,7 @@ class Storage(
             }
         }, this).layout {
             if (file.isFile) {
-                Image(modifier = Modifier.size(60), File("/mnt/e/!Programming/!other/MOys/res/file.jpg"),this)
+                Image(modifier = Modifier.Companion.size(60), File("/mnt/e/!Programming/!other/MOys/res/file.png"),this)
             }else if (file.isDirectory) {
                 Image(modifier = Modifier.size(60), File("/mnt/e/!Programming/!other/MOys/res/folder.png"),this)
             }
