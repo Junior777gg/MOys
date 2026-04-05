@@ -87,6 +87,12 @@ class Renderer(
         } else if (fillMaxSize != null) {
             x2 = avx2
             y2 = avy2
+        }else if(width != null) {
+            x2 = x1 + width.toDouble()
+            y2 = y1 + width.toDouble()
+        }else if(height != null) {
+            x2 = x1 + height.toDouble()
+            y2 = y1 + height.toDouble()
         }
         if (x2 > avx2) x2 = avx2
         if (y2 > avy2) y2 = avy2

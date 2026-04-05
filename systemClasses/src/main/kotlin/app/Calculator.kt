@@ -44,10 +44,10 @@ class CalculatorApp(
     }
 
     private fun MutableList<View>.buildUI() {
-        Column(modifier = Modifier.Companion.fillMaxSize().background(Color(30, 30, 30)), this).layout {
+        Column(modifier = Modifier.fillMaxSize().background(Color(30, 30, 30)), this).layout {
 
             Column(
-                modifier = Modifier.Companion.width(640).height(200)
+                modifier = Modifier.width(640).height(200)
                     .background(Color(40, 40, 40))
                     .childrenWidthCentering(RIGHT)
                     .childrenHeightCentering(BOTTOM),

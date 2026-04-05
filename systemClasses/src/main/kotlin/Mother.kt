@@ -142,7 +142,7 @@ class Mother(
         try {
             val jarFile = File("$installFolderPath/$appId/$jarName")
             val load = arrayOf(jarFile.toURI().toURL())
-            SecurityClassLoader(load, ClassLoader.getSystemClassLoader()).use { classLoader ->
+            URLClassLoader(load, ClassLoader.getSystemClassLoader()).use { classLoader ->
                 val clazz = classLoader.loadClass(activityName)!!
                 val constructor = clazz.getDeclaredConstructor(
                     GraphicServiceI::class.java,
