@@ -4,4 +4,5 @@ interface GraphicServiceI {
     fun redraw()
     fun injectUI(lambda: MutableList<View>.() -> Unit)
     fun cancelInject()
+    fun getSystemResource(path: String):String
 }

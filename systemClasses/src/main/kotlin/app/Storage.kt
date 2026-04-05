@@ -18,7 +18,6 @@ import size
 import width
 import java.awt.Color
 import java.io.File
-import java.nio.file.Path
 import kotlin.io.path.Path
 
 class Storage(
@@ -64,9 +63,9 @@ class Storage(
             }
         }, this).layout {
             if (file.isFile) {
-                Image(modifier = Modifier.Companion.size(60), File("/mnt/e/!Programming/!other/MOys/res/file.png"),this)
+                Image(modifier = Modifier.Companion.size(60), File(gs.getSystemResource("file.png")),this)
             }else if (file.isDirectory) {
-                Image(modifier = Modifier.size(60), File("/mnt/e/!Programming/!other/MOys/res/folder.png"),this)
+                Image(modifier = Modifier.size(60), File(gs.getSystemResource("folder.png")),this)
             }
             Text(modifier = Modifier.height(60).width(640), file.name,17, Color.black,this)
         }

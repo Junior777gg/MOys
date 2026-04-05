@@ -98,7 +98,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         Log.info("Graphical service initialized")
     }
 
-    fun getSystemResource(path: String):String {
+    override fun getSystemResource(path: String):String {
         return Paths.get("").toAbsolutePath().parent.parent.parent.toString()+"/res/"+path
     }
 
