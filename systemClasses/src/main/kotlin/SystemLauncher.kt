@@ -10,7 +10,7 @@ class SystemLauncher(
     val labels = mutableListOf<MutableList<View>.() -> Unit>()
     fun runLaunch() {
         mother.getRegisteredApps().forEach { app ->
-            val appIcon = File("/home/boot/MOys/Installation/${app.app_id}/${app.icon_file_name}")
+            val appIcon = File(mother.getSystemPath()+"/Installation/${app.app_id}/${app.icon_file_name}")
             labels.add({
                 label(
                     appIcon, app.app_name,
@@ -54,7 +54,7 @@ class SystemLauncher(
     }
 
     fun MutableList<View>.screen() {
-        Image(modifier = Modifier.fillMaxSize(), File("/mnt/c/Users/MSI/Desktop/MOys/i.jpg"), this).layout {
+        Image(modifier = Modifier.fillMaxSize(), File("/mnt/e/!Programming/!other/MOys/res/background.png"), this).layout {
             Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)), this).layout {
                 var count = 0
                 for (i in 0..6) {
@@ -82,7 +82,7 @@ class SystemLauncher(
             modifier = Modifier.padding(20).height(130).width(110)
                 .onClick { run() }.background(Color(0,0,0,0)), this
         ).layout {
-            Image(modifier = Modifier.size(70), icon ?: File("/mnt/c/Users/MSI/Desktop/MOys/icon.png"), this)
+            Image(modifier = Modifier.size(70), icon ?: File("/mnt/e/!Programming/!other/MOys/res/basic.png"), this)
             Text(modifier = Modifier.width(70).height(20), appName, 15, parent = this)
         }
     }

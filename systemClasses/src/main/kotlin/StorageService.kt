@@ -29,6 +29,8 @@ class StorageService : StorageServiceI {
                 File(startDir).mkdirs()
             }
         }
+
+        Log.info("Storage service initialized")
     }
 
     private fun buildPath(appId: String, path: String): String {
@@ -51,7 +53,7 @@ class StorageService : StorageServiceI {
             newFile.createNewFile()
             return true
         } catch (e: Exception) {
-            println(e.message)
+            Log.error(e.message.toString())
             return false
         }
     }
@@ -63,7 +65,7 @@ class StorageService : StorageServiceI {
             newFile.writeText(content)
             return true
         } catch (e: Exception) {
-            println(e.message)
+            Log.error(e.message.toString())
             return false
         }
     }
@@ -75,7 +77,7 @@ class StorageService : StorageServiceI {
             newFile.writeBytes(content)
             return true
         } catch (e: Exception) {
-            println(e.message)
+            Log.error(e.message.toString())
             return false
         }
     }
@@ -86,15 +88,15 @@ class StorageService : StorageServiceI {
             File(filePath).delete()
             return true
         } catch (e: Exception) {
-            println(e.message)
+            Log.error(e.message.toString())
             return false
         }
     }
 
     override fun createDirectory(appId: String, path: String): Boolean {
         try {
-            val dirPath = buildPath( appId, path)
-            val appDirPath = buildPath( appId, "")
+            val dirPath = buildPath(appId, path)
+            val appDirPath = buildPath(appId, "")
             if (!File(appDirPath).exists()) {
                 File(appDirPath).mkdirs()
             }
@@ -102,7 +104,7 @@ class StorageService : StorageServiceI {
             newDir.mkdirs()
             return true
         } catch (e: Exception) {
-            println(e.message)
+            Log.error(e.message.toString())
             return false
         }
     }
@@ -113,7 +115,7 @@ class StorageService : StorageServiceI {
             File(dirPath).deleteRecursively()
             return true
         } catch (e: Exception) {
-            println(e.message)
+            Log.error(e.message.toString())
             return false
         }
     }
@@ -124,7 +126,7 @@ class StorageService : StorageServiceI {
             val file = File(filePath)
             return file.readText()
         } catch (e: Exception) {
-            println(e.message)
+            Log.error(e.message.toString())
             return null
         }
     }
@@ -135,7 +137,7 @@ class StorageService : StorageServiceI {
             val file = File(filePath)
             return file.readBytes()
         } catch (e: Exception) {
-            println(e.message)
+            Log.error(e.message.toString())
             return null
         }
     }

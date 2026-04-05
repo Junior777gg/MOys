@@ -1,3 +1,5 @@
 class DeviceManager: DeviceManagerI {
-    fun initialize() {}
+    fun initialize() {
+        Log.info("Device manager initialized")
+    }
 }

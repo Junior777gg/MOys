@@ -35,12 +35,19 @@ class Mother(
         if (!registerFile.exists()) {
             registerFile.createNewFile()
             registerFile.writeText(Json.encodeToString(Apps(mutableListOf())))
-        }
+        } else {
+	    registryCleanup()
+            registerFile = File(registerFolderPath, "register.json")
+	}
     }
 
     val systemLauncher = SystemLauncher(graphicService, deviceManager, this)
     fun start() {
         systemLauncher.runLaunch()
+    }
+
+    fun getSystemPath() : String {
+        return systemFolderPath;
     }
 
     /** Installs the application from the .jarp archive */
@@ -72,7 +79,10 @@ class Mother(
         val manifest = File(tempFolderPath, "manifest.json")
         val manifestObj = Json.decodeFromString<Manifest>(manifest.readText())
         val outputFile = File(installFolderPath, manifestObj.app_id)
-        if (outputFile.exists()) return
+        if (outputFile.exists()) {
+            Log.warn("Duplicate app entry \"${manifestObj.app_id}\". Updating...")
+            outputFile.deleteRecursively()
+        }
         outputFile.mkdirs()
         val listTempFiles = tempDir.listFiles() ?: emptyArray<File>()
         listTempFiles.forEach { file ->
@@ -118,7 +128,7 @@ class Mother(
                 method.invoke(instance)
             }
         } catch (e: Exception) {
-            println(e.message)
+            Log.error(e.message.toString())
         }
     }
 
@@ -126,7 +136,10 @@ class Mother(
     private fun registerNewApp(app: App) {
         val registerFile = File(registerFolderPath, "register.json")
         val oldRegister = Json.decodeFromString<Apps>(registerFile.readText())
-        oldRegister.apps.add(app)
+        //No duplicates (replace with error if possible, because the method is 'registerNewApp' and the id already exists)
+        var entryFound=false
+        for(e in oldRegister.apps) if(app.app_id==e.app_id) {entryFound=true;break}
+        if(!entryFound) oldRegister.apps.add(app)
         registerFile.writeText(Json.encodeToString(oldRegister))
     }
 
@@ -134,5 +147,13 @@ class Mother(
     fun getRegisteredApps(): List<App> {
         val register = File("$registerFolderPath/register.json").readText()
         return Json.decodeFromString<Apps>(register).apps
+    }
+
+    /** Removes duplicates from registry */
+    private fun registryCleanup() {
+        val registerFile = File(registerFolderPath, "register.json")
+        val oldRegister = Json.decodeFromString<Apps>(registerFile.readText())
+        val newRegister=oldRegister.apps.toList().distinct().toMutableList()
+        registerFile.writeText(Json.encodeToString(newRegister))
     }
 }
