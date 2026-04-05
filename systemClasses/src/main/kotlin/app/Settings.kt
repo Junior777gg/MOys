@@ -65,20 +65,43 @@ class Settings(
                         parent = this
                     )
                 }
-                Row(modifier = Modifier.childrenWidthCentering(Modifier.Companion.LEFT).height(50), parent=this).layout {
+                Row(
+                    modifier = Modifier.childrenWidthCentering(Modifier.Companion.LEFT).height(50),
+                    parent = this
+                ).layout {
                     var checkboxColor = Color.RED
-                    if (mother.systemLauncher.getTextDark()) checkboxColor = Color.GREEN
+                    if (mother.systemLauncher.getTextDisplay()) checkboxColor = Color.GREEN
                     Button(modifier = Modifier.size(20).background(checkboxColor).onClick {
-                        mother.systemLauncher.setTextDark(!mother.systemLauncher.getTextDark())
+                        mother.systemLauncher.setTextDisplay(!mother.systemLauncher.getTextDisplay())
                         render(false)
                     }, parent = this)
                     Text(
                         modifier = Modifier.height(50).width(50).paddingLeft(20),
-                        text = "Dark text",
+                        text = "Display app names",
                         textSize = 24,
                         textColor = Color.BLACK,
                         parent = this
                     )
+                }
+                if (mother.systemLauncher.getTextDisplay()) {
+                    Row(
+                        modifier = Modifier.childrenWidthCentering(Modifier.Companion.LEFT).height(50),
+                        parent = this
+                    ).layout {
+                        var checkboxColor = Color.RED
+                        if (mother.systemLauncher.getTextDark()) checkboxColor = Color.GREEN
+                        Button(modifier = Modifier.size(20).background(checkboxColor).onClick {
+                            mother.systemLauncher.setTextDark(!mother.systemLauncher.getTextDark())
+                            render(false)
+                        }, parent = this)
+                        Text(
+                            modifier = Modifier.height(50).width(50).paddingLeft(20),
+                            text = "Dark app names",
+                            textSize = 24,
+                            textColor = Color.BLACK,
+                            parent = this
+                        )
+                    }
                 }
             }
         }

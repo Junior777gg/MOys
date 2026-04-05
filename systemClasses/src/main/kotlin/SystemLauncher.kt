@@ -19,6 +19,7 @@ class SystemLauncher(
     data class LauncherConfig (
         var background: String = "backgrounds/1.png",
         var textDark: Boolean = false,
+        var textDisplay: Boolean = true,
     )
 
     private val labels = mutableListOf<MutableList<View>.() -> Unit>()
@@ -116,6 +117,7 @@ class SystemLauncher(
     fun MutableList<View>.label(icon: File? = null, appName: String, click: () -> Unit, hold: (() -> Unit) = {Log.warn("Can't remove system app")}) {
         var textColor = Color.WHITE
         if(config.textDark) textColor = Color.BLACK
+        if(!config.textDisplay) textColor = Color(0,0,0,0)
         Column(
             modifier = Modifier.padding(20).height(130).width(110)
                 .onClick { click() }.onHold { hold.invoke() } .background(Color(0,0,0,0)), this
@@ -141,6 +143,16 @@ class SystemLauncher(
     fun setTextDark(v: Boolean) {
         Log.dbg("Set launcher text dark to: \"$v\"")
         config.textDark = v
+        val cfg = File("${mother.getSystemPath()}/data/launcher/config.json")
+        cfg.writeText(Json.encodeToString<LauncherConfig>(config))
+        updateScreen(false)
+    }
+    fun getTextDisplay(): Boolean {
+        return config.textDisplay
+    }
+    fun setTextDisplay(v: Boolean) {
+        Log.dbg("Set launcher text display to: \"$v\"")
+        config.textDisplay = v
         val cfg = File("${mother.getSystemPath()}/data/launcher/config.json")
         cfg.writeText(Json.encodeToString<LauncherConfig>(config))
         updateScreen(false)
