@@ -26,10 +26,6 @@ data class OnClick(val onClick: () -> Unit) : ModifierElements
 
 data class OnHold(val onHold: () -> Unit) : ModifierElements
 
-data class ChildrenWidthCentering(val place: Int) : ModifierElements
-
-data class ChildrenHeightCentering(val place: Int) : ModifierElements
-
 open class Modifier private constructor(
     val elements : List<ModifierElements> = listOf()
     ){
@@ -42,13 +38,6 @@ open class Modifier private constructor(
         return elements.filterIsInstance<T>().lastOrNull()
     }
 
-    companion object: Modifier(listOf()){
-        const val CENTER = 0
-        const val RIGHT = 1
-        const val LEFT = 2
-        const val TOP = 4
-        const val BOTTOM = 5
-    }
 }
 
 fun Modifier.height(height: Int) = add(Height(height))
@@ -63,6 +52,5 @@ fun Modifier.paddingRight(padding: Int) = add(PaddingRight(padding))
 fun Modifier.paddingBottom(padding: Int) = add(PaddingBottom(padding))
 fun Modifier.paddingLeft(padding: Int) = add(PaddingLeft(padding))
 fun Modifier.fillMaxSize() = add(FillMaxSize())
-fun Modifier.childrenWidthCentering(place: Int) = add(ChildrenWidthCentering(place))
-fun Modifier.childrenHeightCentering(place: Int) = add(ChildrenHeightCentering(place))
+
 

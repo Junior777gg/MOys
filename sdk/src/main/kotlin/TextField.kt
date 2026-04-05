@@ -5,6 +5,7 @@ class TextField(
     var text: String = "",
     var textSize: Int = 10,
     var textColor: Color = Color.WHITE,
+    val textAlign: Int = Text.CENTER,
     override val parent: MutableList<View>,
 ) : View, KeyboardInterface {
     override val children: MutableList<View> = mutableListOf()

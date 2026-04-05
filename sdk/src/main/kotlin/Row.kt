@@ -1,4 +1,8 @@
-class Row(override val modifier: Modifier, override val parent: MutableList<View>) : View {
+class Row(
+    override val modifier: Modifier,
+    override val parent: MutableList<View>,
+    val verticalAlignment: VerticalAlignment,
+    val horizontalArrangement: HorizontalArrangement) : View {
     override val children: MutableList<View> = mutableListOf()
     init {
         parent.add(this)

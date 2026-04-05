@@ -1,6 +1,7 @@
 class LazyColumn(
     override val modifier: Modifier,
-    override val parent: MutableList<View>
+    override val parent: MutableList<View>,
+    val horizontalAlignment: HorizontalAlignment,
 ) : View {
     override val children= mutableListOf<View>()
     var offset = 0.0
