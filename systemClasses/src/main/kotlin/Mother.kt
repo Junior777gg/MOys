@@ -110,6 +110,33 @@ class Mother(
         tempDir.deleteRecursively()
     }
 
+    /** Removes app's data and register entry */
+    fun deleteApp(appId: String) {
+        try {
+            //Delete app from register.
+            val registerFile = File(registerFolderPath, "system.json")
+            val register = Json.decodeFromString<Apps>(registerFile.readText())
+            var removedRegistryKey=false
+            for (e in register.apps) {
+                if(appId==e.app_id) {
+                    register.apps.remove(e)
+                    registerFile.writeText(Json.encodeToString(register))
+                    removedRegistryKey=true
+                    break
+                }
+            }
+            if(!removedRegistryKey) Log.warn("Register entry for \"$appId\" not found")
+            //Delete app from storage.
+            val outputFile = File("$installFolderPath/$appId")
+            if (outputFile.exists()) outputFile.deleteRecursively()
+            else Log.warn("Install directory for \"$appId\" not found")
+
+            Log.info("Deleted app with id \"$appId\"")
+        } catch (e: Exception) {
+            Log.error(e.message.toString())
+        }
+    }
+
     /** Starts the application in a separate ClassLoader using the appId */
     fun runNewAppProcess(appId: String, jarName: String, activityName: String) {
         try {
@@ -134,18 +161,18 @@ class Mother(
     /** Saves application information in the registry */
     private fun registerNewApp(app: App) {
         val registerFile = File(registerFolderPath, "system.json")
-        val oldRegister = Json.decodeFromString<Apps>(registerFile.readText())
+        val register = Json.decodeFromString<Apps>(registerFile.readText())
         //No duplicates (replace with error if possible, because the method is 'registerNewApp' and the id already exists)
         var entryFound=false
-        for(e in oldRegister.apps) {
+        for (e in register.apps) {
             if(app.app_id==e.app_id) {
                 entryFound=true
                 break
             }
         }
         if(!entryFound) {
-            oldRegister.apps.add(app)
-            registerFile.writeText(Json.encodeToString(oldRegister))
+            register.apps.add(app)
+            registerFile.writeText(Json.encodeToString(register))
         }
     }
 

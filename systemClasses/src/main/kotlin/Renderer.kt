@@ -68,6 +68,7 @@ class Renderer(
         val widthCentering = modifiers.get<ChildrenWidthCentering>()?.place ?: CENTER
         val heightCentering = modifiers.get<ChildrenHeightCentering>()?.place ?: CENTER
         val onClick = modifiers.get<OnClick>()?.onClick
+        val onHold = modifiers.get<OnHold>()?.onHold
 
         if (view is LazyColumn) {
             lazyColumn.add(view)
@@ -122,12 +123,14 @@ class Renderer(
         x2 = x2 - paddingRight.toDouble() - padding.toDouble()
         y2 = y2 - paddingBottom.toDouble() - padding.toDouble()
         if (view is TextField) {
-            bounds.add(Bounds(x1, y1, x2, y2) {
+            bounds.add(Bounds(x1, y1, x2, y2, {
                 onClick?.invoke()
                 Keyboard(gs, view).main()
-            })
+            }, null))
         } else if (onClick != null) {
-            bounds.add(Bounds(x1, y1, x2, y2, onClick))
+            bounds.add(Bounds(x1, y1, x2, y2, onClick, onHold))
+        } else if(onHold!=null) {
+            bounds.add(Bounds(x1, y1, x2, y2, onClick, onHold))
         }
         when (view) {
             is Button, is Box, is Column, is Row, is LazyColumn-> {

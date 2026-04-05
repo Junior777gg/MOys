@@ -1,5 +1,6 @@
 import app.BrowserApp
 import app.CalculatorApp
+import app.Settings
 import app.Storage
 import app.TestApp
 import javafx.application.Application
@@ -13,7 +14,8 @@ class SystemLauncher(
     val mother: Mother
 ) {
     val labels = mutableListOf<MutableList<View>.() -> Unit>()
-    fun runLaunch() {
+    private fun updateLabels() {
+        labels.clear()
         mother.getRegisteredApps().forEach { app ->
             val appIcon = File(mother.getSystemPath()+"/install/${app.app_id}/${app.icon_file_name}")
             labels.add({
@@ -21,27 +23,38 @@ class SystemLauncher(
                     appIcon, app.app_name,
                     {
                         mother.runNewAppProcess(app.app_id, app.jar_file_name, app.activity_name)
+                    },
+                    {
+                        mother.deleteApp(app.app_id)
+                        updateScreen()
                     })
             })
         }
         labels.add({
             label(
                 icon = File(graphicService.getSystemResource("app/calculator.png")),
-                run = { CalculatorApp(graphicService, StorageService(), deviceManager).main() },
+                click = { CalculatorApp(graphicService, StorageService(), deviceManager).main() },
                 appName = "Калькулятор"
             )
         })
         labels.add({
             label(
+                icon = File(graphicService.getSystemResource("app/settings.png")),
+                click = { Settings(mother, graphicService, StorageService(), deviceManager).main()},
+                appName = "Настройки"
+            )
+        })
+        labels.add({
+            label(
                 icon = File(graphicService.getSystemResource("app/storage.png")),
-                run = { Storage(mother, graphicService, StorageService(), deviceManager).main()},
+                click = { Storage(mother, graphicService, StorageService(), deviceManager).main()},
                 appName = "Проводник"
             )
         })
         labels.add({
             label(
                 icon = File(graphicService.getSystemResource("app/browser.png")),
-                run = {
+                click = {
                     Thread {
                         Application.launch(BrowserApp::class.java)
                     }.start()
@@ -51,10 +64,13 @@ class SystemLauncher(
         })
         labels.add({
             label(
-                run = { TestApp(graphicService, StorageService(), deviceManager).main()},
+                click = { TestApp(graphicService, StorageService(), deviceManager).main()},
                 appName = "Scroll Test"
             )
         })
+    }
+    fun runLaunch() {
+        updateLabels()
         graphicService.setContent(true) {
             screen()
         }
@@ -79,16 +95,17 @@ class SystemLauncher(
     }
 
     fun updateScreen() {
+        updateLabels()
         graphicService.setContent{
             screen()
         }
         graphicService.redraw()
     }
 
-    fun MutableList<View>.label(icon: File? = null, appName: String, run: () -> Unit) {
+    fun MutableList<View>.label(icon: File? = null, appName: String, click: () -> Unit, hold: (() -> Unit) = {Log.warn("Can't remove system app")}) {
         Column(
             modifier = Modifier.padding(20).height(130).width(110)
-                .onClick { run() }.background(Color(0,0,0,0)), this
+                .onClick { click() }.onHold { hold.invoke() } .background(Color(0,0,0,0)), this
         ).layout {
             Image(modifier = Modifier.size(70), icon ?: File(graphicService.getSystemResource("basic.png")), this)
             Text(modifier = Modifier.width(70).height(20), appName, 15, parent = this)

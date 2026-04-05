@@ -29,6 +29,10 @@ class GraphicService : GLEventListener, GraphicServiceI {
     //The list of clickable areas on the current frame
     private val bounds = mutableListOf<Bounds>()
 
+    //After how much time click counts as hold
+    private val cursorHoldThreshold = 400L
+    private var cursorHoldTimestamp = 0L
+
     //Saved tree before calling injectUI (for restoration when cancelInject is called)
     private val viewTreeUntilInject = mutableListOf<View>()
 
@@ -82,15 +86,17 @@ class GraphicService : GLEventListener, GraphicServiceI {
             }
         }
         canvas.addMouseListener(object : MouseAdapter() {
-            override fun mouseClicked(p0: MouseEvent?) {
-                super.mouseClicked(p0)
-                val x = p0!!.x.toDouble()
-                val y = p0.y.toDouble()
+            override fun mouseReleased(e: MouseEvent?) {
+                super.mouseReleased(e)
+                val x = e!!.x.toDouble()
+                val y = e.y.toDouble()
                 handleClick(x, y)
+                cursorHoldTimestamp=0L
             }
 
             override fun mousePressed(e: MouseEvent?) {
                 super.mousePressed(e)
+                cursorHoldTimestamp=System.currentTimeMillis()
                 lastMouseY = e!!.y.toDouble()
             }
         })
@@ -147,9 +153,11 @@ class GraphicService : GLEventListener, GraphicServiceI {
 
     //Searches for a clickable area by coordinates and calls onClick
     private fun handleClick(x: Double, y: Double) {
+        val holdDuration=System.currentTimeMillis()-cursorHoldTimestamp
         for (bound in bounds.reversed()) {
             if (x in bound.x1..bound.x2 && y in bound.y1..bound.y2) {
-                bound.onClick.invoke()
+                if(holdDuration<cursorHoldThreshold) bound.onClick?.invoke()
+                else bound.onHold?.invoke()
                 return
             }
         }

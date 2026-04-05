@@ -24,6 +24,8 @@ data class Background(val color: Color) : ModifierElements
 
 data class OnClick(val onClick: () -> Unit) : ModifierElements
 
+data class OnHold(val onHold: () -> Unit) : ModifierElements
+
 data class ChildrenWidthCentering(val place: Int) : ModifierElements
 
 data class ChildrenHeightCentering(val place: Int) : ModifierElements
@@ -54,6 +56,7 @@ fun Modifier.width(width: Int) = add(Width(width))
 fun Modifier.size(size: Int) = add(Size(size))
 fun Modifier.background(color: Color) = add(Background(color))
 fun Modifier.onClick(onClick: () -> Unit) = add(OnClick(onClick))
+fun Modifier.onHold(onHold: () -> Unit) = add(OnHold(onHold))
 fun Modifier.padding(padding: Int) = add(Padding(padding))
 fun Modifier.paddingTop(padding: Int) = add(PaddingTop(padding))
 fun Modifier.paddingRight(padding: Int) = add(PaddingRight(padding))

@@ -6,7 +6,7 @@ class SystemNavigation(val graphicService: GraphicService){
             Row(modifier = Modifier.fillMaxSize()
                 .background(Color(0,0,0,0))
                 .childrenHeightCentering(Modifier.BOTTOM),this).layout {
-                Row(modifier = Modifier.width(640).height(60).background(Color(0,0,0,160)),this).layout {
+                Row(modifier = Modifier.width(640).height(60).background(Color(0,0,0,120)),this).layout {
                     Button(modifier = Modifier.size(50).background(Color.CYAN).onClick { graphicService.popBackStack() },this).layout {}
                 }
             }
