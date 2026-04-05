@@ -135,6 +135,9 @@ class SystemLauncher(
         val cfg = File("${mother.getSystemPath()}/data/launcher/config.json")
         if(cfg.exists()) {
             config = Json.decodeFromString<LauncherConfig>(cfg.readText())
+            //Check if background exists.
+            if(!File("${mother.getSystemPath()}/data/launcher/${config.background}").exists())
+                config.background="backgrounds/1.png"
         }
     }
 }
