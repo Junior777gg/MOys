@@ -86,6 +86,9 @@ class Mother(
             outputFile.deleteRecursively()
         }
         outputFile.mkdirs()
+        if (outputFile.exists()) {
+            outputFile.deleteRecursively()
+        }
         val listTempFiles = tempDir.listFiles() ?: emptyArray<File>()
         listTempFiles.forEach { file ->
             file.copyRecursively(File(outputFile.path, file.name))

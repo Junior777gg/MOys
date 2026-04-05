@@ -3,8 +3,8 @@ import java.awt.Color
 class TextField(
     override val modifier: Modifier,
     var text: String = "",
-    val textSize: Int = 10,
-    val textColor: Color = Color.WHITE,
+    var textSize: Int = 10,
+    var textColor: Color = Color.WHITE,
     override val parent: MutableList<View>,
 ) : View, KeyboardInterface {
     override val children: MutableList<View> = mutableListOf()
