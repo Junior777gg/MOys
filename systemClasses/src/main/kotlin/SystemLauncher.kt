@@ -1,3 +1,7 @@
+import app.BrowserApp
+import app.CalculatorApp
+import app.Storage
+import app.TestApp
 import javafx.application.Application
 import java.awt.Color
 import java.io.File
@@ -10,7 +14,7 @@ class SystemLauncher(
     val labels = mutableListOf<MutableList<View>.() -> Unit>()
     fun runLaunch() {
         mother.getRegisteredApps().forEach { app ->
-            val appIcon = File(mother.getSystemPath()+"/Installation/${app.app_id}/${app.icon_file_name}")
+            val appIcon = File(mother.getSystemPath()+"/install/${app.app_id}/${app.icon_file_name}")
             labels.add({
                 label(
                     appIcon, app.app_name,
@@ -27,13 +31,13 @@ class SystemLauncher(
         })
         labels.add({
             label(
-                run = {TestApp(graphicService,StorageService(), deviceManager).main()},
+                run = { TestApp(graphicService, StorageService(), deviceManager).main()},
                 appName = "тестапп"
             )
         })
         labels.add({
             label(
-                run = {Storage(mother,graphicService,StorageService(), deviceManager).main()},
+                run = { Storage(mother, graphicService, StorageService(), deviceManager).main()},
                 appName = "Проводник"
             )
         })

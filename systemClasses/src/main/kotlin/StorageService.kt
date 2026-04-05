@@ -7,7 +7,7 @@ class StorageService : StorageServiceI {
         listOf("tmpfs", "proc", "sysfs", "devtmpfs", "devpts", "cgroup", "cgroup2", "binfmt_misc")
 
     val rootDirs: MutableList<String> = mutableListOf()
-    private val startDir = "/MOys/AppsData"
+    private val startDir = "/MOys/data"
 
     fun initialize() {
         File(MOUNTS_PATH).readLines().forEach {

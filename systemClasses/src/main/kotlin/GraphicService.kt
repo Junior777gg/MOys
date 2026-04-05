@@ -73,7 +73,13 @@ class GraphicService : GLEventListener, GraphicServiceI {
                 }
             }
         })
-
+        /*canvas.addMouseWheelListener(ev : Mouse) {
+            Log.dbg(ev.wheelRotation.toString()+" "+ev.scrollAmount.toString())
+            if (lazyColumn.isNotEmpty()) {
+                lazyColumn[0].offset += ev.wheelRotation*ev.scrollAmount
+                redraw()
+            }
+        }*/
         canvas.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(p0: MouseEvent?) {
                 super.mouseClicked(p0)
