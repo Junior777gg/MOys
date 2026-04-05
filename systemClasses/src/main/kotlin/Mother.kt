@@ -106,13 +106,7 @@ class Mother(
                 update_date = date.toString()
             )
         )
-        systemLauncher.showNewAppLabel(
-            appName = manifestObj.app_name,
-            appIcon = File(outputFile, manifestObj.icon_file_name),
-            appId = manifestObj.app_id,
-            activityName = manifestObj.activity_name,
-            jarName = manifestObj.jar_file_name
-        )
+        systemLauncher.updateScreen()
         tempDir.deleteRecursively()
     }
 
@@ -143,9 +137,16 @@ class Mother(
         val oldRegister = Json.decodeFromString<Apps>(registerFile.readText())
         //No duplicates (replace with error if possible, because the method is 'registerNewApp' and the id already exists)
         var entryFound=false
-        for(e in oldRegister.apps) if(app.app_id==e.app_id) {entryFound=true;break}
-        if(!entryFound) oldRegister.apps.add(app)
-        registerFile.writeText(Json.encodeToString(oldRegister))
+        for(e in oldRegister.apps) {
+            if(app.app_id==e.app_id) {
+                entryFound=true
+                break
+            }
+        }
+        if(!entryFound) {
+            oldRegister.apps.add(app)
+            registerFile.writeText(Json.encodeToString(oldRegister))
+        }
     }
 
     /** Returns a list of all installed applications from the registry */

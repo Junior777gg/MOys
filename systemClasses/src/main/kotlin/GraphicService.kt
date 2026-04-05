@@ -77,7 +77,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         canvas.addMouseWheelListener{ev->
             val rotation=ev.wheelRotation
             if (lazyColumn.isNotEmpty()) {
-                lazyColumn[0].offset += -20*rotation
+                lazyColumn[0].offset += -40*rotation
                 redraw()
             }
         }

@@ -94,13 +94,4 @@ class SystemLauncher(
             Text(modifier = Modifier.width(70).height(20), appName, 15, parent = this)
         }
     }
-
-    fun showNewAppLabel(appName: String, jarName: String, activityName: String, appIcon: File? = null, appId: String) {
-        labels.add({
-            label(appIcon, appName) {
-                mother.runNewAppProcess(appId, jarName, activityName)
-            }
-        })
-        updateScreen()
-    }
 }
