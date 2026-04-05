@@ -107,7 +107,7 @@ class Mother(
                 update_date = date.toString()
             )
         )
-        systemLauncher.updateScreen()
+        systemLauncher.updateScreen(false)
         tempDir.deleteRecursively()
     }
 

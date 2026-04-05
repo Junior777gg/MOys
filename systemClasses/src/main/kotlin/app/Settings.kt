@@ -1,6 +1,7 @@
 package app
 
 import Activity
+import Button
 import Column
 import DeviceManagerI
 import GraphicServiceI
@@ -17,6 +18,7 @@ import fillMaxSize
 import height
 import onClick
 import padding
+import paddingLeft
 import size
 import width
 import java.awt.Color
@@ -38,10 +40,10 @@ class Settings(
     private fun MutableList<View>.buildUI() {
         LazyColumn(modifier = Modifier.fillMaxSize().background(Color.WHITE), this).layout {
             Column(modifier = Modifier.padding(5).width(640).height(480), parent=this).layout {
-                Text(modifier = Modifier.width(640).height(50), text = "Personalization", textSize = 24, textColor = Color.BLACK, parent = this)
+                Text(modifier = Modifier.width(640).height(50), text = "Launcher", textSize = 24, textColor = Color.BLACK, parent = this)
                 Column(modifier = Modifier.childrenWidthCentering(Modifier.Companion.LEFT).height(50), parent=this).layout {
                     Text(
-                        modifier = Modifier.height(50).width(100),
+                        modifier = Modifier.height(50).width(50),
                         text = "Background",
                         textSize = 24,
                         textColor = Color.BLACK,
@@ -60,6 +62,21 @@ class Settings(
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/3.png") },
                         file = File("${mother.getSystemPath()}/data/launcher/backgrounds/3.png"),
+                        parent = this
+                    )
+                }
+                Row(modifier = Modifier.childrenWidthCentering(Modifier.Companion.LEFT).height(50), parent=this).layout {
+                    var checkboxColor = Color.RED
+                    if (mother.systemLauncher.getTextDark()) checkboxColor = Color.GREEN
+                    Button(modifier = Modifier.size(20).background(checkboxColor).onClick {
+                        mother.systemLauncher.setTextDark(!mother.systemLauncher.getTextDark())
+                        render(false)
+                    }, parent = this)
+                    Text(
+                        modifier = Modifier.height(50).width(50).paddingLeft(20),
+                        text = "Dark text",
+                        textSize = 24,
+                        textColor = Color.BLACK,
                         parent = this
                     )
                 }

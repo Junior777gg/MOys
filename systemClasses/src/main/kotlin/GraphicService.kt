@@ -152,8 +152,8 @@ class GraphicService : GLEventListener, GraphicServiceI {
         val holdDuration=System.currentTimeMillis()-cursorHoldTimestamp
         for (bound in bounds.reversed()) {
             if (x in bound.x1..bound.x2 && y in bound.y1..bound.y2) {
-                if(holdDuration<cursorHoldThreshold) bound.onClick?.invoke()
-                else bound.onHold?.invoke()
+                if(holdDuration<cursorHoldThreshold||bound.onHold==null) bound.onClick?.invoke()
+                else bound.onHold.invoke()
                 return
             }
         }

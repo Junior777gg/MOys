@@ -17,11 +17,12 @@ class SystemLauncher(
 ) {
     @Serializable
     data class LauncherConfig (
-        var background: String,
+        var background: String = "backgrounds/1.png",
+        var textDark: Boolean = false,
     )
 
-    val labels = mutableListOf<MutableList<View>.() -> Unit>()
-    var config = LauncherConfig("backgrounds/1.png")
+    private val labels = mutableListOf<MutableList<View>.() -> Unit>()
+    private var config = LauncherConfig("backgrounds/1.png",false)
     private fun updateLabels() {
         labels.clear()
         mother.getRegisteredApps().forEach { app ->
@@ -34,7 +35,7 @@ class SystemLauncher(
                     },
                     {
                         mother.deleteApp(app.app_id)
-                        updateScreen()
+                        updateScreen(true)
                     })
             })
         }
@@ -103,33 +104,46 @@ class SystemLauncher(
         }
     }
 
-    fun updateScreen() {
+    fun updateScreen(redraw: Boolean) {
         loadConfig()
         updateLabels()
         graphicService.setContent(false) {
             screen()
         }
-        graphicService.redraw()
+        if(redraw) graphicService.redraw()
     }
 
     fun MutableList<View>.label(icon: File? = null, appName: String, click: () -> Unit, hold: (() -> Unit) = {Log.warn("Can't remove system app")}) {
+        var textColor = Color.WHITE
+        if(config.textDark) textColor = Color.BLACK
         Column(
             modifier = Modifier.padding(20).height(130).width(110)
                 .onClick { click() }.onHold { hold.invoke() } .background(Color(0,0,0,0)), this
         ).layout {
-            Image(modifier = Modifier.size(70), icon ?: File(mother.getSystemPath()+"/data/launcher/basic.png"), this)
-            Text(modifier = Modifier.width(70).height(20), appName, 15, parent = this)
+            Image(modifier = Modifier.size(70), icon ?: File("${mother.getSystemPath()}/data/launcher/basic.png"), this)
+            Text(modifier = Modifier.width(70).height(20), text = appName, textColor = textColor, textSize = 15, parent = this)
         }
     }
 
+    fun getBackground(): String {
+        return config.background
+    }
     fun setBackground(path: String) {
         Log.dbg("Set launcher background as: \"$path\"")
         config.background = path
         val cfg = File("${mother.getSystemPath()}/data/launcher/config.json")
         cfg.writeText(Json.encodeToString<LauncherConfig>(config))
-        graphicService.setContent(false) {
-            screen()
-        }
+        updateScreen(false)
+    }
+    fun getTextDark(): Boolean {
+        return config.textDark
+    }
+    fun setTextDark(v: Boolean) {
+        Log.dbg("Set launcher text dark to: \"$v\"")
+        config.textDark = v
+        val cfg = File("${mother.getSystemPath()}/data/launcher/config.json")
+        cfg.writeText(Json.encodeToString<LauncherConfig>(config))
+        updateScreen(false)
     }
     fun loadConfig() {
         val cfg = File("${mother.getSystemPath()}/data/launcher/config.json")
