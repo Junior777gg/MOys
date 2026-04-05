@@ -42,6 +42,7 @@ class Mother(
 
     val systemLauncher = SystemLauncher(graphicService, deviceManager, this)
     fun start() {
+        InstallationService().run(systemFolderPath)
         systemLauncher.runLaunch()
     }
 

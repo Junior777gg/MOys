@@ -4,16 +4,24 @@ import app.Settings
 import app.Storage
 import app.TestApp
 import javafx.application.Application
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.awt.Color
 import java.io.File
-
 
 class SystemLauncher(
     val graphicService: GraphicService,
     val deviceManager: DeviceManager,
     val mother: Mother
 ) {
+    @Serializable
+    data class LauncherConfig (
+        var background: String,
+    )
+
     val labels = mutableListOf<MutableList<View>.() -> Unit>()
+    var config = LauncherConfig("backgrounds/1.png")
     private fun updateLabels() {
         labels.clear()
         mother.getRegisteredApps().forEach { app ->
@@ -32,28 +40,28 @@ class SystemLauncher(
         }
         labels.add({
             label(
-                icon = File(graphicService.getSystemResource("app/calculator.png")),
+                icon = File("${mother.getSystemPath()}/install/calculator/icon.png"),
                 click = { CalculatorApp(graphicService, StorageService(), deviceManager).main() },
                 appName = "Калькулятор"
             )
         })
         labels.add({
             label(
-                icon = File(graphicService.getSystemResource("app/settings.png")),
+                icon = File("${mother.getSystemPath()}/install/settings/icon.png"),
                 click = { Settings(mother, graphicService, StorageService(), deviceManager).main()},
                 appName = "Настройки"
             )
         })
         labels.add({
             label(
-                icon = File(graphicService.getSystemResource("app/storage.png")),
+                icon = File("${mother.getSystemPath()}/install/storage/icon.png"),
                 click = { Storage(mother, graphicService, StorageService(), deviceManager).main()},
                 appName = "Проводник"
             )
         })
         labels.add({
             label(
-                icon = File(graphicService.getSystemResource("app/browser.png")),
+                icon = File("${mother.getSystemPath()}/install/browser/icon.png"),
                 click = {
                     Thread {
                         Application.launch(BrowserApp::class.java)
@@ -70,6 +78,7 @@ class SystemLauncher(
         })
     }
     fun runLaunch() {
+        loadConfig()
         updateLabels()
         graphicService.setContent(true) {
             screen()
@@ -78,7 +87,7 @@ class SystemLauncher(
     }
 
     fun MutableList<View>.screen() {
-        Image(modifier = Modifier.fillMaxSize(), File(graphicService.getSystemResource("background.png")), this).layout {
+        Image(modifier = Modifier.fillMaxSize(), File(mother.getSystemPath()+"/data/launcher/${config.background}"), this).layout {
             Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)), this).layout {
                 var count = 0
                 for (i in 0..6) {
@@ -95,8 +104,9 @@ class SystemLauncher(
     }
 
     fun updateScreen() {
+        loadConfig()
         updateLabels()
-        graphicService.setContent{
+        graphicService.setContent(false) {
             screen()
         }
         graphicService.redraw()
@@ -107,8 +117,24 @@ class SystemLauncher(
             modifier = Modifier.padding(20).height(130).width(110)
                 .onClick { click() }.onHold { hold.invoke() } .background(Color(0,0,0,0)), this
         ).layout {
-            Image(modifier = Modifier.size(70), icon ?: File(graphicService.getSystemResource("basic.png")), this)
+            Image(modifier = Modifier.size(70), icon ?: File(mother.getSystemPath()+"/data/launcher/basic.png"), this)
             Text(modifier = Modifier.width(70).height(20), appName, 15, parent = this)
+        }
+    }
+
+    fun setBackground(path: String) {
+        Log.dbg("Set launcher background as: \"$path\"")
+        config.background = path
+        val cfg = File("${mother.getSystemPath()}/data/launcher/config.json")
+        cfg.writeText(Json.encodeToString<LauncherConfig>(config))
+        graphicService.setContent(false) {
+            screen()
+        }
+    }
+    fun loadConfig() {
+        val cfg = File("${mother.getSystemPath()}/data/launcher/config.json")
+        if(cfg.exists()) {
+            config = Json.decodeFromString<LauncherConfig>(cfg.readText())
         }
     }
 }

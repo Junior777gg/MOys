@@ -104,10 +104,6 @@ class GraphicService : GLEventListener, GraphicServiceI {
         Log.info("Graphical service initialized")
     }
 
-    override fun getSystemResource(path: String):String {
-        return Paths.get("").toAbsolutePath().parent.parent.parent.toString()+"/res/"+path
-    }
-
     //Sets the content of the screen. If itIsNewScreen=true, adds the screen to the navigation stack
     override fun setContent(itIsNewScreen: Boolean, lambda: MutableList<View>.() -> Unit) {
         viewTree.clear()
