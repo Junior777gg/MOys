@@ -8,6 +8,9 @@ class SecurityClassLoader(url: Array<URL>, parent: ClassLoader) : URLClassLoader
         "sun.misc",
         "sun.reflect"
     )
+    private val allowedClasses= listOf(
+        "java.awt"
+    )
 
     override fun loadClass(name: String?): Class<*>? {
         if (!isBlockedClass(name!!)) {
@@ -16,11 +19,6 @@ class SecurityClassLoader(url: Array<URL>, parent: ClassLoader) : URLClassLoader
     }
 
     private fun isBlockedClass(name: String): Boolean {
-        blockedClasses.forEach {
-            if (blockedClasses.contains(it)) {
-                return true
-            }
-        }
         return false
     }
 }
