@@ -7,13 +7,9 @@ import GraphicServiceI
 import StorageServiceI
 import DeviceManagerI
 import View
-import Modifier.Companion.BOTTOM
-import Modifier.Companion.RIGHT
 import Row
 import Text
 import background
-import childrenHeightCentering
-import childrenWidthCentering
 import fillMaxSize
 import height
 import onClick
@@ -49,8 +45,7 @@ class CalculatorApp(
             Column(
                 modifier = Modifier.width(640).height(200)
                     .background(Color(40, 40, 40))
-                    .childrenWidthCentering(RIGHT)
-                    .childrenHeightCentering(BOTTOM),
+                    ,
                 this
             ).layout {
                 Text(

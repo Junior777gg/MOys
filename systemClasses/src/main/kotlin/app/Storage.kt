@@ -44,7 +44,7 @@ class Storage(
                     currentPath = Path(currentPath).parent.toString()
                     main()
                 }, this).layout {
-                    Text(modifier = Modifier.height(60).width(640), "...", 17, Color.black, this)
+                    Text(modifier = Modifier.height(60).width(640), "...", 17, Color.black, parent = this)
                 }
             }
             //Iterate files and folders
@@ -70,7 +70,7 @@ class Storage(
             //Place icon if the file is
             if (file.isFile || file.isDirectory)
                 Image(modifier = Modifier.Companion.size(60), File("${mother.getSystemPath()}/data/storage/${iconList[iconId]}"),this)
-            Text(modifier = Modifier.height(60).width(640), file.name,17, Color.black,this)
+            Text(modifier = Modifier.height(60).width(640), file.name,17, Color.black, parent = this)
         }
     }
 

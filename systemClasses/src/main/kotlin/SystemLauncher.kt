@@ -90,7 +90,9 @@ class SystemLauncher(
 
     fun MutableList<View>.screen() {
         Image(modifier = Modifier.fillMaxSize(), File(mother.getSystemPath()+"/data/launcher/${config.background}"), this).layout {
-            Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)), this).layout {
+            Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)),
+                verticalArrangement = VerticalArrangement.SpaceEvenly(),
+                horizontalAlignment = HorizontalAlignment.Center(), parent = this).layout {
                 var count = 0
                 for (i in 0..6) {
                     Row(modifier = Modifier.height(130).width(640).background(Color(0,0,0,0)), this).layout {

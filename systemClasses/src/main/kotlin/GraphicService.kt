@@ -6,6 +6,7 @@ import com.jogamp.opengl.awt.GLCanvas
 import com.jogamp.opengl.GLEventListener
 import com.jogamp.opengl.GLProfile
 import java.awt.Color
+import java.awt.Dimension
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionAdapter
@@ -47,7 +48,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         val frame = JFrame("MOys")
 
         frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-        frame.setSize(SCREEN_WIDTH, SCREEN_HEIGHT)
+        frame.preferredSize = Dimension(SCREEN_WIDTH, SCREEN_HEIGHT)
 
         val profile = GLProfile.get(GLProfile.GL2)
         val capabilities = GLCapabilities(profile)
@@ -61,6 +62,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         canvas.addGLEventListener(this)
 
         frame.add(canvas)
+        frame.pack()
         frame.setLocationRelativeTo(null)
         frame.isVisible = true
         frame.background = Color(255, 255, 255)
@@ -109,7 +111,6 @@ class GraphicService : GLEventListener, GraphicServiceI {
         viewTree.clear()
         lazyColumn.clear()
         viewTree.lambda()
-        navigationLambda(viewTree)
         if (itIsNewScreen) {
             stack.push(lambda)
         }
@@ -138,7 +139,6 @@ class GraphicService : GLEventListener, GraphicServiceI {
         viewTreeUntilInject.clear()
         val lambda = stack.peek()
         viewTree.lambda()
-        navigationLambda(viewTree)
         canvas.display()
     }
 
@@ -176,6 +176,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         val gl = p0!!.gl.gL2
         gl.glClear(GL.GL_COLOR_BUFFER_BIT)
         bounds.clear()
+        navigationLambda(viewTree)
         viewTree.forEach {
             renderer.parse(gl, it)
         }

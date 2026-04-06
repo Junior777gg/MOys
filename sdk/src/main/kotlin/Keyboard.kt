@@ -10,9 +10,10 @@ class Keyboard(
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .childrenHeightCentering(Modifier.BOTTOM)
                     .paddingBottom(60)
-                    .background(Color(0, 0, 0, 0)), this
+                    .background(Color(0, 0, 0, 0)),
+                verticalAlignment = VerticalAlignment.Bottom(),
+                parent = this
             ).layout {
                 Column(
                     modifier = Modifier.height(260).width(640).background(Color(200, 200, 200, 255)),

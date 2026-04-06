@@ -29,6 +29,7 @@ data class OnHold(val onHold: () -> Unit) : ModifierElements
 open class Modifier private constructor(
     val elements : List<ModifierElements> = listOf()
     ){
+    companion object: Modifier()
 
     fun add(element: ModifierElements): Modifier {
         return Modifier(elements + element)

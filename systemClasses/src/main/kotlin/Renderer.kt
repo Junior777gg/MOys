@@ -305,15 +305,6 @@ class Renderer(
                     }
                 }
 
-                is Box -> {
-                    view.children.forEach {
-                        parse(
-                            gl, it, x1, y1,
-                            x2, y2
-                        )
-
-                    }
-                }
                 //Row
                 is Row -> {
                     var gap = 0.0
@@ -381,6 +372,15 @@ class Renderer(
                             x2, y2
                         )
                         currentx1 += currentWidth + gap
+                    }
+                }
+                else -> {
+                    view.children.forEach {
+                        parse(
+                            gl, it, x1, y1,
+                            x2, y2
+                        )
+
                     }
                 }
             }

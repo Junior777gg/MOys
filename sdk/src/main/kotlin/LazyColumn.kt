@@ -1,7 +1,7 @@
 class LazyColumn(
     override val modifier: Modifier,
     override val parent: MutableList<View>,
-    val horizontalAlignment: HorizontalAlignment,
+    val horizontalAlignment: HorizontalAlignment = HorizontalAlignment.Center(),
 ) : View {
     override val children= mutableListOf<View>()
     var offset = 0.0

@@ -13,7 +13,6 @@ import StorageServiceI
 import View
 import Text
 import background
-import childrenWidthCentering
 import fillMaxSize
 import height
 import onClick
@@ -41,7 +40,7 @@ class Settings(
         LazyColumn(modifier = Modifier.fillMaxSize().background(Color.WHITE), this).layout {
             Column(modifier = Modifier.padding(5).width(640).height(480), parent=this).layout {
                 Text(modifier = Modifier.width(640).height(50), text = "Launcher", textSize = 24, textColor = Color.BLACK, parent = this)
-                Column(modifier = Modifier.childrenWidthCentering(Modifier.Companion.LEFT).height(50), parent=this).layout {
+                Column(modifier = Modifier.height(50), parent=this).layout {
                     Text(
                         modifier = Modifier.height(50).width(50),
                         text = "Background",
@@ -66,7 +65,7 @@ class Settings(
                     )
                 }
                 Row(
-                    modifier = Modifier.childrenWidthCentering(Modifier.Companion.LEFT).height(50),
+                    modifier = Modifier.height(50),
                     parent = this
                 ).layout {
                     var checkboxColor = Color.RED
@@ -85,7 +84,7 @@ class Settings(
                 }
                 if (mother.systemLauncher.getTextDisplay()) {
                     Row(
-                        modifier = Modifier.childrenWidthCentering(Modifier.Companion.LEFT).height(50),
+                        modifier = Modifier.height(50),
                         parent = this
                     ).layout {
                         var checkboxColor = Color.RED
