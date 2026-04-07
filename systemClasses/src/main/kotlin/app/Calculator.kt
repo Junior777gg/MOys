@@ -15,6 +15,7 @@ import height
 import onClick
 import padding
 import paddingBottom
+import paddingTop
 import width
 import java.awt.Color
 
@@ -40,14 +41,9 @@ class CalculatorApp(
     }
 
     private fun MutableList<View>.buildUI() {
-        Column(modifier = Modifier.fillMaxSize().background(Color(30, 30, 30)), this).layout {
+        Column(modifier = Modifier.fillMaxSize().background(Color(30, 30, 30)).paddingBottom(60), this).layout {
 
-            Column(
-                modifier = Modifier.width(640).height(200)
-                    .background(Color(40, 40, 40))
-                    ,
-                this
-            ).layout {
+            Row(modifier = Modifier.width(640).height(200).background(Color(40, 40, 40)), this).layout {
                 Text(
                     modifier = Modifier.width(600).height(80),
                     text = display,
@@ -84,7 +80,7 @@ class CalculatorApp(
                 calcButton("+", 160, Color(255, 159, 10), Color.WHITE) { onOperation("+") }
             }
 
-            Row(modifier = Modifier.width(640).height(140).paddingBottom(60), this).layout {
+            Row(modifier = Modifier.width(640).height(140), this).layout {
                 calcButton("0", 320, Color(51, 51, 51), Color.WHITE) { onDigit("0") }
                 calcButton(".", 160, Color(51, 51, 51), Color.WHITE) { onDot() }
                 calcButton("=", 160, Color(255, 159, 10), Color.WHITE) { onEquals() }

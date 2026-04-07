@@ -14,6 +14,7 @@ import fillMaxSize
 import height
 import onClick
 import paddingBottom
+import paddingLeft
 import size
 import width
 import java.awt.Color
@@ -37,10 +38,10 @@ class Storage(
 
     fun MutableList<View>.buildUI(){
         val files = File(currentPath).listFiles()
-        LazyColumn(modifier = Modifier.Companion.fillMaxSize().paddingBottom(60), this).layout {
+        LazyColumn(modifier = Modifier.fillMaxSize().paddingBottom(60), this).layout {
             if(currentPath!="/") {
                 //Button to return back (may conflict with "back" button in nav)
-                Row(modifier = Modifier.Companion.height(80).width(640).onClick {
+                Row(modifier = Modifier.height(80).width(640).onClick {
                     currentPath = Path(currentPath).parent.toString()
                     main()
                 }, this).layout {
@@ -55,7 +56,7 @@ class Storage(
     }
 
     fun MutableList<View>.file(file: File){
-        Row(modifier = Modifier.Companion.height(80).width(640).onClick {
+        Row(modifier = Modifier.height(80).width(640).paddingLeft(60).onClick {
             if (file.isDirectory){
                 currentPath = file.absolutePath
                 main()
@@ -69,7 +70,7 @@ class Storage(
             }
             //Place icon if the file is
             if (file.isFile || file.isDirectory)
-                Image(modifier = Modifier.Companion.size(60), File("${mother.getSystemPath()}/data/storage/${iconList[iconId]}"),this)
+                Image(modifier = Modifier.size(60), File("${mother.getSystemPath()}/data/storage/${iconList[iconId]}"),this)
             Text(modifier = Modifier.height(60).width(640), file.name,17, Color.black, parent = this)
         }
     }

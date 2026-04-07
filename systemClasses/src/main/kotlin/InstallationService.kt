@@ -16,13 +16,11 @@ class InstallationService {
         copy("app/calculator.png", "$installPath/calculator/icon.png")
         copy("app/settings.png", "$installPath/settings/icon.png")
         copy("app/storage.png", "$installPath/storage/icon.png")
-        write("$dataPath/launcher/config.json", "{\"background\":\"backgrounds/1.png\",\"textDark\": false,\"textDisplay\": true}")
         Log.dbg("Launcher resources copied")
 
         copy("file.png", "$dataPath/storage/file.png")
         copy("folder.png", "$dataPath/storage/folder.png")
         copy("jarp.png", "$dataPath/storage/jarp.png")
-        write("$dataPath/storage/config.json", "{}")
         Log.dbg("Storage resources copied")
 
         Log.dbg("System app data copied")

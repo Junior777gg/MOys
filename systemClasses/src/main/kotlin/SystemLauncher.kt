@@ -5,7 +5,6 @@ import app.Storage
 import app.TestApp
 import javafx.application.Application
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.awt.Color
 import java.io.File
@@ -20,6 +19,7 @@ class SystemLauncher(
         var background: String = "backgrounds/1.png",
         var textDark: Boolean = false,
         var textDisplay: Boolean = true,
+        var appsCentering: Boolean = false,
     )
 
     private val labels = mutableListOf<MutableList<View>.() -> Unit>()
@@ -75,7 +75,7 @@ class SystemLauncher(
         labels.add({
             label(
                 click = { TestApp(graphicService, StorageService(), deviceManager).main()},
-                appName = "Scroll Test"
+                appName = "Testing App"
             )
         })
     }
@@ -88,6 +88,11 @@ class SystemLauncher(
         graphicService.redraw()
     }
 
+    private fun getAppsArrangement(): HorizontalArrangement {
+        if(config.appsCentering) return HorizontalArrangement.Center()
+        else return HorizontalArrangement.Left()
+    }
+
     fun MutableList<View>.screen() {
         Image(modifier = Modifier.fillMaxSize(), File(mother.getSystemPath()+"/data/launcher/${config.background}"), this).layout {
             Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)),
@@ -95,7 +100,7 @@ class SystemLauncher(
                 horizontalAlignment = HorizontalAlignment.Center(), parent = this).layout {
                 var count = 0
                 for (i in 0..6) {
-                    Row(modifier = Modifier.height(130).width(640).background(Color(0,0,0,0)), this).layout {
+                    Row(modifier = Modifier.height(130).width(640).background(Color(0,0,0,0)), horizontalArrangement = getAppsArrangement(), parent = this).layout {
                         while (this.size < 5) {
                             if (count > labels.size - 1) break
                             labels[count](this)
@@ -155,6 +160,16 @@ class SystemLauncher(
     fun setTextDisplay(v: Boolean) {
         Log.dbg("Set launcher text display to: \"$v\"")
         config.textDisplay = v
+        val cfg = File("${mother.getSystemPath()}/data/launcher/config.json")
+        cfg.writeText(Json.encodeToString<LauncherConfig>(config))
+        updateScreen(false)
+    }
+    fun getAppsCentering(): Boolean {
+        return config.appsCentering
+    }
+    fun setAppsCentering(v: Boolean) {
+        Log.dbg("Set launcher apps centering to: \"$v\"")
+        config.appsCentering = v
         val cfg = File("${mother.getSystemPath()}/data/launcher/config.json")
         cfg.writeText(Json.encodeToString<LauncherConfig>(config))
         updateScreen(false)

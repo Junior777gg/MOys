@@ -38,9 +38,9 @@ class Settings(
     }
     private fun MutableList<View>.buildUI() {
         LazyColumn(modifier = Modifier.fillMaxSize().background(Color.WHITE), this).layout {
-            Column(modifier = Modifier.padding(5).width(640).height(480), parent=this).layout {
+            Column(modifier = Modifier.padding(5).width(640).height(480), horizontalAlignment = HorizontalAlignment.Center(), parent=this).layout {
                 Text(modifier = Modifier.width(640).height(50), text = "Launcher", textSize = 24, textColor = Color.BLACK, parent = this)
-                Column(modifier = Modifier.height(50), parent=this).layout {
+                Row(modifier = Modifier.height(50).width(500), horizontalArrangement = HorizontalArrangement.Left(), parent=this).layout {
                     Text(
                         modifier = Modifier.height(50).width(50),
                         text = "Background",
@@ -49,7 +49,7 @@ class Settings(
                         parent = this
                     )
                 }
-                Row(modifier = Modifier.height(140).width(640), parent = this).layout {
+                Row(modifier = Modifier.height(140).width(500), horizontalArrangement = HorizontalArrangement.Left(), parent = this).layout {
                     Image(modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/1.png") },
                         file = File("${mother.getSystemPath()}/data/launcher/backgrounds/1.png"),
                         parent = this
@@ -64,45 +64,34 @@ class Settings(
                         parent = this
                     )
                 }
-                Row(
-                    modifier = Modifier.height(50),
-                    parent = this
-                ).layout {
-                    var checkboxColor = Color.RED
-                    if (mother.systemLauncher.getTextDisplay()) checkboxColor = Color.GREEN
-                    Button(modifier = Modifier.size(20).background(checkboxColor).onClick {
-                        mother.systemLauncher.setTextDisplay(!mother.systemLauncher.getTextDisplay())
-                        render(false)
-                    }, parent = this)
-                    Text(
-                        modifier = Modifier.height(50).width(50).paddingLeft(20),
-                        text = "Display app names",
-                        textSize = 24,
-                        textColor = Color.BLACK,
-                        parent = this
-                    )
-                }
-                if (mother.systemLauncher.getTextDisplay()) {
-                    Row(
-                        modifier = Modifier.height(50),
-                        parent = this
-                    ).layout {
-                        var checkboxColor = Color.RED
-                        if (mother.systemLauncher.getTextDark()) checkboxColor = Color.GREEN
-                        Button(modifier = Modifier.size(20).background(checkboxColor).onClick {
-                            mother.systemLauncher.setTextDark(!mother.systemLauncher.getTextDark())
-                            render(false)
-                        }, parent = this)
-                        Text(
-                            modifier = Modifier.height(50).width(50).paddingLeft(20),
-                            text = "Dark app names",
-                            textSize = 24,
-                            textColor = Color.BLACK,
-                            parent = this
-                        )
-                    }
+                checkbox(get=mother.systemLauncher.getAppsCentering(),set={v->mother.systemLauncher.setAppsCentering(v)},text="Center apps",parent=this)
+                checkbox(get=mother.systemLauncher.getTextDisplay(),set={v->mother.systemLauncher.setTextDisplay(v)},text="Display app names",parent=this)
+                if(mother.systemLauncher.getTextDisplay()) {
+                    checkbox(get=mother.systemLauncher.getTextDark(),set={v->mother.systemLauncher.setTextDark(v)},text="Dark app names",parent=this)
                 }
             }
+        }
+    }
+    private fun checkbox(get: Boolean, set: (Boolean)->Unit, text: String, parent: MutableList<View>) {
+        Row(
+            modifier = Modifier.height(50).width(500),
+            horizontalArrangement = HorizontalArrangement.Left(),
+            parent = parent
+        ).layout {
+            var checkboxColor = Color.RED
+            if (get) checkboxColor = Color.GREEN
+            Button(modifier = Modifier.size(20).background(checkboxColor).onClick {
+                set.invoke(!get)
+                render(false)
+            }, parent = this)
+            Text(
+                modifier = Modifier.height(50).width(50).paddingLeft(200),
+                text = text,
+                textSize = 24,
+                textAlign = Text.LEFT,
+                textColor = Color.BLACK,
+                parent = this
+            )
         }
     }
     private fun setBG(path: String) {
