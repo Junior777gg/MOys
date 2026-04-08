@@ -5,12 +5,13 @@ import com.jogamp.opengl.GLCapabilities
 import com.jogamp.opengl.awt.GLCanvas
 import com.jogamp.opengl.GLEventListener
 import com.jogamp.opengl.GLProfile
+import common.Log
+import common.Stack
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionAdapter
-import java.nio.file.Paths
 import javax.swing.JFrame
 
 //The main graphical service. Controls the window, rendering, and input processing.

@@ -3,6 +3,7 @@ import app.CalculatorApp
 import app.Settings
 import app.Storage
 import app.TestApp
+import common.Log
 import javafx.application.Application
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -74,7 +75,7 @@ class SystemLauncher(
         })
         labels.add({
             label(
-                click = { TestApp(graphicService, StorageService(), deviceManager).main()},
+                click = { TestApp(graphicService, StorageService(), deviceManager, AudioService()).main()},
                 appName = "Testing App"
             )
         })
@@ -121,7 +122,7 @@ class SystemLauncher(
         if(redraw) graphicService.redraw()
     }
 
-    fun MutableList<View>.label(icon: File? = null, appName: String, click: () -> Unit, hold: (() -> Unit) = {Log.warn("Can't remove system app")}) {
+    fun MutableList<View>.label(icon: File? = null, appName: String, click: () -> Unit, hold: (() -> Unit) = { Log.warn("Can't remove system app")}) {
         var textColor = Color.WHITE
         if(config.textDark) textColor = Color.BLACK
         if(!config.textDisplay) textColor = Color(0,0,0,0)

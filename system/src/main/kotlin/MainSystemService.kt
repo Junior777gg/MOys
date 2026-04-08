@@ -1,3 +1,5 @@
+import common.Log
+
 fun main() {
     Log.info("Initialization")
 

@@ -1,3 +1,5 @@
+package common
+
 class Stack<T> {
     private val list = mutableListOf<T>()
     fun push(value: T) {

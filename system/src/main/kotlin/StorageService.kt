@@ -1,3 +1,4 @@
+import common.Log
 import java.io.File
 
 class StorageService : StorageServiceI {

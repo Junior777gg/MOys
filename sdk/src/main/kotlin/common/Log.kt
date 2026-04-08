@@ -1,3 +1,5 @@
+package common
+
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -29,6 +31,6 @@ object Log {
         println("$v\u001b[0m")
     }
     private fun timeCode(code: String) {
-        print("["+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))+" $code]: ")
+        print("["+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))+" $code]: ")
     }
 }
