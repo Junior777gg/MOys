@@ -1,4 +1,4 @@
-interface AudioServiceI {
+interface AudioPlayerI {
     fun getVolume(): Float
     fun setVolume(v: Float)
 

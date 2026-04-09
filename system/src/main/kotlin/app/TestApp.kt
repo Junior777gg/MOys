@@ -4,7 +4,7 @@ import Activity
 import GraphicServiceI
 import StorageServiceI
 import DeviceManagerI
-import AudioServiceI
+import AudioPlayerI
 import Button
 import Text
 import TextField
@@ -21,7 +21,7 @@ class TestApp(
     override val gs: GraphicServiceI,
     override val storage: StorageServiceI,
     override val deviceManager: DeviceManagerI,
-    val audioService: AudioServiceI
+    val audioService: AudioPlayerI
 ) : Activity {
     override fun main() {
         gs.setContent(true) {
@@ -35,7 +35,7 @@ class TestApp(
                 Button(modifier = Modifier.size(100).background(Color.ORANGE), parent = this)
                 Button(modifier = Modifier.size(100).background(Color.GREEN).onClick {
                     //This is temporal.
-                    audioService.playFile("/home/sanya/MOys/data/testApp/yippee-tbh.ogg")
+                    audioService.playFile("/home/sanya/MOys/data/testApp/yippee-tbh.mp3")
                 }, parent = this).layout {
                     Text(modifier = Modifier.height(14).width(20), text = "Play sound", parent = this)
                 }

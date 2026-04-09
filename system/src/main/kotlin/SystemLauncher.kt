@@ -3,6 +3,7 @@ import app.CalculatorApp
 import app.SettingsApp
 import app.StorageApp
 import app.TestApp
+import audio.AudioPlayer
 import common.Log
 import javafx.application.Application
 import kotlinx.serialization.Serializable
@@ -88,7 +89,7 @@ class SystemLauncher(
         labels.add({
             label(
                 click = {
-                    val act=TestApp(graphicService, StorageService(), deviceManager, AudioService())
+                    val act=TestApp(graphicService, StorageService(), deviceManager, AudioPlayer())
                     graphicService.setActivity(act)
                     act.main()
                         },
