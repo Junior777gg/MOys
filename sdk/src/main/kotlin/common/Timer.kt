@@ -1,21 +1,22 @@
 package common
 
 import java.lang.Exception
+import kotlin.concurrent.thread
+import kotlin.math.min
 
 /**
  * Simple timer executed on independent thread in given interval.
  * Outside of testing might be useful for periodic updates, animations and status-bars.
 */
-@Deprecated("Causes main thread to freeze.")
 object Timer {
     private var timerTread: Thread?=null
     private var isRunning=false
     private var callbacks=mutableListOf<TimerCallback>()
 
-    /**Adds [callback] to the stack and calls it every [intervalMs] milliseconds.*/
-    fun subscribe(callback: (currentTimeMs: Long)->Unit, intervalMs: Long=1000L) {
+    /**Adds [callback] to the stack and calls it every [intervalS] seconds.*/
+    fun subscribe(callback: (currentTimeMs: Long)->Unit, intervalS: Long=1L) {
         synchronized(callbacks) {
-            callbacks.add(TimerCallback(intervalMs, callback))
+            callbacks.add(TimerCallback(min(intervalS*1000L, 1000L), callback))
         }
         if(!isRunning) start()
     }
@@ -34,7 +35,7 @@ object Timer {
         if(isRunning) return
         isRunning = true
 
-        /*CoroutineScope(Dispatchers.Default).launch {
+        timerTread = thread(name = "system-timer", isDaemon = true, block = {
             val startTime = System.currentTimeMillis()
             var lastTick=startTime
             //Start execution of the timer stack.
@@ -57,16 +58,12 @@ object Timer {
                     }
                 }
                 //Sync timer stack to be executed ONLY in 60 or fewer FPS.
-                val sleepMs = (lastTick+16)-(System.currentTimeMillis()-startTime)
-                //Log.dbg("Timer stack is alive")
-                if(sleepMs>0) {
-                    try {
-                        delay(sleepMs)
-                    } catch (_: InterruptedException) { }
-                }
+                try {
+                    Thread.sleep(1000)
+                } catch (_: InterruptedException) { }
                 lastTick = System.currentTimeMillis()
             }
-        }*/
+        })
     }
     /**
      * Fully stops the timer stack.
