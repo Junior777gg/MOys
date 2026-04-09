@@ -33,6 +33,9 @@ class GraphicService : GLEventListener, GraphicServiceI {
 
     private val lazyColumns = mutableListOf<LazyColumn>()
 
+    //After how much time click counts as hold
+    private val cursorHoldThreshold = 400L
+    private var cursorHoldTimestamp = 0L
     private var isMouseDragged = false
     private var lastMouseY = 0.0
     private var focusedActivity: Activity? = null
@@ -79,17 +82,27 @@ class GraphicService : GLEventListener, GraphicServiceI {
                 }
             }
         })
+        canvas.addMouseWheelListener{ev->
+            val rotation=ev.wheelRotation
+            if (lazyColumns.isNotEmpty()) {
+                lazyColumns[0].offset += -40*rotation
+                redraw()
+            }
+        }
         canvas.addMouseListener(object : MouseAdapter() {
             override fun mouseReleased(e: MouseEvent?) {
                 super.mouseReleased(e)
                 val x = e!!.x.toDouble()
                 val y = e.y.toDouble()
                 if (!isMouseDragged){
-                handleClick(x, y)}
+                    handleClick(x, y)
+                    cursorHoldTimestamp = 0L
+                }
                 isMouseDragged = false
             }
             override fun mousePressed(e: MouseEvent?) {
                 super.mousePressed(e)
+                cursorHoldTimestamp = System.currentTimeMillis()
                 lastMouseY = e!!.y.toDouble()
             }
         })
@@ -144,7 +157,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
     //Return to the previous screen in the navigation stack
     override fun popBackStack() {
         if (stack.stackSize() <= 1) return
-        if(focusedActivity?.onNavigationBack()==false) return
+        if (focusedActivity?.onNavigationBack()==false) return
         stack.popBackStack()
         viewTree.clear()
         bounds.clear()
@@ -163,9 +176,11 @@ class GraphicService : GLEventListener, GraphicServiceI {
 
     //Searches for a clickable area by coordinates and calls onClick
     private fun handleClick(x: Double, y: Double) {
+        val holdDuration = System.currentTimeMillis()-cursorHoldTimestamp
         for (bound in bounds.reversed()) {
             if (x in bound.x1..bound.x2 && y in bound.y1..bound.y2) {
-                bound.onClick?.invoke()
+                if(holdDuration<cursorHoldThreshold||bound.onHold==null) bound.onClick?.invoke()
+                else bound.onHold.invoke()
                 return
             }
         }

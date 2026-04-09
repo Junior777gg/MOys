@@ -1,8 +1,10 @@
 import common.Log
 import kotlinx.serialization.json.Json
+import org.jsoup.SerializationException
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.lang.IllegalArgumentException
 import java.net.URLClassLoader
 import java.time.LocalDate
 import java.util.zip.ZipInputStream
@@ -85,35 +87,41 @@ class Mother(
             }
         }
         val manifest = File(tempFolderPath, "manifest.json")
-        val manifestObj = Json.decodeFromString<Manifest>(manifest.readText())
-        val outputFile = File(installFolderPath, manifestObj.app_id)
-        if (outputFile.exists()) {
-            Log.warn("Duplicate app entry \"${manifestObj.app_id}\". Updating...")
-            outputFile.deleteRecursively()
-        }
-        outputFile.mkdirs()
-        if (outputFile.exists()) {
-            outputFile.deleteRecursively()
-        }
-        val listTempFiles = tempDir.listFiles() ?: emptyArray<File>()
-        listTempFiles.forEach { file ->
-            file.copyRecursively(File(outputFile.path, file.name))
-        }
-        val date = LocalDate.now()
-        registerNewApp(
-            App(
-                app_id = manifestObj.app_id,
-                app_name = manifestObj.app_name,
-                version = manifestObj.version,
-                jar_file_name = manifestObj.jar_file_name,
-                icon_file_name = manifestObj.icon_file_name,
-                activity_name = manifestObj.activity_name,
-                install_date = date.toString(),
-                update_date = date.toString()
+        try {
+            val manifestObj = Json.decodeFromString<Manifest>(manifest.readText())
+            val outputFile = File(installFolderPath, manifestObj.app_id)
+            if (outputFile.exists()) {
+                Log.warn("Duplicate app entry \"${manifestObj.app_id}\". Updating...")
+                outputFile.deleteRecursively()
+            }
+            outputFile.mkdirs()
+            if (outputFile.exists()) {
+                outputFile.deleteRecursively()
+            }
+            val listTempFiles = tempDir.listFiles() ?: emptyArray<File>()
+            listTempFiles.forEach { file ->
+                file.copyRecursively(File(outputFile.path, file.name))
+            }
+            val date = LocalDate.now()
+            registerNewApp(
+                App(
+                    app_id = manifestObj.app_id,
+                    app_name = manifestObj.app_name,
+                    version = manifestObj.version,
+                    jar_file_name = manifestObj.jar_file_name,
+                    icon_file_name = manifestObj.icon_file_name,
+                    activity_name = manifestObj.activity_name,
+                    install_date = date.toString(),
+                    update_date = date.toString()
+                )
             )
-        )
-        systemLauncher.updateScreen(false)
-        tempDir.deleteRecursively()
+            systemLauncher.updateScreen(false)
+            tempDir.deleteRecursively()
+        } catch (e : SerializationException) {
+            Log.error("Couldn't install app \"${jarp.name}\": ${e.message.toString()}")
+        } catch (e : IllegalArgumentException) {
+            Log.error("Couldn't install app \"${jarp.name}\": ${e.message.toString()}")
+        }
     }
 
     /** Removes app's data and register entry */
@@ -139,7 +147,7 @@ class Mother(
 
             Log.info("Deleted app with id \"$appId\"")
         } catch (e: Exception) {
-            Log.error(e.message.toString())
+            Log.error("Couldn't delete app \"$appId\": ${e.message.toString()}")
         }
     }
 
@@ -161,7 +169,7 @@ class Mother(
                 method.invoke(instance)
             }
         } catch (e: Exception) {
-            Log.error(e.message.toString())
+            Log.error("Couldn't launch app \"$appId\": ${e.message.toString()}")
         }
     }
 
