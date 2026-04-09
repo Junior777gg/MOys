@@ -31,14 +31,12 @@ class GraphicService : GLEventListener, GraphicServiceI {
     //The list of clickable areas on the current frame
     private val bounds = mutableListOf<Bounds>()
 
-    //After how much time click counts as hold
-    private val cursorHoldThreshold = 400L
-    private var cursorHoldTimestamp = 0L
-
     //Saved tree before calling injectUI (for restoration when cancelInject is called)
     private val viewTreeUntilInject = mutableListOf<View>()
 
     private val lazyColumn = mutableListOf<LazyColumn>()
+
+    private var isMouseDragged = false
 
     private val renderer = Renderer(this, bounds, lazyColumn, SCREEN_HEIGHT, SCREEN_WIDTH)
     private val navigationLambda = SystemNavigation(this).setUpNavigation()
@@ -74,6 +72,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         canvas.addMouseMotionListener(object : MouseMotionAdapter() {
             override fun mouseDragged(e: MouseEvent) {
                 if (lazyColumn.isNotEmpty()) {
+                    isMouseDragged = true
                     val deltaY = e.y.toDouble() - lastMouseY
                     lastMouseY = e.y.toDouble()
                     lazyColumn[0].offset += deltaY
@@ -81,25 +80,17 @@ class GraphicService : GLEventListener, GraphicServiceI {
                 }
             }
         })
-        canvas.addMouseWheelListener{ev->
-            val rotation=ev.wheelRotation
-            if (lazyColumn.isNotEmpty()) {
-                lazyColumn[0].offset += -40*rotation
-                redraw()
-            }
-        }
         canvas.addMouseListener(object : MouseAdapter() {
             override fun mouseReleased(e: MouseEvent?) {
                 super.mouseReleased(e)
                 val x = e!!.x.toDouble()
                 val y = e.y.toDouble()
-                handleClick(x, y)
-                cursorHoldTimestamp=0L
+                if (!isMouseDragged){
+                handleClick(x, y)}
+                isMouseDragged = false
             }
-
             override fun mousePressed(e: MouseEvent?) {
                 super.mousePressed(e)
-                cursorHoldTimestamp=System.currentTimeMillis()
                 lastMouseY = e!!.y.toDouble()
             }
         })
@@ -112,6 +103,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         viewTree.clear()
         lazyColumn.clear()
         viewTree.lambda()
+        navigationLambda(viewTree)
         if (itIsNewScreen) {
             stack.push(lambda)
         }
@@ -150,11 +142,9 @@ class GraphicService : GLEventListener, GraphicServiceI {
 
     //Searches for a clickable area by coordinates and calls onClick
     private fun handleClick(x: Double, y: Double) {
-        val holdDuration=System.currentTimeMillis()-cursorHoldTimestamp
         for (bound in bounds.reversed()) {
             if (x in bound.x1..bound.x2 && y in bound.y1..bound.y2) {
-                if(holdDuration<cursorHoldThreshold||bound.onHold==null) bound.onClick?.invoke()
-                else bound.onHold.invoke()
+                bound.onClick?.invoke()
                 return
             }
         }
@@ -176,8 +166,8 @@ class GraphicService : GLEventListener, GraphicServiceI {
         if (viewTree.isEmpty()) return
         val gl = p0!!.gl.gL2
         gl.glClear(GL.GL_COLOR_BUFFER_BIT)
+        lazyColumn.clear()
         bounds.clear()
-        navigationLambda(viewTree)
         viewTree.forEach {
             renderer.parse(gl, it)
         }
