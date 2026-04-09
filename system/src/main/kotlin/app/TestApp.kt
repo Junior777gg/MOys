@@ -35,7 +35,7 @@ class TestApp(
                 Button(modifier = Modifier.size(100).background(Color.ORANGE), parent = this)
                 Button(modifier = Modifier.size(100).background(Color.GREEN).onClick {
                     //This is temporal.
-                    audioService.playFile("/home/sanya/MOys/data/testApp/yippee-tbh.ogg")
+                    
                 }, parent = this).layout {
                     Text(modifier = Modifier.height(14).width(20), text = "Play sound", parent = this)
                 }

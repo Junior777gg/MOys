@@ -132,6 +132,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         viewTreeUntilInject.clear()
         val lambda = stack.peek()
         viewTree.lambda()
+        navigationLambda(viewTree)
         canvas.display()
     }
 
