@@ -1,7 +1,7 @@
 import app.BrowserApp
 import app.CalculatorApp
-import app.Settings
-import app.Storage
+import app.SettingsApp
+import app.StorageApp
 import app.TestApp
 import common.Log
 import javafx.application.Application
@@ -44,21 +44,33 @@ class SystemLauncher(
         labels.add({
             label(
                 icon = File("${mother.getSystemPath()}/install/calculator/icon.png"),
-                click = { CalculatorApp(graphicService, StorageService(), deviceManager).main() },
+                click = {
+                    val act=CalculatorApp(graphicService, StorageService(), deviceManager)
+                    graphicService.setActivity(act)
+                    act.main()
+                        },
                 appName = "Калькулятор"
             )
         })
         labels.add({
             label(
                 icon = File("${mother.getSystemPath()}/install/settings/icon.png"),
-                click = { Settings(mother, graphicService, StorageService(), deviceManager).main()},
+                click = {
+                    val act=SettingsApp(mother, graphicService, StorageService(), deviceManager)
+                    graphicService.setActivity(act)
+                    act.main()
+                        },
                 appName = "Настройки"
             )
         })
         labels.add({
             label(
                 icon = File("${mother.getSystemPath()}/install/storage/icon.png"),
-                click = { Storage(mother, graphicService, StorageService(), deviceManager).main()},
+                click = {
+                    val act=StorageApp(mother, graphicService, StorageService(), deviceManager)
+                    graphicService.setActivity(act)
+                    act.main()
+                        },
                 appName = "Проводник"
             )
         })
@@ -75,7 +87,11 @@ class SystemLauncher(
         })
         labels.add({
             label(
-                click = { TestApp(graphicService, StorageService(), deviceManager, AudioService()).main()},
+                click = {
+                    val act=TestApp(graphicService, StorageService(), deviceManager, AudioService())
+                    graphicService.setActivity(act)
+                    act.main()
+                        },
                 appName = "Testing App"
             )
         })
@@ -102,7 +118,7 @@ class SystemLauncher(
                 var count = 0
                 for (i in 0..6) {
                     Row(modifier = Modifier.height(130).width(640).background(Color(0,0,0,0)), horizontalArrangement = getAppsArrangement(), parent = this).layout {
-                        while (this.size < 5) {
+                        while (this.size < 6) {
                             if (count > labels.size - 1) break
                             labels[count](this)
                             count++
@@ -125,13 +141,12 @@ class SystemLauncher(
     fun MutableList<View>.label(icon: File? = null, appName: String, click: () -> Unit, hold: (() -> Unit) = { Log.warn("Can't remove system app")}) {
         var textColor = Color.WHITE
         if(config.textDark) textColor = Color.BLACK
-        if(!config.textDisplay) textColor = Color(0,0,0,0)
         Column(
             modifier = Modifier.padding(20).height(130).width(110)
                 .onClick { click() }.onHold { hold.invoke() } .background(Color(0,0,0,0)), this
         ).layout {
             Image(modifier = Modifier.size(70), icon ?: File("${mother.getSystemPath()}/data/launcher/basic.png"), this)
-            Text(modifier = Modifier.width(70).height(20), text = appName, textColor = textColor, textSize = 15, parent = this)
+            if(config.textDisplay) Text(modifier = Modifier.width(70).height(20), text = appName, textColor = textColor, textSize = 15, parent = this)
         }
     }
 

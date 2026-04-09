@@ -1,30 +1,30 @@
-package common
-
+import common.TimerI
 import java.lang.Exception
+import java.util.Calendar
 import kotlin.concurrent.thread
+import kotlin.math.max
 import kotlin.math.min
 
 /**
  * Simple timer executed on independent thread in given interval.
  * Outside of testing might be useful for periodic updates, animations and status-bars.
 */
-object Timer {
+object Timer: TimerI {
     private var timerTread: Thread?=null
     private var isRunning=false
-    private var callbacks=mutableListOf<TimerCallback>()
+    private var callbacks=mutableListOf<TimerI.TimerCallback>()
 
     /**Adds [callback] to the stack and calls it every [intervalS] seconds.*/
-    fun subscribe(callback: (currentTimeMs: Long)->Unit, intervalS: Long=1L) {
+    override fun subscribe(callback: (currentTimeMs: Long)->Unit, intervalS: Long) {
         synchronized(callbacks) {
-            callbacks.add(TimerCallback(min(intervalS*1000L, 1000L), callback))
+            callbacks.add(TimerI.TimerCallback(max(intervalS * 1000L, 1000L), callback, System.currentTimeMillis()))
         }
-        if(!isRunning) start()
     }
     /**
      * Removes all instances of [callback].
      * TODO: Disallow disabling system timer callbacks if tried not by system itself.
     */
-    fun unsubscribe(callback: (Long)->Unit) {
+    override fun unsubscribe(callback: (Long)->Unit) {
         synchronized(callbacks) {
             callbacks.removeAll { it.callback==callback }
         }
@@ -37,17 +37,18 @@ object Timer {
 
         timerTread = thread(name = "system-timer", isDaemon = true, block = {
             val startTime = System.currentTimeMillis()
-            var lastTick=startTime
+            var lastTick = startTime
+            var calendar = Calendar.getInstance()
             //Start execution of the timer stack.
-            while(isRunning) {
+            while (isRunning) {
                 val now = System.currentTimeMillis()
                 //Check all timers.
                 synchronized(callbacks) {
                     //Copy the callbacks list to prevent object blocking.
                     val snapshot = callbacks.toList()
                     //Execute all callbacks if time is met.
-                    for(c in snapshot) {
-                        if(now-c.lastTriggered>=c.intervalMs) {
+                    for (c in snapshot) {
+                        if (now - c.lastTriggered >= c.intervalMs) {
                             try {
                                 c.callback(now)
                                 c.lastTriggered = now
@@ -57,29 +58,21 @@ object Timer {
                         }
                     }
                 }
-                //Sync timer stack to be executed ONLY in 60 or fewer FPS.
+                //Sync timer stack to be executed every second and aligned to it.
+                val elapsed = System.currentTimeMillis()-now
+                val sleep=min(1000L-elapsed, 1000L-calendar.get(Calendar.MILLISECOND))
                 try {
-                    Thread.sleep(1000)
+                    Thread.sleep(sleep)
                 } catch (_: InterruptedException) { }
                 lastTick = System.currentTimeMillis()
             }
         })
     }
-    /**
-     * Fully stops the timer stack.
-     * TODO: Disallow stopping the timer stack from SDK. Only allow the system to stop it.
-    */
+    /**Fully stops the timer stack. Can be run by system only.*/
     fun stop() {
         isRunning = false
         timerTread?.join(1000)
         timerTread = null
         synchronized(callbacks) { callbacks.clear() }
     }
-
-    /**Basic structure that holds timer's callback, and it's internal timer.*/
-    private data class TimerCallback(
-        val intervalMs: Long,
-        val callback: (Long)->Unit,
-        var lastTriggered: Long=0L
-    )
 }

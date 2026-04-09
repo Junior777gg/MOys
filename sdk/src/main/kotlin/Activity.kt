@@ -3,4 +3,6 @@ interface Activity {
     val storage : StorageServiceI
     val deviceManager : DeviceManagerI
     fun main()
+
+    fun onNavigationBack(): Boolean = true
 }

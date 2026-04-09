@@ -24,24 +24,23 @@ class GraphicService : GLEventListener, GraphicServiceI {
 
     //The current View-element tree that is rendered on the screen
     private val viewTree = mutableListOf<View>()
-
     //Stack of screens for navigating "back"
     private val stack = Stack<MutableList<View>.() -> Unit>()
-
     //The list of clickable areas on the current frame
     private val bounds = mutableListOf<Bounds>()
-
     //Saved tree before calling injectUI (for restoration when cancelInject is called)
     private val viewTreeUntilInject = mutableListOf<View>()
 
-    private val lazyColumn = mutableListOf<LazyColumn>()
+    private val lazyColumns = mutableListOf<LazyColumn>()
 
     private var isMouseDragged = false
+    private var lastMouseY = 0.0
+    private var focusedActivity: Activity? = null
 
-    private val renderer = Renderer(this, bounds, lazyColumn, SCREEN_HEIGHT, SCREEN_WIDTH)
+    private val renderer = Renderer(this, bounds, lazyColumns, SCREEN_HEIGHT, SCREEN_WIDTH)
     private val navigationLambda = SystemNavigation(this).setUpNavigation()
 
-    private var lastMouseY = 0.0
+
     fun initialize() {
         Log.dbg("Create JFRAME")
         val frame = JFrame("MOys")
@@ -71,11 +70,11 @@ class GraphicService : GLEventListener, GraphicServiceI {
 
         canvas.addMouseMotionListener(object : MouseMotionAdapter() {
             override fun mouseDragged(e: MouseEvent) {
-                if (lazyColumn.isNotEmpty()) {
+                if (lazyColumns.isNotEmpty()) {
                     isMouseDragged = true
                     val deltaY = e.y.toDouble() - lastMouseY
                     lastMouseY = e.y.toDouble()
-                    lazyColumn[0].offset += deltaY
+                    lazyColumns[0].offset += deltaY
                     redraw()
                 }
             }
@@ -98,10 +97,29 @@ class GraphicService : GLEventListener, GraphicServiceI {
         Log.info("Graphical service initialized")
     }
 
+    //Set focus on given [newActivity]. All callbacks will be executed from it.
+    fun setActivity(newActivity: Activity? = null) {
+        focusedActivity = newActivity
+    }
+
+    //Removes all stack elements aside from launcher.
+    fun clearStack() {
+        if (stack.stackSize() <= 1) return
+        focusedActivity=null
+        while(stack.stackSize()>1) stack.popBackStack()
+        viewTree.clear()
+        bounds.clear()
+        viewTreeUntilInject.clear()
+        val lambda = stack.peek()
+        viewTree.lambda()
+        navigationLambda(viewTree)
+        canvas.display()
+    }
+
     //Sets the content of the screen. If itIsNewScreen=true, adds the screen to the navigation stack
     override fun setContent(itIsNewScreen: Boolean, lambda: MutableList<View>.() -> Unit) {
         viewTree.clear()
-        lazyColumn.clear()
+        lazyColumns.clear()
         viewTree.lambda()
         navigationLambda(viewTree)
         if (itIsNewScreen) {
@@ -126,13 +144,16 @@ class GraphicService : GLEventListener, GraphicServiceI {
     //Return to the previous screen in the navigation stack
     override fun popBackStack() {
         if (stack.stackSize() <= 1) return
+        if(focusedActivity?.onNavigationBack()==false) return
         stack.popBackStack()
         viewTree.clear()
         bounds.clear()
         viewTreeUntilInject.clear()
         val lambda = stack.peek()
         viewTree.lambda()
+        navigationLambda(viewTree)
         canvas.display()
+        if (stack.stackSize() <= 1) focusedActivity = null
     }
 
     //Rerender screen must call after setContent or injectUI
@@ -166,7 +187,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         if (viewTree.isEmpty()) return
         val gl = p0!!.gl.gL2
         gl.glClear(GL.GL_COLOR_BUFFER_BIT)
-        lazyColumn.clear()
+        lazyColumns.clear()
         bounds.clear()
         viewTree.forEach {
             renderer.parse(gl, it)

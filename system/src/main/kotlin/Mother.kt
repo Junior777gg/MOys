@@ -45,6 +45,10 @@ class Mother(
     fun start() {
         InstallationService().run(systemFolderPath)
         systemLauncher.runLaunch()
+        Timer.start()
+    }
+    fun shutdown() {
+        Timer.stop()
     }
 
     fun getSystemPath() : String {
@@ -152,6 +156,7 @@ class Mother(
                     DeviceManagerI::class.java
                 )
                 val instance = constructor.newInstance(graphicService, storageService, deviceManager)
+                graphicService.setActivity(instance as Activity)
                 val method = clazz.getMethod("main")
                 method.invoke(instance)
             }
