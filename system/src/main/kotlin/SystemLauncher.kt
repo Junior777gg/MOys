@@ -88,7 +88,7 @@ class SystemLauncher(
         labels.add({
             label(
                 click = {
-                    val act=TestApp(graphicService, StorageService(), deviceManager, AudioService())
+                    val act=TestApp(graphicService, StorageService(), deviceManager)
                     graphicService.setActivity(act)
                     act.main()
                 },

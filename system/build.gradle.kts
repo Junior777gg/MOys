@@ -32,14 +32,11 @@ dependencies {
     implementation("org.jogamp.gluegen:gluegen-rt-main:2.3.2")
     implementation("org.jogamp.jogl:jogl-all-main:2.3.2")
 
-    //Sound module base.
-    implementation("com.googlecode.soundlibs:tritonus-share:0.3.7.4")
     //MP3 playback support.
     implementation("com.googlecode.soundlibs:mp3spi:1.9.5.4")
-    implementation("com.googlecode.soundlibs:jlayer:1.0.1.4")
     //OGG/Vorbis playback support.
     implementation("com.googlecode.soundlibs:vorbisspi:1.0.3.3")
-    implementation("com.googlecode.soundlibs:jorbis:0.0.17.4")
+
 }
 
 kotlin {

@@ -205,13 +205,5 @@ class GraphicService : GLEventListener, GraphicServiceI {
         gl.glFlush()
     }
 
-    override fun reshape(
-        p0: GLAutoDrawable?,
-        p1: Int,
-        p2: Int,
-        p3: Int,
-        p4: Int
-    ) {
-    }
-
+    override fun reshape(p0: GLAutoDrawable?, p1: Int, p2: Int, p3: Int, p4: Int) {}
 }

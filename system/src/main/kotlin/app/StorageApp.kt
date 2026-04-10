@@ -70,7 +70,7 @@ class StorageApp(
             if (file.isDirectory) {
                 currentPath = file.absolutePath
                 main()
-            } else if (file.extension.toString()=="jarp") {
+            } else if (file.extension=="jarp") {
                 mother.installApp(file)
             }
         }, this).layout {
@@ -78,7 +78,7 @@ class StorageApp(
             var iconId=0
             if (file.isFile) {
                 iconId=1
-                when (file.extension.toString()) {
+                when (file.extension) {
                     "jarp"->iconId=2
                     "zip","rar","7z","gz","tar"->iconId=3
                     "mp3","wav","ogg"->iconId=4
