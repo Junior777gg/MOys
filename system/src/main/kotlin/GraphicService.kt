@@ -36,12 +36,16 @@ class GraphicService : GLEventListener, GraphicServiceI {
 
     private val lazyColumn = mutableListOf<LazyColumn>()
 
+    //After how much time click counts as hold
+    private val cursorHoldThreshold = 400L
+    private var cursorHoldTimestamp = 0L
     private var isMouseDragged = false
+    private var lastMouseY = 0.0
+    private var focusedActivity: Activity? = null
 
     private val renderer = Renderer(this, bounds, lazyColumn, SCREEN_HEIGHT, SCREEN_WIDTH)
     private val navigationLambda = SystemNavigation(this).setUpNavigation()
 
-    private var lastMouseY = 0.0
     fun initialize() {
         Log.dbg("Create JFRAME")
         val frame = JFrame("MOys")
@@ -86,16 +90,38 @@ class GraphicService : GLEventListener, GraphicServiceI {
                 val x = e!!.x.toDouble()
                 val y = e.y.toDouble()
                 if (!isMouseDragged){
-                handleClick(x, y)}
+                    handleClick(x, y)
+                    cursorHoldTimestamp = 0L
+                }
                 isMouseDragged = false
             }
             override fun mousePressed(e: MouseEvent?) {
                 super.mousePressed(e)
+                cursorHoldTimestamp = System.currentTimeMillis()
                 lastMouseY = e!!.y.toDouble()
             }
         })
 
         Log.info("Graphical service initialized")
+    }
+
+    //Set focus on given [newActivity]. All callbacks will be executed from it.
+    fun setActivity(newActivity: Activity? = null) {
+        focusedActivity = newActivity
+    }
+
+    //Removes all stack elements aside from launcher.
+    fun clearStack() {
+        if (stack.stackSize() <= 1) return
+        focusedActivity=null
+        while(stack.stackSize()>1) stack.popBackStack()
+        viewTree.clear()
+        bounds.clear()
+        viewTreeUntilInject.clear()
+        val lambda = stack.peek()
+        viewTree.lambda()
+        navigationLambda(viewTree)
+        canvas.display()
     }
 
     //Sets the content of the screen. If itIsNewScreen=true, adds the screen to the navigation stack
@@ -126,6 +152,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
     //Return to the previous screen in the navigation stack
     override fun popBackStack() {
         if (stack.stackSize() <= 1) return
+        if (focusedActivity?.onNavigationBack()==false) return
         stack.popBackStack()
         viewTree.clear()
         bounds.clear()
@@ -134,6 +161,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         viewTree.lambda()
         navigationLambda(viewTree)
         canvas.display()
+        if (stack.stackSize() <= 1) focusedActivity = null
     }
 
     //Rerender screen must call after setContent or injectUI
@@ -143,9 +171,11 @@ class GraphicService : GLEventListener, GraphicServiceI {
 
     //Searches for a clickable area by coordinates and calls onClick
     private fun handleClick(x: Double, y: Double) {
+        val holdDuration = System.currentTimeMillis()-cursorHoldTimestamp
         for (bound in bounds.reversed()) {
             if (x in bound.x1..bound.x2 && y in bound.y1..bound.y2) {
-                bound.onClick?.invoke()
+                if(holdDuration<cursorHoldThreshold||bound.onHold==null) bound.onClick?.invoke()
+                else bound.onHold.invoke()
                 return
             }
         }

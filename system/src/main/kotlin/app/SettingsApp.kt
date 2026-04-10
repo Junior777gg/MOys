@@ -23,7 +23,7 @@ import width
 import java.awt.Color
 import java.io.File
 
-class Settings(
+class SettingsApp(
     val mother: Mother,
     override val gs: GraphicServiceI,
     override val storage: StorageServiceI,

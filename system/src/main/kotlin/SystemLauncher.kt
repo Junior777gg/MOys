@@ -1,7 +1,7 @@
 import app.BrowserApp
 import app.CalculatorApp
-import app.Settings
-import app.Storage
+import app.SettingsApp
+import app.StorageApp
 import app.TestApp
 import common.Log
 import javafx.application.Application
@@ -44,21 +44,33 @@ class SystemLauncher(
         labels.add({
             label(
                 icon = File("${mother.getSystemPath()}/install/calculator/icon.png"),
-                click = { CalculatorApp(graphicService, StorageService(), deviceManager).main() },
+                click = {
+                    val act=CalculatorApp(graphicService, StorageService(), deviceManager)
+                    graphicService.setActivity(act)
+                    act.main()
+                },
                 appName = "Калькулятор"
             )
         })
         labels.add({
             label(
                 icon = File("${mother.getSystemPath()}/install/settings/icon.png"),
-                click = { Settings(mother, graphicService, StorageService(), deviceManager).main()},
+                click = {
+                    val act=SettingsApp(mother, graphicService, StorageService(), deviceManager)
+                    graphicService.setActivity(act)
+                    act.main()
+                },
                 appName = "Настройки"
             )
         })
         labels.add({
             label(
                 icon = File("${mother.getSystemPath()}/install/storage/icon.png"),
-                click = { Storage(mother, graphicService, StorageService(), deviceManager).main()},
+                click = {
+                    val act=StorageApp(mother, graphicService, StorageService(), deviceManager)
+                    graphicService.setActivity(act)
+                    act.main()
+                },
                 appName = "Проводник"
             )
         })
@@ -75,7 +87,11 @@ class SystemLauncher(
         })
         labels.add({
             label(
-                click = { TestApp(graphicService, StorageService(), deviceManager, AudioService()).main()},
+                click = {
+                    val act=TestApp(graphicService, StorageService(), deviceManager, AudioService())
+                    graphicService.setActivity(act)
+                    act.main()
+                },
                 appName = "Testing App"
             )
         })
