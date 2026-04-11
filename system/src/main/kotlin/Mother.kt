@@ -47,6 +47,10 @@ class Mother(
     fun start() {
         InstallationService().run(systemFolderPath)
         systemLauncher.runLaunch()
+        Timer.start()
+    }
+    fun shutdown() {
+        Timer.stop()
     }
 
     fun getSystemPath() : String {
