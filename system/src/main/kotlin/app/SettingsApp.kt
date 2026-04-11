@@ -124,7 +124,7 @@ class SettingsApp(
                 modifier = Modifier.height(50).width(50).paddingLeft(200),
                 text = text,
                 textSize = 24,
-                textAlign = Text.LEFT,
+                textAlign = Text.LEFT_CENTER,
                 textColor = Color.BLACK,
                 parent = this
             )

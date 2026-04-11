@@ -2,6 +2,7 @@ import app.BrowserApp
 import app.CalculatorApp
 import app.SettingsApp
 import app.StorageApp
+import app.TerminalApp
 import app.TestApp
 import common.Log
 import javafx.application.Application
@@ -72,6 +73,17 @@ class SystemLauncher(
                     act.main()
                 },
                 appName = "Проводник"
+            )
+        })
+        labels.add({
+            label(
+                icon = File("${mother.getSystemPath()}/install/terminal/icon.png"),
+                click = {
+                    val act= TerminalApp(mother, graphicService, StorageService(), deviceManager)
+                    graphicService.setActivity(act)
+                    act.main()
+                },
+                appName = "Терминал"
             )
         })
         labels.add({

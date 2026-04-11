@@ -126,7 +126,9 @@ class Renderer(
                 gl.glVertex2f(x2.toFloat(), y2.toFloat())
                 gl.glVertex2f(x1.toFloat(), y2.toFloat())
                 gl.glEnd()
-                gl.glColor4f(1f, 1f, 1f, 1f)
+                var bgColor=view.modifier.get<Background>()?.color
+                if(bgColor==null) bgColor = Color(1,1,1,1)
+                gl.glColor4f(bgColor.red / 255f, bgColor.green / 255f, bgColor.blue / 255f, bgColor.alpha / 255f)
                 gl.glBegin(GL2.GL_QUADS)
                 gl.glVertex2f((x1 + 2).toFloat(), (y1 + 2).toFloat())
                 gl.glVertex2f((x2 - 2).toFloat(), (y1 + 2).toFloat())
@@ -138,7 +140,20 @@ class Renderer(
                 textRenderer.setColor(view.textColor)
                 val offsetx = (x2 - x1) - textRenderer.getBounds(view.text).bounds.width
                 val offsety = (y2 - y1) - textRenderer.getBounds(view.text).bounds.height
-                textRenderer.draw(view.text, (x1 + offsetx / 2).toInt(), screenHeight - (y2 - offsety / 2).toInt())
+                var textAlign = view.textAlign
+                val x = when(Text.getHorizontalAlign(textAlign)) {
+                    Text.H_LEFT->x1
+                    Text.H_CENTER->x1+offsetx/2
+                    Text.H_RIGHT->x1+offsetx
+                    else->x1
+                }
+                val y = when(Text.getVerticalAlign(textAlign)) {
+                    Text.V_TOP->y2
+                    Text.V_CENTER->y2-offsety/2
+                    Text.V_BOTTOM->y2-offsety
+                    else->y2
+                }
+                textRenderer.draw(view.text, x.toInt(), screenHeight-y.toInt())
                 textRenderer.endRendering()
             }
 
@@ -148,7 +163,20 @@ class Renderer(
                 textRenderer.setColor(view.textColor)
                 val offsetx = (x2 - x1) - textRenderer.getBounds(view.text).bounds.width
                 val offsety = (y2 - y1) - textRenderer.getBounds(view.text).bounds.height
-                textRenderer.draw(view.text, (x1 + offsetx / 2).toInt(), screenHeight - (y2 - offsety / 2).toInt())
+                var textAlign = view.textAlign
+                val x = when(Text.getHorizontalAlign(textAlign)) {
+                    Text.H_LEFT->x1
+                    Text.H_CENTER->x1+offsetx/2
+                    Text.H_RIGHT->x1+offsetx
+                    else->x1
+                }
+                val y = when(Text.getVerticalAlign(textAlign)) {
+                    Text.V_TOP->y2
+                    Text.V_CENTER->y2-offsety/2
+                    Text.V_BOTTOM->y2-offsety
+                    else->y2
+                }
+                textRenderer.draw(view.text, x.toInt(), screenHeight-y.toInt())
                 textRenderer.endRendering()
             }
 

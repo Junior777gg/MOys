@@ -27,6 +27,8 @@ class InstallationService {
         copy("app/calculator.png", "$installPath/calculator/icon.png")
         copy("app/settings.png", "$installPath/settings/icon.png")
         copy("app/storage.png", "$installPath/storage/icon.png")
+        copy("app/terminal.png", "$installPath/terminal/icon.png")
+        copy("terminal_run.png", "$dataPath/terminal/run.png")
         Log.dbg("Launcher resources copied")
 
         copy("file.png", "$dataPath/storage/file.png")

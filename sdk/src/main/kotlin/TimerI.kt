@@ -1,5 +1,3 @@
-package common
-
 interface TimerI {
     fun subscribe(id: String, callback: (currentTimeMs: Long)->Unit, intervalS: Long=1L)
     fun unsubscribe(id: String)
