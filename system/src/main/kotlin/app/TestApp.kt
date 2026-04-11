@@ -2,6 +2,7 @@ package app
 
 import Activity
 import AudioService
+import AudioServiceI
 import GraphicServiceI
 import StorageServiceI
 import DeviceManagerI
@@ -23,7 +24,7 @@ class TestApp(
     override val gs: GraphicServiceI,
     override val storage: StorageServiceI,
     override val deviceManager: DeviceManagerI,
-) : Activity {
+) : Activity{
     override fun main() {
         val sound = AudioService
         sound.setSound("/mnt/c/Users/MSI/Desktop/discord.mp3")
@@ -33,14 +34,8 @@ class TestApp(
                 parent = this, verticalArrangement = VerticalArrangement.SpaceEvenly(),
                 horizontalAlignment = HorizontalAlignment.Left()
             ).layout {
-                Button(modifier = Modifier.fillMaxHeight().width(100).background(Color.YELLOW).onClick{
-                    sound.play()
-                }, parent = this)
-                Button(modifier = Modifier.fillMaxSize().background(Color.ORANGE).onClick {
-                    sound.pause()
-                }, parent = this)
+                TextField(modifier = Modifier.fillMaxWidth().height(100).background(Color.YELLOW), textColor = Color.BLACK, parent = this)
                 Button(modifier = Modifier.height(100).fillMaxWidth().background(Color.GREEN).onClick {
-                    sound.cancel()
                 }, parent = this).layout {
                     Text(modifier = Modifier.height(14).width(20), text = "Play sound", parent = this)
                 }

@@ -4,6 +4,17 @@ class Keyboard(
     val gs: GraphicServiceI,
     val contract: KeyboardInterface
 ) {
+    private val russianAlphabet= listOf("Й", "Ц", "У", "К", "Е", "Н", "Г", "Ш", "Щ", "З", "Х","Ф", "Ы", "В", "А", "П", "Р",
+        "О", "Л", "Д", "Ж", "Э","^", "Я", "Ч", "С", "М", "И", "Т", "Ь", "Б", "Ю", "<","123", "ABC", ",", " ", ".", "ОК",)
+    private val englishAlphabet = listOf("Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "[", "A", "S", "D", "F", "G",
+        "H", "J", "K", "L", ";", "'", "^", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "<",
+        "123", "АБВ", ",", " ", ".", "OK")
+    private val specialSymbols = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-",
+        "@", "#", "$", "%", "&", "*", "(", ")", "/", ";", "'",
+        "^", "?", "!", "\"", ":", ";", ",", ".", "+", "=", "<", "\\", "АБВ", ",", " ", ".", "ОК" )
+
+    private var currentAlphabet = russianAlphabet
+    private var lowercase: Boolean = false
 
     fun main() {
         gs.injectUI {
@@ -22,56 +33,57 @@ class Keyboard(
 
                     // Ряд 1: Й Ц У К Е Н Г Ш Щ З Х
                     Row(modifier = Modifier.width(640).height(60), this).layout {
-                        key("Й", 58)
-                        key("Ц", 58)
-                        key("У", 58)
-                        key("К", 58)
-                        key("Е", 58)
-                        key("Н", 58)
-                        key("Г", 58)
-                        key("Ш", 58)
-                        key("Щ", 58)
-                        key("З", 58)
-                        key("Х", 58)
+                        key(currentAlphabet[0], 58)
+                        key(currentAlphabet[1], 58)
+                        key(currentAlphabet[2], 58)
+                        key(currentAlphabet[3], 58)
+                        key(currentAlphabet[4], 58)
+                        key(currentAlphabet[5], 58)
+                        key(currentAlphabet[6], 58)
+                        key(currentAlphabet[7], 58)
+                        key(currentAlphabet[8], 58)
+                        key(currentAlphabet[9], 58)
+                        key(currentAlphabet[10], 58)
                     }
 
                     // Ряд 2: Ф Ы В А П Р О Л Д Ж Э
                     Row(modifier = Modifier.width(640).height(60), this).layout {
-                        key("Ф", 58)
-                        key("Ы", 58)
-                        key("В", 58)
-                        key("А", 58)
-                        key("П", 58)
-                        key("Р", 58)
-                        key("О", 58)
-                        key("Л", 58)
-                        key("Д", 58)
-                        key("Ж", 58)
-                        key("Э", 58)
+                        key(currentAlphabet[11], 58)
+                        key(currentAlphabet[12], 58)
+                        key(currentAlphabet[13], 58)
+                        key(currentAlphabet[14], 58)
+                        key(currentAlphabet[15], 58)
+                        key(currentAlphabet[16], 58)
+                        key(currentAlphabet[17], 58)
+                        key(currentAlphabet[18], 58)
+                        key(currentAlphabet[19], 58)
+                        key(currentAlphabet[20], 58)
+                        key(currentAlphabet[21], 58)
                     }
 
                     // Ряд 3: Shift Я Ч С М И Т Ь Б Ю Backspace
                     Row(modifier = Modifier.width(640).height(60), this).layout {
-                        key("^", 58)
-                        key("Я", 58)
-                        key("Ч", 58)
-                        key("С", 58)
-                        key("М", 58)
-                        key("И", 58)
-                        key("Т", 58)
-                        key("Ь", 58)
-                        key("Б", 58)
-                        key("Ю", 58)
-                        key("<", 58)
+                        key(currentAlphabet[22], 58)
+                        key(currentAlphabet[23], 58)
+                        key(currentAlphabet[24], 58)
+                        key(currentAlphabet[25], 58)
+                        key(currentAlphabet[26], 58)
+                        key(currentAlphabet[27], 58)
+                        key(currentAlphabet[28], 58)
+                        key(currentAlphabet[29], 58)
+                        key(currentAlphabet[30], 58)
+                        key(currentAlphabet[31], 58)
+                        key(currentAlphabet[32], 58)
                     }
 
                     // Ряд 4: 123 Пробел . Enter
                     Row(modifier = Modifier.width(640).height(60), this).layout {
-                        key("123", 100)
-                        key(",", 60)
-                        key(" ", 320)
-                        key(".", 60)
-                        key("ОК", 100)
+                        key(currentAlphabet[33], 100)
+                        key(currentAlphabet[34], 60)
+                        key(currentAlphabet[35],60)
+                        key(currentAlphabet[36],260)
+                        key(currentAlphabet[37],60)
+                        key(currentAlphabet[38], 100)
                     }
                 }
             }
@@ -87,10 +99,55 @@ class Keyboard(
                 .padding(2)
                 .background(Color(0, 0, 0, 255))
                 .onClick {
-                    if (label=="ОК"){
+                    if (label=="ОК"||label=="OK"){
                         gs.cancelInject()
                         gs.redraw()
                         return@onClick
+                    }
+                    if(label=="ABC"){
+                        gs.cancelInject()
+                        gs.redraw()
+                        currentAlphabet = englishAlphabet
+                        main()
+                        return@onClick
+                    }
+                    if(label=="АБВ"){
+                        gs.cancelInject()
+                        gs.redraw()
+                        currentAlphabet = russianAlphabet
+                        main()
+                        return@onClick
+                    }
+                    if(label=="123"){
+                        gs.cancelInject()
+                        gs.redraw()
+                        currentAlphabet = specialSymbols
+                        main()
+                        return@onClick
+                    }
+                    if (label=="^"){
+                        lowercase = !lowercase
+                        if (lowercase) {
+                            gs.cancelInject()
+                            gs.redraw()
+                            val lowAlphabet = mutableListOf<String>()
+                            currentAlphabet.forEach {
+                                lowAlphabet.add(it.lowercase())
+                            }
+                            currentAlphabet = lowAlphabet
+                            main()
+                            return@onClick
+                        }else{
+                            gs.cancelInject()
+                            gs.redraw()
+                            val upAlphabet = mutableListOf<String>()
+                            currentAlphabet.forEach {
+                                upAlphabet.add(it.uppercase())
+                            }
+                            currentAlphabet = upAlphabet
+                            main()
+                            return@onClick
+                        }
                     }
                     val needUpdate = contract.onKeyPress(label)
                     if (needUpdate) {
