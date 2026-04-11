@@ -9,9 +9,16 @@ class InstallationService {
     }
 
     private fun copyAppDataFiles(dataPath: String, installPath: String) {
-        copy("backgrounds/1.png", "$dataPath/launcher/backgrounds/1.png")
-        copy("backgrounds/2.png", "$dataPath/launcher/backgrounds/2.png")
-        copy("backgrounds/3.png", "$dataPath/launcher/backgrounds/3.png")
+        copy("backgrounds/1.png", "$dataPath/launcher/backgrounds/mobile/1.png")
+        copy("backgrounds/1d.png", "$dataPath/launcher/backgrounds/desktop/1.png")
+        copy("backgrounds/2.png", "$dataPath/launcher/backgrounds/mobile/2.png")
+        copy("backgrounds/2d.png", "$dataPath/launcher/backgrounds/desktop/2.png")
+        copy("backgrounds/3.png", "$dataPath/launcher/backgrounds/mobile/3.png")
+        copy("backgrounds/3d.png", "$dataPath/launcher/backgrounds/desktop/3.png")
+        copy("backgrounds/4.png", "$dataPath/launcher/backgrounds/mobile/4.png")
+        copy("backgrounds/4d.png", "$dataPath/launcher/backgrounds/desktop/4.png")
+        copy("backgrounds/5.png", "$dataPath/launcher/backgrounds/mobile/5.png")
+        copy("backgrounds/5d.png", "$dataPath/launcher/backgrounds/desktop/5.png")
         copy("basic.png", "$dataPath/launcher/basic.png")
         copy("navigation/back.png", "$dataPath/launcher/navigation/back.png")
         copy("navigation/bars.png", "$dataPath/launcher/navigation/bars.png")

@@ -17,14 +17,14 @@ class SystemLauncher(
 ) {
     @Serializable
     data class LauncherConfig (
-        var background: String = "backgrounds/1.png",
+        var background: String = "backgrounds/mobile/1.png",
         var textDark: Boolean = false,
         var textDisplay: Boolean = true,
         var appsCentering: Boolean = false,
     )
 
     private val labels = mutableListOf<MutableList<View>.() -> Unit>()
-    private var config = LauncherConfig("backgrounds/1.png",false)
+    private var config = LauncherConfig("backgrounds/mobile/1.png",false)
     private fun updateLabels() {
         labels.clear()
         mother.getRegisteredApps().forEach { app ->

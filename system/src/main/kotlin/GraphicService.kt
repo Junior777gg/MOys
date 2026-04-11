@@ -9,6 +9,8 @@ import common.Log
 import common.Stack
 import java.awt.Color
 import java.awt.Dimension
+import java.awt.event.KeyEvent
+import java.awt.event.KeyListener
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionAdapter
@@ -17,8 +19,8 @@ import javax.swing.JFrame
 //The main graphical service. Controls the window, rendering, and input processing.
 class GraphicService : GLEventListener, GraphicServiceI {
     companion object {
-        const val SCREEN_WIDTH = 640
-        const val SCREEN_HEIGHT = 960
+        const val SCREEN_WIDTH = 1920
+        const val SCREEN_HEIGHT = 1080
     }
     private lateinit var canvas: GLCanvas
 
@@ -99,6 +101,18 @@ class GraphicService : GLEventListener, GraphicServiceI {
                 super.mousePressed(e)
                 cursorHoldTimestamp = System.currentTimeMillis()
                 lastMouseY = e!!.y.toDouble()
+            }
+        })
+        canvas.addKeyListener(object : KeyListener {
+            override fun keyTyped(e: KeyEvent?) {}
+            override fun keyReleased(e: KeyEvent?) {}
+
+            override fun keyPressed(e: KeyEvent?) {
+                if(e?.keyChar==null) return
+                val key=e.keyChar
+                if(key=='q') popBackStack()
+                else if(key=='w') clearStack()
+                Log.dbg("Pressed key '$key'")
             }
         })
 

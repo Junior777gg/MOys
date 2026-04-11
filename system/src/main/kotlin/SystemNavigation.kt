@@ -11,7 +11,7 @@ class SystemNavigation(val graphicService: GraphicService){
                 horizontalArrangement = HorizontalArrangement.SpaceEvenly(),
                 verticalAlignment = VerticalAlignment.Bottom(),
                 parent = this).layout {
-                Row(modifier = Modifier.width(640).height(60).background(Color(0,0,0,120)),
+                Row(modifier = Modifier.fillMaxWidth().height(60).background(Color(0,0,0,120)),
                     horizontalArrangement = HorizontalArrangement.SpaceEvenly(),
                     parent = this).layout {
                     Image(
@@ -30,7 +30,7 @@ class SystemNavigation(val graphicService: GraphicService){
                 horizontalArrangement = HorizontalArrangement.SpaceEvenly(),
                 verticalAlignment = VerticalAlignment.Top(),
                 parent = this).layout{
-                Row(modifier = Modifier.width(640).height(30).background(Color(0,0,0,0)),
+                Row(modifier = Modifier.fillMaxWidth().height(30).background(Color(0,0,0,0)),
                     verticalAlignment = VerticalAlignment.Center(),
                    horizontalArrangement = HorizontalArrangement.Left(),
                    parent = this).layout {

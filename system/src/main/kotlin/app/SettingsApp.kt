@@ -14,6 +14,7 @@ import View
 import Text
 import background
 import fillMaxSize
+import fillMaxWidth
 import height
 import onClick
 import padding
@@ -38,7 +39,7 @@ class SettingsApp(
     }
     private fun MutableList<View>.buildUI() {
         LazyColumn(modifier = Modifier.fillMaxSize().background(Color.WHITE), this).layout {
-            Column(modifier = Modifier.padding(5).width(640).height(480), horizontalAlignment = HorizontalAlignment.Center(), parent=this).layout {
+            Column(modifier = Modifier.padding(5).fillMaxWidth().height(480), horizontalAlignment = HorizontalAlignment.Center(), parent=this).layout {
                 Text(modifier = Modifier.width(640).height(50), text = "Launcher", textSize = 24, textColor = Color.BLACK, parent = this)
                 Row(modifier = Modifier.height(50).width(500), horizontalArrangement = HorizontalArrangement.Left(), parent=this).layout {
                     Text(
@@ -49,18 +50,53 @@ class SettingsApp(
                         parent = this
                     )
                 }
-                Row(modifier = Modifier.height(140).width(500), horizontalArrangement = HorizontalArrangement.Left(), parent = this).layout {
-                    Image(modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/1.png") },
-                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/1.png"),
+                Row(modifier = Modifier.height(140).fillMaxWidth(), horizontalArrangement = HorizontalArrangement.Left(), parent = this).layout {
+                    Image(modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/1.png") },
+                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/mobile/1.png"),
                         parent = this
                     )
-                    Image(modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/2.png") },
-                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/2.png"),
+                    Image(modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/2.png") },
+                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/mobile/2.png"),
                         parent = this
                     )
                     Image(
-                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/3.png") },
-                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/3.png"),
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/3.png") },
+                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/mobile/3.png"),
+                        parent = this
+                    )
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/4.png") },
+                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/mobile/4.png"),
+                        parent = this
+                    )
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/5.png") },
+                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/mobile/5.png"),
+                        parent = this
+                    )
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/1.png") },
+                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/desktop/1.png"),
+                        parent = this
+                    )
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/2.png") },
+                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/desktop/2.png"),
+                        parent = this
+                    )
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/3.png") },
+                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/desktop/3.png"),
+                        parent = this
+                    )
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/4.png") },
+                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/desktop/4.png"),
+                        parent = this
+                    )
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/5.png") },
+                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/desktop/5.png"),
                         parent = this
                     )
                 }
