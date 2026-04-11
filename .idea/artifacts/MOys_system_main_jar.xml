@@ -3,77 +3,74 @@
     <output-path>$PROJECT_DIR$/out/artifacts/MOys_system_main_jar</output-path>
     <root id="root">
       <element id="archive" name="MOys.system.main.jar">
-        <element id="directory" name="META-INF">
-          <element id="file-copy" path="$PROJECT_DIR$/sdk/src/main/resources/META-INF/MANIFEST.MF" />
-        </element>
         <element id="module-output" name="MOys.system.main" />
         <element id="module-output" name="MOys.sdk.main" />
       </element>
-      <element id="library" level="project" name="Gradle: org.jetbrains:annotations:23.0.0" />
-      <element id="library" level="project" name="Gradle: org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.9.0" />
-      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-windows-i586:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.openjfx:javafx-swing:linux:21" />
-      <element id="library" level="project" name="Gradle: org.openjfx:javafx-graphics:linux:21" />
-      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-android-armv6:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.jsoup:jsoup:1.17.2" />
-      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22" />
-      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-android-armv6:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.openjfx:javafx-web:linux:21" />
-      <element id="library" level="project" name="Gradle: io.ktor:ktor-network-jvm:2.3.6" />
-      <element id="library" level="project" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.9.0" />
-      <element id="library" level="project" name="Gradle: org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.9.0" />
-      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-macosx-universal:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-linux-armv6hf:2.3.2" />
-      <element id="library" level="project" name="Gradle: io.ktor:ktor-websockets-jvm:2.3.6" />
-      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-solaris-amd64:2.3.2" />
-      <element id="library" level="project" name="Gradle: io.ktor:ktor-events-jvm:2.3.6" />
-      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-android-aarch64:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.openjfx:javafx-media:21" />
-      <element id="library" level="project" name="Gradle: org.openjfx:javafx-media:linux:21" />
-      <element id="library" level="project" name="Gradle: io.ktor:ktor-client-core-jvm:2.3.6" />
-      <element id="library" level="project" name="Gradle: org.slf4j:slf4j-api:1.7.36" />
-      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt-main:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22" />
-      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-macosx-universal:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-solaris-i586:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.openjfx:javafx-controls:linux:21" />
-      <element id="library" level="project" name="Gradle: com.googlecode.soundlibs:vorbisspi:1.0.3.3" />
-      <element id="library" level="project" name="Gradle: com.googlecode.soundlibs:jlayer:1.0.1.4" />
-      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-linux-armv6:2.3.2" />
-      <element id="library" level="project" name="Gradle: io.ktor:ktor-io-jvm:2.3.6" />
-      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-linux-i586:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.openjfx:javafx-base:linux:21" />
-      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-windows-amd64:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.openjfx:javafx-graphics:21" />
-      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all-main:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.9.0" />
-      <element id="library" level="project" name="Gradle: io.ktor:ktor-utils-jvm:2.3.6" />
-      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-windows-amd64:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-solaris-amd64:2.3.2" />
-      <element id="library" level="project" name="Gradle: io.ktor:ktor-http-cio-jvm:2.3.6" />
-      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-linux-amd64:2.3.2" />
-      <element id="library" level="project" name="Gradle: io.ktor:ktor-websocket-serialization-jvm:2.3.6" />
       <element id="library" level="project" name="Gradle: io.ktor:ktor-client-cio-jvm:2.3.6" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-web:linux:21" />
+      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-linux-i586:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-android-armv6:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-swing:linux:21" />
       <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-linux-armv6:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-android-aarch64:2.3.2" />
       <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-windows-i586:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.openjfx:javafx-controls:21" />
-      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-solaris-i586:2.3.2" />
-      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-linux-amd64:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-linux-amd64:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-solaris-i586:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.9.0" />
+      <element id="library" level="project" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib:2.2.20" />
+      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-windows-amd64:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:2.3.2" />
+      <element id="library" level="project" name="Gradle: io.ktor:ktor-io-jvm:2.3.6" />
+      <element id="library" level="project" name="Gradle: org.jsoup:jsoup:1.17.2" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-controls:linux:21" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-media:linux:21" />
+      <element id="library" level="project" name="Gradle: com.googlecode.soundlibs:vorbisspi:1.0.3.3" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-media:21" />
+      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-android-armv6:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-linux-armv6hf:2.3.2" />
+      <element id="library" level="project" name="Gradle: io.ktor:ktor-http-jvm:2.3.6" />
+      <element id="library" level="project" name="Gradle: io.ktor:ktor-http-cio-jvm:2.3.6" />
+      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-solaris-amd64:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt-main:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.9.0" />
       <element id="library" level="project" name="Gradle: org.openjfx:javafx-base:21" />
       <element id="library" level="project" name="Gradle: io.ktor:ktor-serialization-jvm:2.3.6" />
+      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-windows-i586:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-graphics:linux:21" />
       <element id="library" level="project" name="Gradle: org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.9.0" />
-      <element id="library" level="project" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib:2.2.20" />
-      <element id="library" level="project" name="Gradle: io.ktor:ktor-network-tls-jvm:2.3.6" />
-      <element id="library" level="project" name="Gradle: junit:junit:3.8.2" />
-      <element id="library" level="project" name="Gradle: com.googlecode.soundlibs:jorbis:0.0.17.4" />
-      <element id="library" level="project" name="Gradle: com.googlecode.soundlibs:mp3spi:1.9.5.4" />
-      <element id="library" level="project" name="Gradle: io.ktor:ktor-http-jvm:2.3.6" />
+      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all-main:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-controls:21" />
+      <element id="library" level="project" name="Gradle: org.jetbrains:annotations:23.0.0" />
       <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-linux-i586:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22" />
+      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-android-aarch64:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.9.0" />
       <element id="library" level="project" name="Gradle: com.googlecode.soundlibs:tritonus-share:0.3.7.4" />
+      <element id="library" level="project" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22" />
+      <element id="library" level="project" name="Gradle: org.slf4j:slf4j-api:1.7.36" />
+      <element id="library" level="project" name="Gradle: io.ktor:ktor-network-tls-jvm:2.3.6" />
+      <element id="library" level="project" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.9.0" />
+      <element id="library" level="project" name="Gradle: io.ktor:ktor-client-core-jvm:2.3.6" />
+      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-macosx-universal:2.3.2" />
+      <element id="library" level="project" name="Gradle: io.ktor:ktor-websocket-serialization-jvm:2.3.6" />
+      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-solaris-i586:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:2.3.2" />
+      <element id="library" level="project" name="Gradle: com.googlecode.soundlibs:jlayer:1.0.1.4" />
+      <element id="library" level="project" name="Gradle: io.ktor:ktor-utils-jvm:2.3.6" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-base:linux:21" />
+      <element id="library" level="project" name="Gradle: com.googlecode.soundlibs:jorbis:0.0.17.4" />
+      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-android-aarch64:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-linux-amd64:2.3.2" />
+      <element id="library" level="project" name="Gradle: junit:junit:3.8.2" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-graphics:21" />
+      <element id="library" level="project" name="Gradle: com.googlecode.soundlibs:mp3spi:1.9.5.4" />
+      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-macosx-universal:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-linux-armv6:2.3.2" />
+      <element id="library" level="project" name="Gradle: io.ktor:ktor-network-jvm:2.3.6" />
       <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-linux-armv6hf:2.3.2" />
+      <element id="library" level="project" name="Gradle: org.jogamp.jogl:jogl-all:natives-windows-amd64:2.3.2" />
+      <element id="library" level="project" name="Gradle: io.ktor:ktor-websockets-jvm:2.3.6" />
+      <element id="library" level="project" name="Gradle: io.ktor:ktor-events-jvm:2.3.6" />
+      <element id="library" level="project" name="Gradle: org.jogamp.gluegen:gluegen-rt:natives-solaris-amd64:2.3.2" />
     </root>
   </artifact>
 </component>

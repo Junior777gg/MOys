@@ -10,6 +10,10 @@ data class Size(val size: Int) : ModifierElements
 
 class FillMaxSize : ModifierElements
 
+class FillMaxWidth : ModifierElements
+
+class FillMaxHeight : ModifierElements
+
 data class Padding(val padding: Int) : ModifierElements
 
 data class PaddingTop(val top: Int) : ModifierElements
@@ -53,5 +57,7 @@ fun Modifier.paddingRight(padding: Int) = add(PaddingRight(padding))
 fun Modifier.paddingBottom(padding: Int) = add(PaddingBottom(padding))
 fun Modifier.paddingLeft(padding: Int) = add(PaddingLeft(padding))
 fun Modifier.fillMaxSize() = add(FillMaxSize())
+fun Modifier.fillMaxWidth() = add(FillMaxWidth())
+fun Modifier.fillMaxHeight() = add(FillMaxHeight())
 
 

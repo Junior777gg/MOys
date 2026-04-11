@@ -17,8 +17,8 @@ import javax.swing.JFrame
 //The main graphical service. Controls the window, rendering, and input processing.
 class GraphicService : GLEventListener, GraphicServiceI {
     companion object {
-        const val SCREEN_WIDTH = 640
-        const val SCREEN_HEIGHT = 960
+        const val SCREEN_WIDTH = 1920
+        const val SCREEN_HEIGHT = 1080
     }
     private lateinit var canvas: GLCanvas
 

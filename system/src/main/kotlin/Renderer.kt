@@ -2,6 +2,7 @@ import com.jogamp.opengl.GL2
 import com.jogamp.opengl.util.awt.TextRenderer
 import com.jogamp.opengl.util.texture.Texture
 import com.jogamp.opengl.util.texture.TextureIO
+import common.Log
 import java.awt.Color
 import java.awt.Font
 import java.io.File
@@ -52,6 +53,8 @@ class Renderer(
         val height = modifiers.get<Height>()?.height
         val size = modifiers.get<Size>()?.size
         val fillMaxSize = modifiers.get<FillMaxSize>()
+        val fillMaxWidth = modifiers.get<FillMaxWidth>()
+        val fillMaxHeight = modifiers.get<FillMaxHeight>()
         val color = modifiers.get<Background>()?.color ?: Color(255, 255, 255, 255)
         val paddingTop = modifiers.get<PaddingTop>()?.top ?: 0
         val paddingLeft = modifiers.get<PaddingLeft>()?.left ?: 0
@@ -72,18 +75,20 @@ class Renderer(
         if (width != null && height != null) {
             x2 = x1 + width.toDouble()
             y2 = y1 + height.toDouble()
-        } else if (size != null) {
+        }else if (size != null) {
             x2 = x1 + size.toDouble()
             y2 = y1 + size.toDouble()
-        } else if (fillMaxSize != null) {
+        }else if (fillMaxSize != null) {
             x2 = avx2
             y2 = avy2
-        }else if(width != null) {
-            x2 = x1 + width.toDouble()
-            y2 = y1 + width.toDouble()
-        }else if(height != null) {
-            x2 = x1 + height.toDouble()
+        }else if (fillMaxWidth != null&&height != null) {
+            x2 = avx2
             y2 = y1 + height.toDouble()
+        }else if (fillMaxHeight != null&&width != null) {
+            x2 = x1 + width.toDouble()
+            y2 = avy2
+        }else{
+            Log.warn("$view doesnt have anough size")
         }
         if (x2 > avx2) x2 = avx2
         if (y2 > avy2) y2 = avy2
@@ -99,11 +104,11 @@ class Renderer(
             }, null))
         } else if (onClick != null) {
             bounds.add(Bounds(x1, y1, x2, y2, onClick, onHold))
-        } else if(onHold!=null) {
+        } else if (onHold != null) {
             bounds.add(Bounds(x1, y1, x2, y2, onClick, onHold))
         }
         when (view) {
-            is Button, is Box, is Column, is Row, is LazyColumn-> {
+            is Button, is Box, is Column, is Row, is LazyColumn -> {
                 gl.glColor4f(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
                 gl.glBegin(GL2.GL_QUADS)
                 gl.glVertex2f(x1.toFloat(), y1.toFloat())
@@ -112,6 +117,7 @@ class Renderer(
                 gl.glVertex2f(x1.toFloat(), y2.toFloat())
                 gl.glEnd()
             }
+
             is TextField -> {
                 gl.glColor4f(0f, 0f, 0f, 1f)
                 gl.glBegin(GL2.GL_QUADS)
@@ -177,12 +183,15 @@ class Renderer(
                     view.children.forEach {
                         val heightChild = it.modifier.get<Height>()?.height
                         val sizeChild = it.modifier.get<Size>()?.size
+                        val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
                         val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
                         if (heightChild != null) {
                             childrenHeight += heightChild.toDouble()
                         } else if (sizeChild != null) {
                             childrenHeight += sizeChild.toDouble()
                         } else if (fillMaxSizeChild != null) {
+                            childrenHeight += avy2
+                        } else if (fillMaxHeightChild != null) {
                             childrenHeight += avy2
                         }
                     }
@@ -199,27 +208,41 @@ class Renderer(
                         var currentHeight = 0.0
                         val heightChild = it.modifier.get<Height>()?.height
                         val widthChild = it.modifier.get<Width>()?.width
+                        val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
+                        val fillMaxWidthChild = it.modifier.get<FillMaxWidth>()
                         val sizeChild = it.modifier.get<Size>()?.size
                         val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
-                        if (widthChild != null&&heightChild != null) {
+                        if (widthChild != null) {
                             currentWidth = widthChild.toDouble()
+                        }
+                        if (heightChild != null) {
                             currentHeight = heightChild.toDouble()
-                        }else if (sizeChild != null) {
+                        }
+                        if (fillMaxWidthChild != null) {
+                            currentWidth = x2 - x1
+                        }
+                        if (fillMaxHeightChild != null) {
+                            currentHeight = y2 - y1
+                        }
+                        if (sizeChild != null) {
                             currentWidth = sizeChild.toDouble()
                             currentHeight = sizeChild.toDouble()
-                        }else if (fillMaxSizeChild != null) {
+                        }
+                        if (fillMaxSizeChild != null) {
                             currentHeight = x2 - x1
                             currentWidth = x2 - x1
                         }
-                        when(view.horizontalAlignment){
-                            is HorizontalAlignment.Left ->{
+                        when (view.horizontalAlignment) {
+                            is HorizontalAlignment.Left -> {
                                 currentx1 = x1
                             }
-                            is HorizontalAlignment.Right->{
+
+                            is HorizontalAlignment.Right -> {
                                 currentx1 = x2 - currentWidth
                             }
-                            is HorizontalAlignment.Center->{
-                                currentx1 = x1 + ((x2 - x1)- currentWidth)/2
+
+                            is HorizontalAlignment.Center -> {
+                                currentx1 = x1 + ((x2 - x1) - currentWidth) / 2
                             }
                         }
 
@@ -240,31 +263,43 @@ class Renderer(
                     var currenty1 = 0.0
                     var gap = 0.0
                     var childrenHeight = 0.0
+                    var heightSmallChildren = 0.0
+                    var fillMaxHeightChildCount = 0
                     view.children.forEach {
                         val heightChild = it.modifier.get<Height>()?.height
                         val sizeChild = it.modifier.get<Size>()?.size
+                        val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
                         val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
-                        if (heightChild != null) {
-                            childrenHeight+=heightChild.toDouble()
-                        }else if (sizeChild != null) {
-                            childrenHeight+=sizeChild.toDouble()
+                        if(heightChild != null) {
+                            childrenHeight += heightChild.toDouble()
+                            heightSmallChildren += heightChild.toDouble()
+                        } else if (sizeChild != null) {
+                            childrenHeight += sizeChild.toDouble()
+                            heightSmallChildren += sizeChild.toDouble()
+                        }else if (fillMaxHeightChild != null) {
+                            childrenHeight = y2 - y1
+                            fillMaxHeightChildCount++
                         }else if (fillMaxSizeChild != null) {
-                            childrenHeight=y2-y1
+                            childrenHeight = y2 - y1
+                            fillMaxHeightChildCount++
                         }
                     }
-                    when(view.verticalArrangement){
+                    when (view.verticalArrangement) {
                         is VerticalArrangement.Bottom -> {
                             currenty1 = y2 - childrenHeight
                         }
-                        is VerticalArrangement.Top ->{
+
+                        is VerticalArrangement.Top -> {
                             currenty1 = y1
                         }
+
                         is VerticalArrangement.Center -> {
-                            currenty1 = y1 + ((y2 - y1)- childrenHeight)/2
+                            currenty1 = y1 + ((y2 - y1) - childrenHeight) / 2
                         }
+
                         is VerticalArrangement.SpaceEvenly -> {
-                            gap = ((y2 - y1) - childrenHeight)/(view.children.size.toDouble() + 1.0)
-                           currenty1 = y1 + gap
+                            gap = ((y2 - y1) - childrenHeight) / (view.children.size.toDouble() + 1.0)
+                            currenty1 = y1 + gap
                         }
 
                     }
@@ -274,27 +309,41 @@ class Renderer(
                         var currentHeight = 0.0
                         val heightChild = it.modifier.get<Height>()?.height
                         val widthChild = it.modifier.get<Width>()?.width
+                        val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
+                        val fillMaxWidthChild = it.modifier.get<FillMaxWidth>()
                         val sizeChild = it.modifier.get<Size>()?.size
                         val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
-                        if (widthChild != null&&heightChild != null) {
+                        if (widthChild != null) {
                             currentWidth = widthChild.toDouble()
+                        }
+                        if (heightChild != null) {
                             currentHeight = heightChild.toDouble()
-                        }else if (sizeChild != null) {
+                        }
+                        if (sizeChild != null) {
                             currentWidth = sizeChild.toDouble()
                             currentHeight = sizeChild.toDouble()
-                        }else if (fillMaxSizeChild != null) {
-                            currentHeight = y2 - y1
+                        }
+                        if (fillMaxHeightChild != null) {
+                            currentHeight = (childrenHeight - heightSmallChildren)/fillMaxHeightChildCount
+                        }
+                        if (fillMaxWidthChild != null) {
                             currentWidth = x2 - x1
                         }
-                        when(view.horizontalAlignment){
-                            is HorizontalAlignment.Left ->{
+                        if (fillMaxSizeChild != null) {
+                            currentHeight = (childrenHeight - heightSmallChildren)/fillMaxHeightChildCount
+                            currentWidth = x2 - x1
+                        }
+                        when (view.horizontalAlignment) {
+                            is HorizontalAlignment.Left -> {
                                 currentx1 = x1
                             }
-                            is HorizontalAlignment.Right->{
+
+                            is HorizontalAlignment.Right -> {
                                 currentx1 = x2 - currentWidth
                             }
-                            is HorizontalAlignment.Center->{
-                                currentx1 = x1 + ((x2 - x1) - currentWidth)/2
+
+                            is HorizontalAlignment.Center -> {
+                                currentx1 = x1 + ((x2 - x1) - currentWidth) / 2
                             }
                         }
                         parse(
@@ -310,30 +359,42 @@ class Renderer(
                     var gap = 0.0
                     var currentx1 = 0.0
                     var childrenWidth = 0.0
+                    var widthSmallChildren = 0.0
+                    var fillMaxWidthChildCount = 0
                     view.children.forEach {
                         val widthChild = it.modifier.get<Width>()?.width
+                        val fillMaxWidthChild = it.modifier.get<FillMaxWidth>()
                         val sizeChild = it.modifier.get<Size>()?.size
                         val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
                         if (widthChild != null) {
-                            childrenWidth+=widthChild.toDouble()
+                            childrenWidth += widthChild.toDouble()
+                            widthSmallChildren += widthChild.toDouble()
+                        } else if (fillMaxWidthChild != null) {
+                            childrenWidth = x2 - x1
+                            fillMaxWidthChildCount++
                         }else if (sizeChild != null) {
-                            childrenWidth+=sizeChild.toDouble()
-                        }else if (fillMaxSizeChild != null) {
-                            childrenWidth=x2-x1
+                            childrenWidth += sizeChild.toDouble()
+                            widthSmallChildren += sizeChild.toDouble()
+                        } else if (fillMaxSizeChild != null) {
+                            childrenWidth = x2 - x1
+                            fillMaxWidthChildCount++
                         }
                     }
-                    when(view.horizontalArrangement){
-                        is HorizontalArrangement.Left ->{
+                    when (view.horizontalArrangement) {
+                        is HorizontalArrangement.Left -> {
                             currentx1 = x1
                         }
-                        is HorizontalArrangement.Right->{
+
+                        is HorizontalArrangement.Right -> {
                             currentx1 = x2 - childrenWidth
                         }
-                        is HorizontalArrangement.Center->{
-                            currentx1 = x1 + ((x2-x1)-childrenWidth)/2
+
+                        is HorizontalArrangement.Center -> {
+                            currentx1 = x1 + ((x2 - x1) - childrenWidth) / 2
                         }
+
                         is HorizontalArrangement.SpaceEvenly -> {
-                            gap = ((x2-x1)-childrenWidth)/(view.children.size.toDouble() + 1.0)
+                            gap = ((x2 - x1) - childrenWidth) / (view.children.size.toDouble() + 1.0)
                             currentx1 = x1 + gap
                         }
 
@@ -344,27 +405,41 @@ class Renderer(
                         var currentHeight = 0.0
                         val heightChild = it.modifier.get<Height>()?.height
                         val widthChild = it.modifier.get<Width>()?.width
+                        val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
+                        val fillMaxWidthChild = it.modifier.get<FillMaxWidth>()
                         val sizeChild = it.modifier.get<Size>()?.size
                         val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
-                        if (widthChild != null&&heightChild != null) {
+                        if (widthChild != null) {
                             currentWidth = widthChild.toDouble()
+                        }
+                        if (heightChild != null) {
                             currentHeight = heightChild.toDouble()
-                        }else if (sizeChild != null) {
+                        }
+                        if (sizeChild != null) {
                             currentWidth = sizeChild.toDouble()
                             currentHeight = sizeChild.toDouble()
-                        }else if (fillMaxSizeChild != null) {
-                            currentHeight = y2 - y1
-                            currentWidth = x2 - x1
                         }
-                        when(view.verticalAlignment){
-                            is VerticalAlignment.Top ->{
+                        if (fillMaxWidthChild != null) {
+                            currentWidth = (childrenWidth - widthSmallChildren)/fillMaxWidthChildCount
+                        }
+                        if (fillMaxHeightChild != null) {
+                            currentHeight = y2 - y1
+                        }
+                        if (fillMaxSizeChild != null) {
+                            currentHeight = x2 - x1
+                            currentWidth = (childrenWidth - widthSmallChildren)/fillMaxWidthChildCount
+                        }
+                        when (view.verticalAlignment) {
+                            is VerticalAlignment.Top -> {
                                 currenty1 = y1
                             }
-                            is VerticalAlignment.Bottom ->{
+
+                            is VerticalAlignment.Bottom -> {
                                 currenty1 = y2 - currentHeight
                             }
-                            is VerticalAlignment.Center ->{
-                                currenty1 = y1 + ((y2-y1)-currentHeight)/2
+
+                            is VerticalAlignment.Center -> {
+                                currenty1 = y1 + ((y2 - y1) - currentHeight) / 2
                             }
                         }
                         parse(
@@ -374,6 +449,7 @@ class Renderer(
                         currentx1 += currentWidth + gap
                     }
                 }
+
                 else -> {
                     view.children.forEach {
                         parse(

@@ -11,6 +11,8 @@ import TextField
 import background
 import fillMaxSize
 import Column
+import fillMaxHeight
+import fillMaxWidth
 import height
 import onClick
 import size
@@ -26,17 +28,18 @@ class TestApp(
         val sound = AudioService
         sound.setSound("/mnt/c/Users/MSI/Desktop/discord.mp3")
         gs.setContent(true) {
-            TextField(modifier = Modifier.width(640).height(30),textSize = 15, parent = this)
             Column(
                 modifier = Modifier.fillMaxSize().background(Color.CYAN),
                 parent = this, verticalArrangement = VerticalArrangement.SpaceEvenly(),
                 horizontalAlignment = HorizontalAlignment.Left()
             ).layout {
-                Button(modifier = Modifier.size(100).background(Color.YELLOW).onClick{
+                Button(modifier = Modifier.fillMaxHeight().width(100).background(Color.YELLOW).onClick{
                     sound.play()
                 }, parent = this)
-                Button(modifier = Modifier.size(100).background(Color.ORANGE), parent = this)
-                Button(modifier = Modifier.size(100).background(Color.GREEN).onClick {
+                Button(modifier = Modifier.fillMaxSize().background(Color.ORANGE).onClick {
+                    sound.pause()
+                }, parent = this)
+                Button(modifier = Modifier.height(100).fillMaxWidth().background(Color.GREEN).onClick {
                     sound.cancel()
                 }, parent = this).layout {
                     Text(modifier = Modifier.height(14).width(20), text = "Play sound", parent = this)
