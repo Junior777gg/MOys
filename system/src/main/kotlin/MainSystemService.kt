@@ -19,4 +19,9 @@ fun main() {
     )
     motherInstance.start()
     Log.info("System ready")
+
+    Runtime.getRuntime().addShutdownHook(Thread {
+        motherInstance.shutdown()
+        Log.info("System shut down")
+    })
 }

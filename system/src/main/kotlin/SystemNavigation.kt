@@ -4,6 +4,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 class SystemNavigation(val graphicService: GraphicService){
+    var addedToTimerStack=false
     fun setUpNavigation():MutableList<View>.() -> Unit {
         return {
             Row(modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)),
@@ -34,10 +35,12 @@ class SystemNavigation(val graphicService: GraphicService){
                    horizontalArrangement = HorizontalArrangement.Left(),
                    parent = this).layout {
                     val clock = Text(modifier = Modifier.height(20).width(80), text = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")), textSize = 18, parent = this)
-                    /*Timer.subscribe({
-                        time->clock.text = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
-                        graphicService.redraw()
-                    },1000*60)*/
+                    if(!addedToTimerStack) {
+                        addedToTimerStack=true
+                        Timer.subscribe("TOP_PANEL_CLOCK",{ time ->
+                            clock.text = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
+                        }, 60L)
+                    }
                 }
             }
         }
