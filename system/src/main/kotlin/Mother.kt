@@ -46,9 +46,9 @@ class Mother(
             systemFolder.mkdirs()
         }
 
-        val registerDir = File(registerFolderPath)
-        if (!registerDir.exists()) {
-            registerDir.mkdirs()
+        val registerFolder = File(registerFolderPath)
+        if (!registerFolder.exists()) {
+            registerFolder.mkdirs()
         }
 
         val libsFolder = File(libsFolderPath)
