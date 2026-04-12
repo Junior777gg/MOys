@@ -186,8 +186,8 @@ class Mother(
                     add(libFile.toURI().toURL())
                 }
             }.toTypedArray()
-            println(load.toString())
-            SecurityClassLoader(load, this.javaClass.classLoader).use { classLoader ->
+            val classLoader = SecurityClassLoader(load, this.javaClass.classLoader)
+                classLoader.use { classLoader ->
                 val clazz = classLoader.loadClass(activityName)!!
                 val constructor = clazz.getDeclaredConstructor(
                     GraphicServiceI::class.java,

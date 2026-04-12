@@ -2,7 +2,6 @@ package app
 
 import Activity
 import AudioService
-import AudioServiceI
 import GraphicServiceI
 import StorageServiceI
 import DeviceManagerI
@@ -12,11 +11,13 @@ import TextField
 import background
 import fillMaxSize
 import Column
-import fillMaxHeight
+import MavenRepository
 import fillMaxWidth
 import height
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import onClick
-import size
 import width
 import java.awt.Color
 
@@ -36,6 +37,7 @@ class TestApp(
             ).layout {
                 TextField(modifier = Modifier.fillMaxWidth().height(100).background(Color.YELLOW), textColor = Color.BLACK, parent = this)
                 Button(modifier = Modifier.height(100).fillMaxWidth().background(Color.GREEN).onClick {
+                    CoroutineScope(Dispatchers.IO).launch {}
                 }, parent = this).layout {
                     Text(modifier = Modifier.height(14).width(20), text = "Play sound", parent = this)
                 }

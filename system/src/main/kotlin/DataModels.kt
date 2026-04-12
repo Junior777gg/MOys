@@ -10,6 +10,7 @@ data class App(
     val activity_name: String,
     val install_date: String,
     val update_date: String,
+    val libs: List<String>,
 )
 @Serializable
 data class Apps(
@@ -23,5 +24,6 @@ data class Manifest(
     val icon_file_name: String,
     val jar_file_name: String,
     val activity_name: String,
+    val libs: List<String>,
 )
 
