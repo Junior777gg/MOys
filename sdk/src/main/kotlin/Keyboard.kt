@@ -104,14 +104,14 @@ class Keyboard(
                         gs.redraw()
                         return@onClick
                     }
-                    if(label=="ABC"){
+                    if(label=="ABC"||label=="abc"){
                         gs.cancelInject()
                         gs.redraw()
                         currentAlphabet = englishAlphabet
                         main()
                         return@onClick
                     }
-                    if(label=="АБВ"){
+                    if(label=="АБВ"||label=="абв"){
                         gs.cancelInject()
                         gs.redraw()
                         currentAlphabet = russianAlphabet
@@ -154,7 +154,7 @@ class Keyboard(
                         gs.redraw()
                     }
                 },
-            this
+            parent = this
         ).layout {
             Text(
                 modifier = Modifier

@@ -38,7 +38,7 @@ class TestApp(
                 TextField(modifier = Modifier.fillMaxWidth().height(100).background(Color.YELLOW), textColor = Color.BLACK, parent = this)
                 Button(modifier = Modifier.height(100).fillMaxWidth().background(Color.GREEN).onClick {
                     CoroutineScope(Dispatchers.IO).launch {}
-                }, parent = this).layout {
+                }, cornerRadius = 50,parent = this).layout {
                     Text(modifier = Modifier.height(14).width(20), text = "Play sound", parent = this)
                 }
 

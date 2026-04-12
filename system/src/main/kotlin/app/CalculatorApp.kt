@@ -98,7 +98,7 @@ class CalculatorApp(
             modifier = Modifier.width(w).height(140).background(bg).padding(2).onClick {
                 action()
             },
-            this
+            parent = this
         ).layout {
             Text(
                 modifier = Modifier.width(w - 4).height(136).background(textColor),

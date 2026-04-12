@@ -7,6 +7,9 @@ import common.Vec2
 import java.awt.Color
 import java.awt.Font
 import java.io.File
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * Renderer. Traverses the View tree and renders elements using OpenGL.
@@ -21,6 +24,17 @@ class Renderer(
 ) {
     private val textRenderers = mutableMapOf<Int, TextRenderer>()
     private val textures = mutableMapOf<File, Texture>()
+    private val segments = 16
+    private val cos = FloatArray(segments+1)
+    private val sin = FloatArray(segments+1)
+    init {
+        for (i in 0..segments) {
+            val corner = (i.toFloat() / segments)*(PI/2).toFloat()
+            cos[i] = cos(corner)
+            sin[i] = sin(corner)
+        }
+
+    }
     fun getTexture(file: File): Texture {
         return textures.getOrPut(file) {
             TextureIO.newTexture(file, true)
@@ -130,13 +144,63 @@ class Renderer(
             bounds.add(Bounds(x1, y1, x2, y2, onClick, onHold))
         }
         when (view) {
-            is Button, is Box, is Column, is Row, is LazyColumn -> {
+            is Box, is Column, is Row, is LazyColumn -> {
                 gl.glColor4f(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
                 gl.glBegin(GL2.GL_QUADS)
                 gl.glVertex2f(x1.toFloat(), y1.toFloat())
                 gl.glVertex2f(x2.toFloat(), y1.toFloat())
                 gl.glVertex2f(x2.toFloat(), y2.toFloat())
                 gl.glVertex2f(x1.toFloat(), y2.toFloat())
+                gl.glEnd()
+            }
+
+            is Button -> {
+                gl.glBegin(GL2.GL_POLYGON)
+                if (view.cornerRadius == 0){
+                    gl.glColor4f(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
+                    gl.glBegin(GL2.GL_QUADS)
+                    gl.glVertex2f(x1.toFloat(), y1.toFloat())
+                    gl.glVertex2f(x2.toFloat(), y1.toFloat())
+                    gl.glVertex2f(x2.toFloat(), y2.toFloat())
+                    gl.glVertex2f(x1.toFloat(), y2.toFloat())
+                    gl.glEnd()
+                    return
+                }
+                gl.glBegin(GL2.GL_POLYGON)
+                gl.glColor4f(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
+                val height = y2-y1
+                val width = x2-x1
+                val r = view.cornerRadius
+                val right = x1 + width
+                val bottom = y1 + height
+                val cx_tl = x1 + r      // center x, top-left
+                val cy_tl = y1 + r      // center y, top-left
+                val cx_tr = right - r  // center x, top-right
+                val cy_tr = y1 + r
+                val cx_bl = x1 + r
+                val cy_bl = bottom - r
+                val cx_br = right - r
+                val cy_br = bottom - r
+
+                gl.glBegin(GL2.GL_POLYGON)
+
+                // Верхний левый угол
+                for (i in 0..segments) {
+                    gl.glVertex2f((cx_tl - r * sin[i]).toFloat(), (cy_tl - r * cos[i]).toFloat())
+                }
+                // Нижний левый угол
+                for (i in 0..segments) {
+                    gl.glVertex2f((cx_bl - r * cos[i]).toFloat(), (cy_bl + r * sin[i]).toFloat())
+                }
+                // Нижний правый угол
+                for (i in 0..segments) {
+                    gl.glVertex2f((cx_br + r * sin[i]).toFloat(), (cy_br + r * cos[i]).toFloat())
+                }
+                // Верхний правый угол
+                for (i in 0..segments) {
+                    gl.glVertex2f((cx_tr + r * cos[i]).toFloat(), (cy_tr - r * sin[i]).toFloat())
+                }
+
                 gl.glEnd()
             }
 
