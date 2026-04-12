@@ -1,6 +1,8 @@
 package app
 
 import Activity
+import Button
+import Column
 import GraphicServiceI
 import StorageServiceI
 import DeviceManagerI
@@ -10,11 +12,14 @@ import LazyColumn
 import Mother
 import Row
 import Text
+import background
 import fillMaxSize
+import fillMaxWidth
 import height
 import onClick
 import paddingBottom
 import paddingLeft
+import paddingTop
 import size
 import width
 import java.awt.Color
@@ -28,6 +33,8 @@ class StorageApp(
     override val deviceManager: DeviceManagerI
 ) : Activity {
     private var currentPath = "/"
+    private var stuckInInstallation = false
+    private var installationAppPath = ""
     private val iconList = listOf("folder.png","file.png","jarp.png", "archive_file.png", "audio_file.png", "image_file.png", "text_file.png", "unknown_file.png")
     override fun main() {
         gs.setContent(true){
@@ -37,6 +44,12 @@ class StorageApp(
     }
 
     override fun onNavigationBack(): Boolean {
+        if(stuckInInstallation) {
+            stuckInInstallation=false
+            gs.cancelInject()
+            gs.redraw()
+            return false
+        }
         tryGoBack()
         return true
     }
@@ -46,19 +59,30 @@ class StorageApp(
         currentPath = Path(currentPath).parent.toString()
     }
 
-    fun MutableList<View>.buildUI(){
+    fun MutableList<View>.installationPopup() {
+        Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,100)), parent = this).layout {
+            Column(modifier = Modifier.width(250).height(250).background(Color.LIGHT_GRAY), verticalArrangement = VerticalArrangement.Top(), parent = this).layout {
+                Text(modifier = Modifier.fillMaxWidth().height(20).paddingTop(10), text = "Install app?", textSize = 18, parent = this)
+                Text(modifier = Modifier.fillMaxWidth().height(20).paddingTop(10), text = installationAppPath, textSize = 12, parent = this)
+                Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)), verticalArrangement = VerticalArrangement.Bottom(), parent = this).layout {
+                    Button(modifier = Modifier.fillMaxWidth().height(40).background(Color.WHITE).onClick {
+                        mother.installApp(File(installationAppPath))
+                        stuckInInstallation=false
+                        gs.cancelInject()
+                        gs.redraw()
+                    }, this).layout { Text(modifier = Modifier.fillMaxSize(), textColor = Color.BLACK, text = "Install", textSize = 12, parent = this) }
+                    Button(modifier = Modifier.fillMaxWidth().height(40).background(Color.WHITE).onClick {
+                        gs.cancelInject()
+                        gs.redraw()
+                    }, this).layout { Text(modifier = Modifier.fillMaxSize(), textColor = Color.BLACK, text = "Cancel", textSize = 12, parent = this) }
+                }
+            }
+        }
+    }
+
+    fun MutableList<View>.buildUI() {
         val files = File(currentPath).listFiles()
         LazyColumn(modifier = Modifier.fillMaxSize().paddingBottom(60), this).layout {
-            /*if(currentPath!="/") {
-                //Button to return back (may conflict with "back" button in nav)
-                Row(modifier = Modifier.height(80).width(640).onClick {
-                    tryGoBack()
-                    main()
-                }, this).layout {
-                    Text(modifier = Modifier.height(60).width(640), "...", 17, Color.black, parent = this)
-                }
-            }*/
-            //Iterate files and folders
             files.forEach {
                 file(it)
             }
@@ -71,7 +95,12 @@ class StorageApp(
                 currentPath = file.absolutePath
                 main()
             } else if (file.extension=="jarp") {
-                mother.installApp(file)
+                stuckInInstallation = true
+                installationAppPath = file.absolutePath
+                gs.injectUI {
+                    installationPopup()
+                }
+                gs.redraw()
             }
         }, this).layout {
             //Determine icon.

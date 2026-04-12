@@ -20,6 +20,8 @@ import fillMaxSize
 import fillMaxWidth
 import height
 import onClick
+import paddingTop
+import size
 import width
 import java.awt.Color
 import java.io.File
@@ -46,26 +48,11 @@ class TerminalApp(
     }
     fun MutableList<View>.buildUI() {
         Box(modifier = Modifier.fillMaxSize().background(Color.BLACK), this).layout {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)),
-                horizontalAlignment = HorizontalAlignment.Left(),
-                parent = this
-            ).layout {
-                for (e in executeStore) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth().height(20).background(Color(0,0,0,0)),
-                        textAlign = Text.LEFT_CENTER,
-                        textSize = 16,
-                        text = e,
-                        parent = this
-                    )
-                }
-            }
-
             Row(modifier = Modifier.fillMaxWidth().height(50).background(Color(0,0,0,0)), this).layout {
                 val input = TextField(
-                    modifier = Modifier.fillMaxSize().background(Color.DARK_GRAY),
+                    modifier = Modifier.height(50).fillMaxWidth().background(Color.DARK_GRAY),
                     textSize = 16,
+                    textAlign = Text.LEFT_CENTER,
                     textColor = Color.WHITE,
                     parent = this
                 )
@@ -84,14 +71,32 @@ class TerminalApp(
                     process.waitFor()
                     Log.info("TerminalApp Result: $result")
                     //Format.
-                    val resultSplit = result.split("\n")
-                    for (l in resultSplit) executeStore.add(l)
+                    if(!result.isEmpty()) {
+                        val resultSplit = result.split("\n")
+                        for (l in resultSplit) executeStore.add(l)
+                    } else executeStore.add("Unknown or invalid command: $t")
                     while (executeStore.size > maxExecuteStore) executeStore.removeFirst()
                     updateUI()
-                }.fillMaxHeight().width(50), this).layout {
+                }.height(49).width(60), this).layout {
                     Image(
                         modifier = Modifier.fillMaxSize(),
                         file = File("${Mother.getSystemPath()}/data/terminal/run.png"),
+                        parent = this
+                    )
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)).paddingTop(50),
+                horizontalAlignment = HorizontalAlignment.Left(),
+                parent = this
+            ).layout {
+                for (e in executeStore) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth().height(20).background(Color(0,0,0,0)),
+                        textAlign = Text.LEFT_CENTER,
+                        textSize = 16,
+                        text = e,
                         parent = this
                     )
                 }
