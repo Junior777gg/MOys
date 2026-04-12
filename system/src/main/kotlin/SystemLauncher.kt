@@ -29,7 +29,7 @@ class SystemLauncher(
     private fun updateLabels() {
         labels.clear()
         mother.getRegisteredApps().forEach { app ->
-            val appIcon = File(mother.getSystemPath()+"/install/${app.app_id}/${app.icon_file_name}")
+            val appIcon = File(Mother.getSystemPath()+"/install/${app.app_id}/${app.icon_file_name}")
             labels.add({
                 label(
                     appIcon, app.app_name,
@@ -44,7 +44,7 @@ class SystemLauncher(
         }
         labels.add({
             label(
-                icon = File("${mother.getSystemPath()}/install/calculator/icon.png"),
+                icon = File("${Mother.getSystemPath()}/install/calculator/icon.png"),
                 click = {
                     val act=CalculatorApp(graphicService, StorageService(), deviceManager)
                     graphicService.setActivity(act)
@@ -55,7 +55,7 @@ class SystemLauncher(
         })
         labels.add({
             label(
-                icon = File("${mother.getSystemPath()}/install/settings/icon.png"),
+                icon = File("${Mother.getSystemPath()}/install/settings/icon.png"),
                 click = {
                     val act=SettingsApp(mother, graphicService, StorageService(), deviceManager)
                     graphicService.setActivity(act)
@@ -66,7 +66,7 @@ class SystemLauncher(
         })
         labels.add({
             label(
-                icon = File("${mother.getSystemPath()}/install/storage/icon.png"),
+                icon = File("${Mother.getSystemPath()}/install/storage/icon.png"),
                 click = {
                     val act=StorageApp(mother, graphicService, StorageService(), deviceManager)
                     graphicService.setActivity(act)
@@ -77,7 +77,7 @@ class SystemLauncher(
         })
         labels.add({
             label(
-                icon = File("${mother.getSystemPath()}/install/terminal/icon.png"),
+                icon = File("${Mother.getSystemPath()}/install/terminal/icon.png"),
                 click = {
                     val act= TerminalApp(mother, graphicService, StorageService(), deviceManager)
                     graphicService.setActivity(act)
@@ -88,7 +88,7 @@ class SystemLauncher(
         })
         labels.add({
             label(
-                icon = File("${mother.getSystemPath()}/install/browser/icon.png"),
+                icon = File("${Mother.getSystemPath()}/install/browser/icon.png"),
                 click = {
                     Thread {
                         Application.launch(BrowserApp::class.java)
@@ -123,7 +123,7 @@ class SystemLauncher(
     }
 
     fun MutableList<View>.screen() {
-        Image(modifier = Modifier.fillMaxSize(), File(mother.getSystemPath()+"/data/launcher/${config.background}"), this).layout {
+        Image(modifier = Modifier.fillMaxSize(), File(Mother.getSystemPath()+"/data/launcher/${config.background}"), this).layout {
             Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)),
                 verticalArrangement = VerticalArrangement.SpaceEvenly(),
                 horizontalAlignment = HorizontalAlignment.Center(), parent = this).layout {
@@ -158,7 +158,7 @@ class SystemLauncher(
             modifier = Modifier.padding(20).height(130).width(110)
                 .onClick { click() }.onHold { hold.invoke() } .background(Color(0,0,0,0)), this
         ).layout {
-            Image(modifier = Modifier.size(70), icon ?: File("${mother.getSystemPath()}/data/launcher/basic.png"), this)
+            Image(modifier = Modifier.size(70), icon ?: File("${Mother.getSystemPath()}/data/launcher/basic.png"), this)
             Text(modifier = Modifier.width(70).height(20), text = appName, textColor = textColor, textSize = 15, parent = this)
         }
     }
@@ -169,7 +169,7 @@ class SystemLauncher(
     fun setBackground(path: String) {
         Log.dbg("Set launcher background as: \"$path\"")
         config.background = path
-        val cfg = File("${mother.getSystemPath()}/data/launcher/config.json")
+        val cfg = File("${Mother.getSystemPath()}/data/launcher/config.json")
         cfg.writeText(Json.encodeToString<LauncherConfig>(config))
         updateScreen(false)
     }
@@ -179,7 +179,7 @@ class SystemLauncher(
     fun setTextDark(v: Boolean) {
         Log.dbg("Set launcher text dark to: \"$v\"")
         config.textDark = v
-        val cfg = File("${mother.getSystemPath()}/data/launcher/config.json")
+        val cfg = File("${Mother.getSystemPath()}/data/launcher/config.json")
         cfg.writeText(Json.encodeToString<LauncherConfig>(config))
         updateScreen(false)
     }
@@ -189,7 +189,7 @@ class SystemLauncher(
     fun setTextDisplay(v: Boolean) {
         Log.dbg("Set launcher text display to: \"$v\"")
         config.textDisplay = v
-        val cfg = File("${mother.getSystemPath()}/data/launcher/config.json")
+        val cfg = File("${Mother.getSystemPath()}/data/launcher/config.json")
         cfg.writeText(Json.encodeToString<LauncherConfig>(config))
         updateScreen(false)
     }
@@ -199,16 +199,16 @@ class SystemLauncher(
     fun setAppsCentering(v: Boolean) {
         Log.dbg("Set launcher apps centering to: \"$v\"")
         config.appsCentering = v
-        val cfg = File("${mother.getSystemPath()}/data/launcher/config.json")
+        val cfg = File("${Mother.getSystemPath()}/data/launcher/config.json")
         cfg.writeText(Json.encodeToString<LauncherConfig>(config))
         updateScreen(false)
     }
     fun loadConfig() {
-        val cfg = File("${mother.getSystemPath()}/data/launcher/config.json")
+        val cfg = File("${Mother.getSystemPath()}/data/launcher/config.json")
         if(cfg.exists()) {
             config = Json.decodeFromString<LauncherConfig>(cfg.readText())
             //Check if background exists.
-            if(!File("${mother.getSystemPath()}/data/launcher/${config.background}").exists())
+            if(!File("${Mother.getSystemPath()}/data/launcher/${config.background}").exists())
                 config.background="backgrounds/1.png"
         }
     }

@@ -18,12 +18,23 @@ class Mother(
     val deviceManager: DeviceManager,
     val storageService: StorageService,
 ) {
-    /*These paths are accessible to mortal API (SDK)*/
-    private val systemFolderPath = System.getProperty("user.home") + "/MOys"
-    private val tempFolderPath = "$systemFolderPath/temp"
-    /*These paths are private and kept behind API usage*/
-    private val installFolderPath = "$systemFolderPath/install"
-    private val registerFolderPath = "$systemFolderPath/register"
+    companion object {
+        /*These paths are accessible to mortal API (SDK)*/
+        private val systemFolderPath = System.getProperty("user.home") + "/MOys"
+        private val tempFolderPath = "$systemFolderPath/temp"
+
+        /*These paths are private and kept behind API usage*/
+        private val installFolderPath = "$systemFolderPath/install"
+        private val registerFolderPath = "$systemFolderPath/register"
+
+        fun getSystemPath(): String {
+            return systemFolderPath;
+        }
+
+        fun getTempPath(): String {
+            return tempFolderPath;
+        }
+    }
 
     init {
         val systemFolder = File(systemFolderPath)
@@ -51,13 +62,7 @@ class Mother(
     }
     fun shutdown() {
         Timer.stop()
-    }
-
-    fun getSystemPath() : String {
-        return systemFolderPath;
-    }
-    fun getTempPath() : String {
-        return tempFolderPath;
+        graphicService.shutdown(systemFolderPath)
     }
 
     /** Installs the application from the .jarp archive */

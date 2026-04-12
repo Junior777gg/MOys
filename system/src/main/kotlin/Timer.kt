@@ -76,6 +76,7 @@ object Timer: TimerI {
                 lastTick = System.currentTimeMillis()
             }
         })
+        Log.dbg("Timer stack is active")
     }
     /**Fully stops the timer stack. Can be run by system only.*/
     fun stop() {
@@ -83,5 +84,6 @@ object Timer: TimerI {
         timerTread?.join(1000)
         timerTread = null
         synchronized(callbacks) { callbacks.clear() }
+        Log.dbg("Timer stack has been stopped")
     }
 }

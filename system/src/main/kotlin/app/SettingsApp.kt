@@ -4,7 +4,7 @@ import Activity
 import Button
 import Column
 import DeviceManagerI
-import GraphicServiceI
+import GraphicService
 import Image
 import LazyColumn
 import Mother
@@ -13,6 +13,7 @@ import StorageServiceI
 import View
 import Text
 import background
+import fillMaxHeight
 import fillMaxSize
 import fillMaxWidth
 import height
@@ -26,7 +27,7 @@ import java.io.File
 
 class SettingsApp(
     val mother: Mother,
-    override val gs: GraphicServiceI,
+    override val gs: GraphicService,
     override val storage: StorageServiceI,
     override val deviceManager: DeviceManagerI
 ) : Activity {
@@ -39,71 +40,165 @@ class SettingsApp(
     }
     private fun MutableList<View>.buildUI() {
         LazyColumn(modifier = Modifier.fillMaxSize().background(Color.WHITE), this).layout {
-            Column(modifier = Modifier.padding(5).fillMaxWidth().height(480), horizontalAlignment = HorizontalAlignment.Center(), parent=this).layout {
-                Text(modifier = Modifier.width(640).height(50), text = "Launcher", textSize = 24, textColor = Color.BLACK, parent = this)
-                Row(modifier = Modifier.height(50).width(500), horizontalArrangement = HorizontalArrangement.Left(), parent=this).layout {
+            Text(
+                modifier = Modifier.fillMaxWidth().height(50),
+                text = "Launcher",
+                textSize = 24,
+                textColor = Color.BLACK,
+                parent = this
+            )
+            Row(
+                modifier = Modifier.height(50).fillMaxWidth(),
+                horizontalArrangement = HorizontalArrangement.Left(),
+                parent = this
+            ).layout {
+                Text(
+                    modifier = Modifier.height(50).width(100),
+                    text = "Background",
+                    textSize = 24,
+                    textColor = Color.BLACK,
+                    parent = this
+                )
+            }
+            Row(
+                modifier = Modifier.height(140).fillMaxWidth(),
+                horizontalArrangement = HorizontalArrangement.Left(),
+                parent = this
+            ).layout {
+                if(!GraphicService.isDesktopResolution()) {
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/1.png") },
+                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/mobile/1.png"),
+                        parent = this
+                    )
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/2.png") },
+                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/mobile/2.png"),
+                        parent = this
+                    )
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/3.png") },
+                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/mobile/3.png"),
+                        parent = this
+                    )
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/4.png") },
+                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/mobile/4.png"),
+                        parent = this
+                    )
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/5.png") },
+                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/mobile/5.png"),
+                        parent = this
+                    )
+                } else {
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/1.png") },
+                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/desktop/1.png"),
+                        parent = this
+                    )
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/2.png") },
+                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/desktop/2.png"),
+                        parent = this
+                    )
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/3.png") },
+                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/desktop/3.png"),
+                        parent = this
+                    )
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/4.png") },
+                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/desktop/4.png"),
+                        parent = this
+                    )
+                    Image(
+                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/5.png") },
+                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/desktop/5.png"),
+                        parent = this
+                    )
+                }
+            }
+            checkbox(
+                get = mother.systemLauncher.getAppsCentering(),
+                set = { v -> mother.systemLauncher.setAppsCentering(v) },
+                text = "Center apps",
+                parent = this
+            )
+            checkbox(
+                get = mother.systemLauncher.getTextDisplay(),
+                set = { v -> mother.systemLauncher.setTextDisplay(v) },
+                text = "Display app names",
+                parent = this
+            )
+            if (mother.systemLauncher.getTextDisplay()) {
+                checkbox(
+                    get = mother.systemLauncher.getTextDark(),
+                    set = { v -> mother.systemLauncher.setTextDark(v) },
+                    text = "Dark app names",
+                    parent = this
+                )
+            }
+            Text(
+                modifier = Modifier.fillMaxWidth().height(50),
+                text = "Screen",
+                textSize = 24,
+                textColor = Color.BLACK,
+                parent = this
+            )
+            Row(
+                modifier = Modifier.height(50).fillMaxWidth(),
+                horizontalArrangement = HorizontalArrangement.Left(),
+                parent = this
+            ).layout {
+                Text(
+                    modifier = Modifier.height(50).width(100),
+                    text = "Desktop",
+                    textSize = 24,
+                    textColor = Color.BLACK,
+                    parent = this
+                )
+            }
+            for (r in GraphicService.RESOLUTIONS.R_ALL) {
+                Button(
+                    modifier = Modifier.width(100).height(50).onClick { gs.setScreenResolution(r) },
+                    parent = this
+                ).layout {
                     Text(
-                        modifier = Modifier.height(50).width(50),
-                        text = "Background",
+                        modifier = Modifier.fillMaxSize(),
+                        text = "${r.x.toInt()}x${r.y.toInt()}",
                         textSize = 24,
                         textColor = Color.BLACK,
                         parent = this
                     )
                 }
-                Row(modifier = Modifier.height(140).fillMaxWidth(), horizontalArrangement = HorizontalArrangement.Left(), parent = this).layout {
-                    Image(modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/1.png") },
-                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/mobile/1.png"),
+            }
+            Row(
+                modifier = Modifier.height(50).fillMaxWidth(),
+                horizontalArrangement = HorizontalArrangement.Left(),
+                parent = this
+            ).layout {
+                Text(
+                    modifier = Modifier.height(50).width(100),
+                    text = "Mobile",
+                    textSize = 24,
+                    textColor = Color.BLACK,
+                    parent = this
+                )
+            }
+            for (s in GraphicService.RESOLUTIONS.R_ALL) {
+                val r = s.swap()
+                Button(
+                    modifier = Modifier.width(100).height(50).onClick { gs.setScreenResolution(r) },
+                    parent = this
+                ).layout {
+                    Text(
+                        modifier = Modifier.fillMaxSize(),
+                        text = "${r.x.toInt()}x${r.y.toInt()}",
+                        textSize = 24,
+                        textColor = Color.BLACK,
                         parent = this
                     )
-                    Image(modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/2.png") },
-                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/mobile/2.png"),
-                        parent = this
-                    )
-                    Image(
-                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/3.png") },
-                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/mobile/3.png"),
-                        parent = this
-                    )
-                    Image(
-                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/4.png") },
-                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/mobile/4.png"),
-                        parent = this
-                    )
-                    Image(
-                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/5.png") },
-                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/mobile/5.png"),
-                        parent = this
-                    )
-                    Image(
-                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/1.png") },
-                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/desktop/1.png"),
-                        parent = this
-                    )
-                    Image(
-                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/2.png") },
-                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/desktop/2.png"),
-                        parent = this
-                    )
-                    Image(
-                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/3.png") },
-                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/desktop/3.png"),
-                        parent = this
-                    )
-                    Image(
-                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/4.png") },
-                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/desktop/4.png"),
-                        parent = this
-                    )
-                    Image(
-                        modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/5.png") },
-                        file = File("${mother.getSystemPath()}/data/launcher/backgrounds/desktop/5.png"),
-                        parent = this
-                    )
-                }
-                checkbox(get=mother.systemLauncher.getAppsCentering(),set={v->mother.systemLauncher.setAppsCentering(v)},text="Center apps",parent=this)
-                checkbox(get=mother.systemLauncher.getTextDisplay(),set={v->mother.systemLauncher.setTextDisplay(v)},text="Display app names",parent=this)
-                if(mother.systemLauncher.getTextDisplay()) {
-                    checkbox(get=mother.systemLauncher.getTextDark(),set={v->mother.systemLauncher.setTextDark(v)},text="Dark app names",parent=this)
                 }
             }
         }

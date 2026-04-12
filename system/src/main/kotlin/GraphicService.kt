@@ -7,6 +7,9 @@ import com.jogamp.opengl.GLEventListener
 import com.jogamp.opengl.GLProfile
 import common.Log
 import common.Stack
+import common.Vec2i
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.event.KeyEvent
@@ -14,15 +17,45 @@ import java.awt.event.KeyListener
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionAdapter
+import java.io.File
 import javax.swing.JFrame
 
 //The main graphical service. Controls the window, rendering, and input processing.
 class GraphicService : GLEventListener, GraphicServiceI {
+    @Serializable
+    data class GraphicalConfig (
+        var width: Int,
+        var height: Int
+    )
     companion object {
-        const val SCREEN_WIDTH = 1920
-        const val SCREEN_HEIGHT = 1080
+        var config: GraphicalConfig=GraphicalConfig(1920,1080)
+
+        fun getScreenHeight(): Int=config.height
+        fun getScreenWidth(): Int=config.width
+        fun isDesktopResolution(): Boolean=config.width>config.height
+    }
+    object RESOLUTIONS {
+        val R_144p=Vec2i(256,144)
+        val R_240p=Vec2i(426,420)
+        val R_360p=Vec2i(640,360)
+        val R_480p=Vec2i(640,480)
+        val R_HD=Vec2i(1366,768)
+        val R_720p=Vec2i(1280,720)
+        val R_HD_PLUS=Vec2i(1600,900)
+        val R_FULL_HD=Vec2i(1920,1080)
+        val R_WUXGA=Vec2i(1920,1200)
+        val R_2K=Vec2i(2560,1440)
+        val R_WQXGA=Vec2i(2560,1600)
+        val R_UWQHD=Vec2i(3440,1440)
+        val R_4K=Vec2i(3840,2160)
+        val R_WQUXGA=Vec2i(3840,2400)
+        val R_5K=Vec2i(5120,2880)
+        val R_8K=Vec2i(7680,4320)
+        //All default resolutions in a list.
+        val R_ALL=listOf<Vec2i>(R_144p,R_240p,R_360p,R_480p,R_HD,R_720p,R_HD_PLUS,R_FULL_HD,R_WUXGA,R_2K,R_WQXGA,R_UWQHD,R_4K,R_WQUXGA,R_5K,R_8K)
     }
     private lateinit var canvas: GLCanvas
+    private lateinit var frame: JFrame
 
     //The current View-element tree that is rendered on the screen
     private val viewTree = mutableListOf<View>()
@@ -45,15 +78,19 @@ class GraphicService : GLEventListener, GraphicServiceI {
     private var lastMouseY = 0.0
     private var focusedActivity: Activity? = null
 
-    private val renderer = Renderer(this, bounds, lazyColumn, SCREEN_HEIGHT, SCREEN_WIDTH)
+    private val renderer = Renderer(this, bounds, lazyColumn, getScreenHeight(), getScreenWidth())
     private val navigationLambda = SystemNavigation(this).setUpNavigation()
 
-    fun initialize() {
+    fun initialize(systemPath: String) {
+        Log.dbg("Getting config")
+        val cfg = File("${systemPath}/register/video.json")
+        if(cfg.exists()) config = Json.decodeFromString<GraphicalConfig>(cfg.readText())
+
         Log.dbg("Create JFRAME")
-        val frame = JFrame("MOys")
+        frame = JFrame("MOys")
 
         frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-        frame.preferredSize = Dimension(SCREEN_WIDTH, SCREEN_HEIGHT)
+        frame.preferredSize = Dimension(getScreenWidth(), getScreenHeight())
 
         val profile = GLProfile.get(GLProfile.GL2)
         val capabilities = GLCapabilities(profile)
@@ -119,6 +156,12 @@ class GraphicService : GLEventListener, GraphicServiceI {
         Log.info("Graphical service initialized")
     }
 
+    fun shutdown(systemPath: String) {
+        val cfg = File("${systemPath}/register/video.json")
+        cfg.writeText(Json.encodeToString<GraphicalConfig>(config))
+        Log.dbg("Saved graphical settings")
+    }
+
     //Set focus on given [newActivity]. All callbacks will be executed from it.
     fun setActivity(newActivity: Activity? = null) {
         focusedActivity = newActivity
@@ -129,6 +172,34 @@ class GraphicService : GLEventListener, GraphicServiceI {
         if (stack.stackSize() <= 1) return
         focusedActivity=null
         while(stack.stackSize()>1) stack.popBackStack()
+        updateStack()
+    }
+
+    //Updates screen resolution and current screen.
+    fun setScreenResolution(resolution: Vec2i) {
+        val x=resolution.x
+        val y=resolution.y
+        if(x<1 || y<1) {
+            Log.error("Invalid resolution: ${x}x${y}")
+            return
+        }
+        if((x<256 && y<144)||(y<256 && x<144)) {
+            Log.warn("Unusual resolution: ${x}x${y}. Rendering may be invalid")
+        }
+        config.width=x
+        config.height=y
+        Log.info("Set resolution to ${x}x${y}")
+        frame.preferredSize=Dimension(x, y)
+        renderer.clearCache()
+        renderer.screenWidth=x
+        renderer.screenHeight=y
+        frame.validate()
+        frame.pack()
+        updateStack()
+    }
+
+    //Resets view tree and redraws current screen.
+    fun updateStack() {
         viewTree.clear()
         bounds.clear()
         viewTreeUntilInject.clear()
@@ -168,13 +239,7 @@ class GraphicService : GLEventListener, GraphicServiceI {
         if (stack.stackSize() <= 1) return
         if (focusedActivity?.onNavigationBack()==false) return
         stack.popBackStack()
-        viewTree.clear()
-        bounds.clear()
-        viewTreeUntilInject.clear()
-        val lambda = stack.peek()
-        viewTree.lambda()
-        navigationLambda(viewTree)
-        canvas.display()
+        updateStack()
         if (stack.stackSize() <= 1) focusedActivity = null
     }
 
@@ -195,18 +260,19 @@ class GraphicService : GLEventListener, GraphicServiceI {
         }
     }
 
+    //Called on canvas initialization.
     override fun init(p0: GLAutoDrawable?) {
         val gl = p0!!.gl.gL2
         gl.glMatrixMode(GL2.GL_PROJECTION)
         gl.glLoadIdentity()
-        gl.glOrtho(0.0, SCREEN_WIDTH.toDouble(),SCREEN_HEIGHT.toDouble(),  0.0, -1.0, 1.0)
+        gl.glOrtho(0.0, getScreenWidth().toDouble(),getScreenHeight().toDouble(),  0.0, -1.0, 1.0)
         gl.glMatrixMode(GL2.GL_MODELVIEW)
         gl.glEnable(GL2.GL_BLEND)
         gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA)
     }
-
+    //Called when canvas is destroyed.
     override fun dispose(p0: GLAutoDrawable?) {}
-
+    //Called to draw elements.
     override fun display(p0: GLAutoDrawable?) {
         if (viewTree.isEmpty()) return
         val gl = p0!!.gl.gL2
@@ -218,6 +284,15 @@ class GraphicService : GLEventListener, GraphicServiceI {
         }
         gl.glFlush()
     }
-
-    override fun reshape(p0: GLAutoDrawable?, p1: Int, p2: Int, p3: Int, p4: Int) {}
+    //Called when canvas size was changed.
+    override fun reshape(p0: GLAutoDrawable?, x: Int, y: Int, w: Int, h: Int) {
+        val gl = p0!!.gl.gL2
+        gl.glViewport(0, 0, w, h)
+        gl.glMatrixMode(GL2.GL_PROJECTION)
+        gl.glLoadIdentity()
+        gl.glOrtho(0.0, w.toDouble(), h.toDouble(), 0.0, -1.0, 1.0)
+        gl.glMatrixMode(GL2.GL_MODELVIEW)
+        renderer.screenWidth = w
+        renderer.screenHeight = h
+    }
 }

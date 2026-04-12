@@ -91,7 +91,7 @@ class TerminalApp(
                 }.fillMaxHeight().width(50), this).layout {
                     Image(
                         modifier = Modifier.fillMaxSize(),
-                        file = File("${mother.getSystemPath()}/data/terminal/run.png"),
+                        file = File("${Mother.getSystemPath()}/data/terminal/run.png"),
                         parent = this
                     )
                 }

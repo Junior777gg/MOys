@@ -88,7 +88,7 @@ class StorageApp(
             }
             //Place icon if the file is
             if (file.isFile || file.isDirectory)
-                Image(modifier = Modifier.size(60), File("${mother.getSystemPath()}/data/storage/${iconList[iconId]}"),this)
+                Image(modifier = Modifier.size(60), File("${Mother.getSystemPath()}/data/storage/${iconList[iconId]}"),this)
             Text(modifier = Modifier.height(60).width(640), file.name,17, Color.black, parent = this)
         }
     }

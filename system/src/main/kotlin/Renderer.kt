@@ -3,6 +3,7 @@ import com.jogamp.opengl.util.awt.TextRenderer
 import com.jogamp.opengl.util.texture.Texture
 import com.jogamp.opengl.util.texture.TextureIO
 import common.Log
+import common.Vec2
 import java.awt.Color
 import java.awt.Font
 import java.io.File
@@ -15,8 +16,8 @@ class Renderer(
     val gs: GraphicService,
     val bounds: MutableList<Bounds>,
     val lazyColumn: MutableList<LazyColumn>,
-    val screenHeight: Int,
-    val screenWidth: Int,
+    var screenHeight: Int,
+    var screenWidth: Int,
 ) {
     private val textRenderers = mutableMapOf<Int, TextRenderer>()
     private val textures = mutableMapOf<File, Texture>()
@@ -26,10 +27,31 @@ class Renderer(
         }
     }
 
+    fun clearCache() {
+        textRenderers.clear()
+        textures.clear()
+    }
+
     fun getTextRenderer(size: Int): TextRenderer {
         return textRenderers.getOrPut(size) {
             TextRenderer(Font("SansSerif", Font.PLAIN, size))
         }
+    }
+
+    fun getTextAlign(textAlign: Int, x1: Double, y2: Double, offsetx: Double, offsety: Double): Vec2 {
+        val x = when(Text.getHorizontalAlign(textAlign)) {
+            Text.H_LEFT->x1
+            Text.H_CENTER->x1+offsetx/2
+            Text.H_RIGHT->x1+offsetx
+            else->x1
+        }
+        val y = when(Text.getVerticalAlign(textAlign)) {
+            Text.V_TOP->y2
+            Text.V_CENTER->y2-offsety/2
+            Text.V_BOTTOM->y2-offsety
+            else->y2
+        }
+        return Vec2(x,y)
     }
 
     /**
@@ -140,20 +162,8 @@ class Renderer(
                 textRenderer.setColor(view.textColor)
                 val offsetx = (x2 - x1) - textRenderer.getBounds(view.text).bounds.width
                 val offsety = (y2 - y1) - textRenderer.getBounds(view.text).bounds.height
-                var textAlign = view.textAlign
-                val x = when(Text.getHorizontalAlign(textAlign)) {
-                    Text.H_LEFT->x1
-                    Text.H_CENTER->x1+offsetx/2
-                    Text.H_RIGHT->x1+offsetx
-                    else->x1
-                }
-                val y = when(Text.getVerticalAlign(textAlign)) {
-                    Text.V_TOP->y2
-                    Text.V_CENTER->y2-offsety/2
-                    Text.V_BOTTOM->y2-offsety
-                    else->y2
-                }
-                textRenderer.draw(view.text, x.toInt(), screenHeight-y.toInt())
+                val alignVec = getTextAlign(view.textAlign, x1, y2, offsetx, offsety)
+                textRenderer.draw(view.text, alignVec.x.toInt(), screenHeight-alignVec.y.toInt())
                 textRenderer.endRendering()
             }
 
@@ -163,20 +173,8 @@ class Renderer(
                 textRenderer.setColor(view.textColor)
                 val offsetx = (x2 - x1) - textRenderer.getBounds(view.text).bounds.width
                 val offsety = (y2 - y1) - textRenderer.getBounds(view.text).bounds.height
-                var textAlign = view.textAlign
-                val x = when(Text.getHorizontalAlign(textAlign)) {
-                    Text.H_LEFT->x1
-                    Text.H_CENTER->x1+offsetx/2
-                    Text.H_RIGHT->x1+offsetx
-                    else->x1
-                }
-                val y = when(Text.getVerticalAlign(textAlign)) {
-                    Text.V_TOP->y2
-                    Text.V_CENTER->y2-offsety/2
-                    Text.V_BOTTOM->y2-offsety
-                    else->y2
-                }
-                textRenderer.draw(view.text, x.toInt(), screenHeight-y.toInt())
+                val alignVec = getTextAlign(view.textAlign, x1, y2, offsetx, offsety)
+                textRenderer.draw(view.text, alignVec.x.toInt(), screenHeight-alignVec.y.toInt())
                 textRenderer.endRendering()
             }
 
