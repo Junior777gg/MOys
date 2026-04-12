@@ -1,11 +1,14 @@
 import common.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.jsoup.SerializationException
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.lang.IllegalArgumentException
-import java.net.URLClassLoader
+import java.net.URL
 import java.time.LocalDate
 import java.util.zip.ZipInputStream
 
@@ -35,6 +38,7 @@ class Mother(
             return tempFolderPath;
         }
     }
+    private val libsFolderPath = "$systemFolderPath/libs"
 
     init {
         val systemFolder = File(systemFolderPath)
@@ -45,6 +49,11 @@ class Mother(
         val registerDir = File(registerFolderPath)
         if (!registerDir.exists()) {
             registerDir.mkdirs()
+        }
+
+        val libsFolder = File(libsFolderPath)
+        if (!libsFolder.exists()) {
+            libsFolder.mkdirs()
         }
 
         val appsRegisterFile = File(registerFolderPath, "system.json")
@@ -63,6 +72,10 @@ class Mother(
     fun shutdown() {
         Timer.stop()
         graphicService.shutdown(systemFolderPath)
+    }
+
+    fun getLibsPath(): String {
+        return libsFolderPath
     }
 
     /** Installs the application from the .jarp archive */
@@ -107,6 +120,11 @@ class Mother(
             listTempFiles.forEach { file ->
                 file.copyRecursively(File(outputFile.path, file.name))
             }
+            CoroutineScope(Dispatchers.IO).launch {
+                manifestObj.libs.forEach { lib ->
+                    MavenRepository.getLibs(lib, this@Mother)
+                }
+            }
             val date = LocalDate.now()
             registerNewApp(
                 App(
@@ -117,14 +135,16 @@ class Mother(
                     icon_file_name = manifestObj.icon_file_name,
                     activity_name = manifestObj.activity_name,
                     install_date = date.toString(),
-                    update_date = date.toString()
-                )
+                    update_date = date.toString(),
+                    libs = manifestObj.libs,
+
+                    )
             )
             systemLauncher.updateScreen(false)
             tempDir.deleteRecursively()
-        } catch (e : SerializationException) {
+        } catch (e: SerializationException) {
             Log.error("Couldn't install app \"${jarp.name}\": ${e.message.toString()}")
-        } catch (e : IllegalArgumentException) {
+        } catch (e: IllegalArgumentException) {
             Log.error("Couldn't install app \"${jarp.name}\": ${e.message.toString()}")
         }
     }
@@ -135,16 +155,16 @@ class Mother(
             //Delete app from register.
             val registerFile = File(registerFolderPath, "system.json")
             val register = Json.decodeFromString<Apps>(registerFile.readText())
-            var removedRegistryKey=false
+            var removedRegistryKey = false
             for (e in register.apps) {
-                if(appId==e.app_id) {
+                if (appId == e.app_id) {
                     register.apps.remove(e)
                     registerFile.writeText(Json.encodeToString(register))
-                    removedRegistryKey=true
+                    removedRegistryKey = true
                     break
                 }
             }
-            if(!removedRegistryKey) Log.warn("Register entry for \"$appId\" not found")
+            if (!removedRegistryKey) Log.warn("Register entry for \"$appId\" not found")
             //Delete app from storage.
             val outputFile = File("$installFolderPath/$appId")
             if (outputFile.exists()) outputFile.deleteRecursively()
@@ -160,8 +180,14 @@ class Mother(
     fun runNewAppProcess(appId: String, jarName: String, activityName: String) {
         try {
             val jarFile = File("$installFolderPath/$appId/$jarName")
-            val load = arrayOf(jarFile.toURI().toURL())
-            URLClassLoader(load, ClassLoader.getSystemClassLoader()).use { classLoader ->
+            val load = buildList<URL>{
+                add(jarFile.toURI().toURL())
+                File(getLibsPath()).listFiles().forEach { libFile ->
+                    add(libFile.toURI().toURL())
+                }
+            }.toTypedArray()
+            println(load.toString())
+            SecurityClassLoader(load, this.javaClass.classLoader).use { classLoader ->
                 val clazz = classLoader.loadClass(activityName)!!
                 val constructor = clazz.getDeclaredConstructor(
                     GraphicServiceI::class.java,
@@ -175,6 +201,7 @@ class Mother(
             }
         } catch (e: Exception) {
             Log.error("Couldn't launch app \"$appId\": ${e.message.toString()}")
+            e.printStackTrace()
         }
     }
 
@@ -183,14 +210,14 @@ class Mother(
         val registerFile = File(registerFolderPath, "system.json")
         val register = Json.decodeFromString<Apps>(registerFile.readText())
         //No duplicates (replace with error if possible, because the method is 'registerNewApp' and the id already exists)
-        var entryFound=false
+        var entryFound = false
         for (e in register.apps) {
-            if(app.app_id==e.app_id) {
-                entryFound=true
+            if (app.app_id == e.app_id) {
+                entryFound = true
                 break
             }
         }
-        if(!entryFound) {
+        if (!entryFound) {
             register.apps.add(app)
             registerFile.writeText(Json.encodeToString(register))
         }
@@ -205,8 +232,8 @@ class Mother(
     /** Removes duplicates from registry */
     private fun registryCleanup() {
         val registerFile = File(registerFolderPath, "system.json")
-        var register = Json.decodeFromString<Apps>(registerFile.readText())
-        var newRegister = Apps(register.apps.toList().distinct().toMutableList())
+        val register = Json.decodeFromString<Apps>(registerFile.readText())
+        val newRegister = Apps(register.apps.toList().distinct().toMutableList())
         registerFile.writeText(Json.encodeToString(newRegister))
     }
 }
