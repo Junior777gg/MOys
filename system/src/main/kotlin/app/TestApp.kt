@@ -12,6 +12,7 @@ import background
 import fillMaxSize
 import Column
 import MavenRepository
+import cornerRadius
 import fillMaxWidth
 import height
 import kotlinx.coroutines.CoroutineScope
@@ -35,10 +36,10 @@ class TestApp(
                 parent = this, verticalArrangement = VerticalArrangement.SpaceEvenly(),
                 horizontalAlignment = HorizontalAlignment.Left()
             ).layout {
-                TextField(modifier = Modifier.fillMaxWidth().height(100).background(Color.YELLOW), textColor = Color.BLACK, parent = this)
+                TextField(modifier = Modifier.fillMaxWidth().height(100).background(Color.YELLOW).cornerRadius(40), textColor = Color.BLACK, parent = this)
                 Button(modifier = Modifier.height(100).fillMaxWidth().background(Color.GREEN).onClick {
                     CoroutineScope(Dispatchers.IO).launch {}
-                }, cornerRadius = 50,parent = this).layout {
+                },parent = this).layout {
                     Text(modifier = Modifier.height(14).width(20), text = "Play sound", parent = this)
                 }
 

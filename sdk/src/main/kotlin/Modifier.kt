@@ -8,6 +8,8 @@ data class Width(val width: Int) : ModifierElements
 
 data class Size(val size: Int) : ModifierElements
 
+data class CornerRadius(val cornerRadius: Int) : ModifierElements
+
 class FillMaxSize : ModifierElements
 
 class FillMaxWidth : ModifierElements
@@ -48,6 +50,7 @@ open class Modifier private constructor(
 fun Modifier.height(height: Int) = add(Height(height))
 fun Modifier.width(width: Int) = add(Width(width))
 fun Modifier.size(size: Int) = add(Size(size))
+fun Modifier.cornerRadius(cornerRadius: Int) = add(CornerRadius(cornerRadius))
 fun Modifier.background(color: Color) = add(Background(color))
 fun Modifier.onClick(onClick: () -> Unit) = add(OnClick(onClick))
 fun Modifier.onHold(onHold: () -> Unit) = add(OnHold(onHold))

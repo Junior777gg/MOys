@@ -1,4 +1,4 @@
-class Button(override val modifier: Modifier,val cornerRadius:Int = 0,  override val parent: MutableList<View>) : View {
+class Button(override val modifier: Modifier, override val parent: MutableList<View>) : View {
     override val children = mutableListOf<View>()
 
     init {
