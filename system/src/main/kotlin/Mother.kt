@@ -7,7 +7,6 @@ import org.jsoup.SerializationException
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.lang.IllegalArgumentException
 import java.net.URL
 import java.time.LocalDate
 import java.util.zip.ZipInputStream
@@ -78,35 +77,66 @@ class Mother(
         return libsFolderPath
     }
 
+    /**Copies app to temp directory*/
+    fun unpackApp(jarp: File, needToUnpack: Boolean = true) : Manifest? {
+        val tempDir = File(tempFolderPath+"/install_"+getFilename(jarp.name))
+        if (!tempDir.exists()) {
+            tempDir.mkdirs()
+        }
+        try {
+            if (needToUnpack) {
+                ZipInputStream(FileInputStream(jarp)).use {
+                    var entry = it.nextEntry
+                    while (entry != null) {
+                        val file = File(tempDir, entry.name)
+                        if (entry.isDirectory) {
+                            file.mkdirs()
+                        } else {
+                            file.parentFile?.mkdirs()
+                            FileOutputStream(file).use { output ->
+                                it.copyTo(output)
+                            }
+                        }
+                        entry = it.nextEntry
+                    }
+                }
+            }
+            val manifest = File(tempDir, "manifest.json")
+            return Json.decodeFromString<Manifest>(manifest.readText())
+        } catch (e: SerializationException) {
+            Log.error("Couldn't install app \"${jarp.name}\": ${e.message.toString()}")
+        } catch (e: IllegalArgumentException) {
+            Log.error("Couldn't install app \"${jarp.name}\": ${e.message.toString()}")
+        }
+        //If failed to install - delete folder.
+        if (tempDir.exists()) {
+            tempDir.deleteRecursively()
+            tempDir.delete()
+        }
+        return null
+    }
+
+    /**Returns filename without extension.*/
+    private fun getFilename(filename: String): String {
+        val dotIndex = filename.lastIndexOf('.')
+        return if (dotIndex == -1) filename else filename.substring(0, dotIndex)
+    }
+
     /** Installs the application from the .jarp archive */
     fun installApp(jarp: File) {
         val installationDir = File(installFolderPath)
         if (!installationDir.exists()) {
             installationDir.mkdirs()
         }
-        val tempDir = File(tempFolderPath)
+
+        var needToUnpack = true
+        val tempDir = File(tempFolderPath+"/install_"+getFilename(jarp.name))
         if (!tempDir.exists()) {
             tempDir.mkdirs()
-        }
-
-        ZipInputStream(FileInputStream(jarp)).use {
-            var entry = it.nextEntry
-            while (entry != null) {
-                val file = File(tempFolderPath, entry.name)
-                if (entry.isDirectory) {
-                    file.mkdirs()
-                } else {
-                    file.parentFile?.mkdirs()
-                    FileOutputStream(file).use { output ->
-                        it.copyTo(output)
-                    }
-                }
-                entry = it.nextEntry
-            }
-        }
-        val manifest = File(tempFolderPath, "manifest.json")
+        } else needToUnpack = false
         try {
-            val manifestObj = Json.decodeFromString<Manifest>(manifest.readText())
+            val manifestObj = unpackApp(jarp, needToUnpack)
+            if (manifestObj == null) return
             val outputFile = File(installFolderPath, manifestObj.app_id)
             if (outputFile.exists()) {
                 Log.warn("Duplicate app entry \"${manifestObj.app_id}\". Updating...")
@@ -142,6 +172,7 @@ class Mother(
             )
             systemLauncher.updateScreen(false)
             tempDir.deleteRecursively()
+            tempDir.delete()
         } catch (e: SerializationException) {
             Log.error("Couldn't install app \"${jarp.name}\": ${e.message.toString()}")
         } catch (e: IllegalArgumentException) {

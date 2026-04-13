@@ -60,21 +60,40 @@ class StorageApp(
     }
 
     fun MutableList<View>.installationPopup() {
-        Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,100)), parent = this).layout {
-            Column(modifier = Modifier.width(250).height(250).background(Color.LIGHT_GRAY), verticalArrangement = VerticalArrangement.Top(), parent = this).layout {
-                Text(modifier = Modifier.fillMaxWidth().height(20).paddingTop(10), text = "Install app?", textSize = 18, parent = this)
-                Text(modifier = Modifier.fillMaxWidth().height(20).paddingTop(10), text = installationAppPath, textSize = 12, parent = this)
-                Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)), verticalArrangement = VerticalArrangement.Bottom(), parent = this).layout {
-                    Button(modifier = Modifier.fillMaxWidth().height(40).background(Color.WHITE).onClick {
-                        mother.installApp(File(installationAppPath))
-                        stuckInInstallation=false
-                        gs.cancelInject()
-                        gs.redraw()
-                    }, this).layout { Text(modifier = Modifier.fillMaxSize(), textColor = Color.BLACK, text = "Install", textSize = 12, parent = this) }
-                    Button(modifier = Modifier.fillMaxWidth().height(40).background(Color.WHITE).onClick {
-                        gs.cancelInject()
-                        gs.redraw()
-                    }, this).layout { Text(modifier = Modifier.fillMaxSize(), textColor = Color.BLACK, text = "Cancel", textSize = 12, parent = this) }
+        val appFile = File(installationAppPath)
+        val manifest = mother.unpackApp(appFile)
+        if (manifest != null) {
+            Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,100)), parent = this).layout {
+                Column(modifier = Modifier.width(250).height(250).background(Color.LIGHT_GRAY), verticalArrangement = VerticalArrangement.Top(), parent = this).layout {
+                    Text(modifier = Modifier.fillMaxWidth().height(20).paddingTop(10), text = "Install app?", textSize = 18, parent = this)
+                    Text(modifier = Modifier.fillMaxWidth().height(20).paddingTop(10), text = manifest.app_name, textSize = 12, parent = this)
+                    Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)), verticalArrangement = VerticalArrangement.Bottom(), parent = this).layout {
+                        Button(modifier = Modifier.fillMaxWidth().height(40).background(Color.WHITE).onClick {
+                            mother.installApp(File(installationAppPath))
+                            stuckInInstallation=false
+                            gs.cancelInject()
+                            gs.redraw()
+                        }, this).layout { Text(modifier = Modifier.fillMaxSize(), textColor = Color.BLACK, text = "Install", textSize = 12, parent = this) }
+                        Button(modifier = Modifier.fillMaxWidth().height(40).background(Color.WHITE).onClick {
+                            stuckInInstallation=false
+                            gs.cancelInject()
+                            gs.redraw()
+                        }, this).layout { Text(modifier = Modifier.fillMaxSize(), textColor = Color.BLACK, text = "Cancel", textSize = 12, parent = this) }
+                    }
+                }
+            }
+        } else {
+            Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,100)), parent = this).layout {
+                Column(modifier = Modifier.width(300).height(150).background(Color.LIGHT_GRAY), verticalArrangement = VerticalArrangement.Top(), parent = this).layout {
+                    Text(modifier = Modifier.fillMaxWidth().height(20).paddingTop(10), text = "Invalid app", textSize = 18, parent = this)
+                    Text(modifier = Modifier.fillMaxWidth().height(20).paddingTop(10), text = "Selected app has invalid manifest or is corrupted.", textSize = 12, parent = this)
+                    Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)), verticalArrangement = VerticalArrangement.Bottom(), parent = this).layout {
+                        Button(modifier = Modifier.fillMaxWidth().height(40).background(Color.WHITE).onClick {
+                            stuckInInstallation=false
+                            gs.cancelInject()
+                            gs.redraw()
+                        }, this).layout { Text(modifier = Modifier.fillMaxSize(), textColor = Color.BLACK, text = "Cancel", textSize = 12, parent = this) }
+                    }
                 }
             }
         }
