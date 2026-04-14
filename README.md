@@ -39,7 +39,7 @@ sudo apt install default-jdk
 java -cp ".:*" MainSystemServiceKt
 ```
 ## Building
-IntelliJ Idea is recommended to build this project. Directory `systemClasses` contains the OS wrapper itself. While `sdk` contains SDK to build your own apps.
+IntelliJ Idea is recommended to build this project. Directory `system` contains the OS wrapper itself. While `sdk` contains SDK to build your own apps.
 ### Build OS
 Clone this repository and open it in IntelliJ Idea. Wait for the Gradle to sync and build the project and after that proceed to `Build->Build artefacts`. There build systemClasses.MainSystemService. After that do what is said in previous chapter to launch it (built OS is in folder `out/artefacts`).
 ### Creating your own app
@@ -55,14 +55,13 @@ dependencies {
 Resync Gradle. Create your own Kotlin class that inherites from Activity. Here's an example fot it:
 ``` kotlin
 class ExampleApp(
-    val mother: Mother,
     override val gs: GraphicServiceI,
     override val storage: StorageServiceI,
     override val deviceManager: DeviceManagerI
 ) : Activity {
     override fun main() {
         gs.setContent(true){
-            Text(Modifier.fillMaxSize(), "Hello world", 14, Color.PINK, this)
+            Text(modifier = Modifier.fillMaxSize(), text = "Hello world", textSize = 14, textColor = Color.PINK, parent = this)
         }
         gs.redraw()
     }
@@ -77,7 +76,8 @@ Find your built app, add icon and manifest.json to it. Manifest example:
   "version": "1.0.0",
   "icon_file_name": "icon.png",
   "jar_file_name": "MyApp.jar",
-  "activity_name": "MainActivity"
+  "activity_name": "MainActivity",
+  "libs": []
 }
 ```
 Pack these 3 files into zip and change the extension to `jarp`. Your app is ready.
