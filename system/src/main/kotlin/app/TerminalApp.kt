@@ -52,7 +52,7 @@ class TerminalApp(
                 val input = TextField(
                     modifier = Modifier.height(50).fillMaxWidth().background(Color.DARK_GRAY),
                     textSize = 16,
-                    textAlign = Text.LEFT_CENTER,
+                    textAlign = TextAlignment.Left(),
                     textColor = Color.WHITE,
                     parent = this
                 )
@@ -80,7 +80,7 @@ class TerminalApp(
                 }.height(49).width(60), this).layout {
                     Image(
                         modifier = Modifier.fillMaxSize(),
-                        file = File("${Mother.getSystemPath()}/data/terminal/run.png"),
+                        file = File("${Mother.systemPath}/data/terminal/run.png"),
                         parent = this
                     )
                 }
@@ -94,7 +94,7 @@ class TerminalApp(
                 for (e in executeStore) {
                     Text(
                         modifier = Modifier.fillMaxWidth().height(20).background(Color(0,0,0,0)),
-                        textAlign = Text.LEFT_CENTER,
+                        textAlign = TextAlignment.Left(),
                         textSize = 16,
                         text = e,
                         parent = this

@@ -47,19 +47,14 @@ class SettingsApp(
                 textColor = Color.BLACK,
                 parent = this
             )
-            Row(
-                modifier = Modifier.height(50).fillMaxWidth(),
-                horizontalArrangement = HorizontalArrangement.Left(),
+            Text(
+                modifier = Modifier.fillMaxWidth().height(50).paddingLeft(10),
+                text = "Background",
+                textSize = 24,
+                textColor = Color.BLACK,
+                textAlign = TextAlignment.Left(),
                 parent = this
-            ).layout {
-                Text(
-                    modifier = Modifier.height(50).width(100),
-                    text = "Background",
-                    textSize = 24,
-                    textColor = Color.BLACK,
-                    parent = this
-                )
-            }
+            )
             Row(
                 modifier = Modifier.height(140).fillMaxWidth(),
                 horizontalArrangement = HorizontalArrangement.Left(),
@@ -68,53 +63,53 @@ class SettingsApp(
                 if(!GraphicService.isDesktopResolution()) {
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/1.png") },
-                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/mobile/1.png"),
+                        file = File("${Mother.systemPath}/data/launcher/backgrounds/mobile/1.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/2.png") },
-                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/mobile/2.png"),
+                        file = File("${Mother.systemPath}/data/launcher/backgrounds/mobile/2.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/3.png") },
-                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/mobile/3.png"),
+                        file = File("${Mother.systemPath}/data/launcher/backgrounds/mobile/3.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/4.png") },
-                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/mobile/4.png"),
+                        file = File("${Mother.systemPath}/data/launcher/backgrounds/mobile/4.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/5.png") },
-                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/mobile/5.png"),
+                        file = File("${Mother.systemPath}/data/launcher/backgrounds/mobile/5.png"),
                         parent = this
                     )
                 } else {
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/1.png") },
-                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/desktop/1.png"),
+                        file = File("${Mother.systemPath}/data/launcher/backgrounds/desktop/1.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/2.png") },
-                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/desktop/2.png"),
+                        file = File("${Mother.systemPath}/data/launcher/backgrounds/desktop/2.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/3.png") },
-                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/desktop/3.png"),
+                        file = File("${Mother.systemPath}/data/launcher/backgrounds/desktop/3.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/4.png") },
-                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/desktop/4.png"),
+                        file = File("${Mother.systemPath}/data/launcher/backgrounds/desktop/4.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/5.png") },
-                        file = File("${Mother.getSystemPath()}/data/launcher/backgrounds/desktop/5.png"),
+                        file = File("${Mother.systemPath}/data/launcher/backgrounds/desktop/5.png"),
                         parent = this
                     )
                 }
@@ -146,22 +141,17 @@ class SettingsApp(
                 textColor = Color.BLACK,
                 parent = this
             )
-            Row(
-                modifier = Modifier.height(50).fillMaxWidth(),
-                horizontalArrangement = HorizontalArrangement.Left(),
+            Text(
+                modifier = Modifier.fillMaxWidth().height(50).paddingLeft(10),
+                text = "Desktop",
+                textSize = 24,
+                textColor = Color.BLACK,
+                textAlign = TextAlignment.Left(),
                 parent = this
-            ).layout {
-                Text(
-                    modifier = Modifier.height(50).width(100),
-                    text = "Desktop",
-                    textSize = 24,
-                    textColor = Color.BLACK,
-                    parent = this
-                )
-            }
+            )
             for (r in GraphicService.RESOLUTIONS.R_ALL) {
                 Button(
-                    modifier = Modifier.width(100).height(50).onClick { gs.setScreenResolution(r) },
+                    modifier = Modifier.fillMaxWidth().height(50).onClick { gs.setScreenResolution(r) },
                     parent = this
                 ).layout {
                     Text(
@@ -173,19 +163,14 @@ class SettingsApp(
                     )
                 }
             }
-            Row(
-                modifier = Modifier.height(50).fillMaxWidth(),
-                horizontalArrangement = HorizontalArrangement.Left(),
+            Text(
+                modifier = Modifier.fillMaxWidth().height(50).paddingLeft(10),
+                text = "Mobile",
+                textSize = 24,
+                textColor = Color.BLACK,
+                textAlign = TextAlignment.Left(),
                 parent = this
-            ).layout {
-                Text(
-                    modifier = Modifier.height(50).width(100),
-                    text = "Mobile",
-                    textSize = 24,
-                    textColor = Color.BLACK,
-                    parent = this
-                )
-            }
+            )
             for (s in GraphicService.RESOLUTIONS.R_ALL) {
                 val r = s.swap()
                 Button(
@@ -219,7 +204,7 @@ class SettingsApp(
                 modifier = Modifier.height(50).width(50).paddingLeft(200),
                 text = text,
                 textSize = 24,
-                textAlign = Text.LEFT_CENTER,
+                textAlign = TextAlignment.Left(),
                 textColor = Color.BLACK,
                 parent = this
             )

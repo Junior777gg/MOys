@@ -16,7 +16,7 @@ object MavenRepository {
     }
 
     suspend fun getLibs(packageName: String, mother: Mother){
-        val libFile = File("${mother.getLibsPath()}/$packageName.jar")
+        val libFile = File("${Mother.libsPath}/$packageName.jar")
         if (libFile.exists()){
             return
         }

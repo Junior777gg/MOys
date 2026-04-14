@@ -24,6 +24,10 @@ object Math {
     fun lerp(a: Vec2i, b: Vec2i, t: Vec2i): Vec2i {
         return a+t*(b-a)
     }
+    /**Get value from [a] to [b] based on time [t]*/
+    fun lerp(a: Color, b: Color, t: Color): Color {
+        return a+t*(b-a)
+    }
 
     /**Calculate position on theoretical circle from given [radius] and [angle].*/
     fun positionOnCircle(radius: Float, angle: Float): Vec2 {

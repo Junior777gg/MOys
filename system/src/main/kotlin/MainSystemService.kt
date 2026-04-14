@@ -7,7 +7,7 @@ fun main() {
     deviceManagerInstance.initialize()
 
     val graphicServiceInstance = GraphicService()
-    graphicServiceInstance.initialize(Mother.getSystemPath())
+    graphicServiceInstance.initialize(Mother.systemPath)
 
     val storageServiceInstance = StorageService()
     storageServiceInstance.initialize()

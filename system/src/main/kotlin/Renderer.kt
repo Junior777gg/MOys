@@ -55,16 +55,18 @@ class Renderer(
     }
 
     fun getTextAlign(textAlign: Int, x1: Double, y2: Double, offsetx: Double, offsety: Double): Vec2 {
-        val x = when (Text.getHorizontalAlign(textAlign)) {
-            Text.H_LEFT -> x1
-            Text.H_CENTER -> x1 + offsetx / 2
-            Text.H_RIGHT -> x1 + offsetx
+        var align=textAlign
+        if(!TextAlignment.isValidAlignment(align)) align=TextAlignment.Center()
+        val x = when (TextAlignment.getHorizontal(align)) {
+            TextAlignment.H_LEFT -> x1
+            TextAlignment.H_CENTER -> x1 + offsetx / 2
+            TextAlignment.H_RIGHT -> x1 + offsetx
             else -> x1
         }
-        val y = when (Text.getVerticalAlign(textAlign)) {
-            Text.V_TOP -> y2
-            Text.V_CENTER -> y2 - offsety / 2
-            Text.V_BOTTOM -> y2 - offsety
+        val y = when (TextAlignment.getVertical(align)) {
+            TextAlignment.V_TOP -> y2
+            TextAlignment.V_CENTER -> y2 - offsety / 2
+            TextAlignment.V_BOTTOM -> y2 - offsety
             else -> y2
         }
         return Vec2(x, y)
@@ -314,28 +316,6 @@ class Renderer(
                     gl.glEnable(GL2.GL_SCISSOR_TEST)
                     gl.glScissor(x1.toInt(), screenHeight - y2.toInt(), (x2 - x1).toInt(), (y2 - y1).toInt())
                     var currenty1 = y1 + view.offset
-                    var childrenHeight = 0.0
-                    view.children.forEach {
-                        val heightChild = it.modifier.get<Height>()?.height
-                        val sizeChild = it.modifier.get<Size>()?.size
-                        val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
-                        val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
-                        if (heightChild != null) {
-                            childrenHeight += heightChild.toDouble()
-                        } else if (sizeChild != null) {
-                            childrenHeight += sizeChild.toDouble()
-                        } else if (fillMaxSizeChild != null) {
-                            childrenHeight += avy2
-                        } else if (fillMaxHeightChild != null) {
-                            childrenHeight += avy2
-                        }
-                    }
-                    var minimum = (-childrenHeight + (y2 - y1))
-                    if (minimum > 0.0) {
-                        minimum = 0.0
-                    } else {
-                        view.offset = view.offset.coerceIn(minimum, 0.0)
-                    }
 
                     view.children.forEach {
                         var currentx1 = 0.0

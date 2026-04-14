@@ -1,35 +1,10 @@
 package common
 
 import kotlin.math.floor
-import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.round
 
 class Color(var r: Int, var g: Int, var b: Int, var a: Int) {
-    //Aliases.
-    var red: Int
-        get() = r
-        set(v) {r=v}
-    var green: Int
-        get() = g
-        set(v) {g=v}
-    var blue: Int
-        get() = b
-        set(v) {g=v}
-    var alpha: Int
-        get() = a
-        set(v) {a=v}
-    //Helper constructors.
-    constructor(r: Double, g: Double, b: Double, a: Double) : this((r*255).toInt(),(g*255).toInt(),(b*255).toInt(),(a*255).toInt())
-    constructor(r: Float, g: Float, b: Float, a: Float) : this((r*255).toInt(),(g*255).toInt(),(b*255).toInt(),(a*255).toInt())
-
-    constructor(r: Float, g: Float, b: Float) : this((r*255).toInt(),(g*255).toInt(),(b*255).toInt(),255)
-    constructor(r: Double, g: Double, b: Double) : this((r*255).toInt(),(g*255).toInt(),(b*255).toInt(),255)
-    constructor(r: Int, g: Int, b: Int) : this(r,g,b,255) {}
-
-    constructor(c: Int) : this(c,c,c,255) {}
-    constructor(c: Float) : this((c*255).toInt(),(c*255).toInt(),(c*255).toInt(),255)
-    constructor(c: Double) : this((c*255).toInt(),(c*255).toInt(),(c*255).toInt(),255)
-
     companion object {
         val WHITE = Color(255)
         val LIGHT_GRAY = Color(192)
@@ -51,11 +26,11 @@ class Color(var r: Int, var g: Int, var b: Int, var a: Int) {
         fun fromHex(hex: String): Color {
             var code=hex.trim().removePrefix("#")
             //Cast #RGB to #RRGGBB.
-            if(code.length==3) code=code.map { it->"$it$it" }.joinToString("")
+            if (code.length==3) code=code.map { it->"$it$it" }.joinToString("")
             //Cast #RGBA to #RRGGBBAA.
-            if(code.length==4) code=code.map { it->"$it$it" }.joinToString("")
+            if (code.length==4) code=code.map { it->"$it$it" }.joinToString("")
             //Check if length is valid.
-            if(code.length !in listOf<Int>(6,8)) {
+            if (code.length !in listOf<Int>(6,8)) {
                 Log.error("Given HEX-string must be in one of formats: #RGB, #RRGGBB, #RGBA or #RRGGBBAA")
                 return BLACK
             }
@@ -95,7 +70,36 @@ class Color(var r: Int, var g: Int, var b: Int, var a: Int) {
             return Color(round(r * 255).toInt(), round(g * 255).toInt(), round(b * 255).toInt());
         }
     }
+    //Aliases.
+    var red: Int
+        get() = r
+        set(v) {r=v}
+    var green: Int
+        get() = g
+        set(v) {g=v}
+    var blue: Int
+        get() = b
+        set(v) {g=v}
+    var alpha: Int
+        get() = a
+        set(v) {a=v}
+    //Helper constructors.
+    constructor(r: Double, g: Double, b: Double, a: Double) : this((r*255).toInt(),(g*255).toInt(),(b*255).toInt(),(a*255).toInt())
+    constructor(r: Float, g: Float, b: Float, a: Float) : this((r*255).toInt(),(g*255).toInt(),(b*255).toInt(),(a*255).toInt())
 
+    constructor(r: Float, g: Float, b: Float) : this((r*255).toInt(),(g*255).toInt(),(b*255).toInt(),255)
+    constructor(r: Double, g: Double, b: Double) : this((r*255).toInt(),(g*255).toInt(),(b*255).toInt(),255)
+    constructor(r: Int, g: Int, b: Int) : this(r,g,b,255)
+
+    constructor(c: Int) : this(c,c,c,255)
+    constructor(c: Float) : this((c*255).toInt(),(c*255).toInt(),(c*255).toInt(),255)
+    constructor(c: Double) : this((c*255).toInt(),(c*255).toInt(),(c*255).toInt(),255)
+    //Basic operators.
+    operator fun plus(o: Color) = Color(r+o.r, g+o.g, b+o.b, a+o.a)
+    operator fun minus(o: Color) = Color(r-o.r, g-o.g, b-o.b, a-o.a)
+    operator fun times(o: Color) = Color(floatRed()*o.floatRed(), floatGreen()*o.floatGreen(), floatBlue()*o.floatBlue(), floatAlpha()*o.floatAlpha())
+    operator fun div(o: Color) = Color(floatRed()/o.floatRed(), floatGreen()/o.floatGreen(), floatBlue()/o.floatBlue(), floatAlpha()/o.floatAlpha())
+    operator fun rem(o: Color) = Color(floatRed()%o.floatRed(), floatGreen()%o.floatGreen(), floatBlue()%o.floatBlue(), floatAlpha()%o.floatAlpha())
     /**Converts this color to HEX-string.*/
     fun toHex(includeAlpha: Boolean = false): String {
         return if(includeAlpha) "#%02X%02X%02X%02X".format(r,g,b,a)
@@ -107,8 +111,8 @@ class Color(var r: Int, var g: Int, var b: Int, var a: Int) {
         val G=floatGreen()
         val B=floatBlue()
         var K=R
-        if(G>K) K=G
-        if(B>K) K=B
+        if (G>K) K=G
+        if (B>K) K=B
         K=1-K
         return listOf<Float>((1-R-K)/(1-K),(1-G-K)/(1-K),(1-B-K)/(1-K),K)
     }
@@ -119,19 +123,19 @@ class Color(var r: Int, var g: Int, var b: Int, var a: Int) {
         val B=floatBlue()
 
         var Max=R
-        if(G>Max) Max=G
-        if(B>Max) Max=B
+        if (G>Max) Max=G
+        if (B>Max) Max=B
         var Min=R
-        if(G<Min) Min=G
-        if(B<Min) Min=B
+        if (G<Min) Min=G
+        if (B<Min) Min=B
         var h=Max
         var s=Max
         var v=Max
 
         val delta=Max-Min
-        s=if(Max==0f) 0f else delta/Max
+        s=if (Max==0f) 0f else delta/Max
 
-        if(Max==Min) h=0f
+        if (Max==Min) h=0f
         else {
             when(Max) {
                 R->h=(G-B)/delta+(if(G<B) 6f else 0f)
@@ -142,16 +146,16 @@ class Color(var r: Int, var g: Int, var b: Int, var a: Int) {
         }
         return listOf<Float>(h*360,s*360,v*360)
     }
+    /**Converts red to float.*/
+    fun floatRed(): Float=min(r/255f,1f)
+    /**Converts green to float.*/
+    fun floatGreen(): Float=min(g/255f,1f)
+    /**Converts blue to float.*/
+    fun floatBlue(): Float=min(b/255f,1f)
+    /**Converts alpha to float.*/
+    fun floatAlpha(): Float=min(a/255f,1f)
     /**Converts all values to floats.*/
     fun toFloating(): List<Float> {
-        return listOf<Float>(r/255f,g/255f,b/255f,a/255f)
+        return listOf<Float>(floatRed(),floatGreen(),floatBlue(),floatAlpha())
     }
-    /**Converts red to float.*/
-    fun floatRed(): Float=r/255f
-    /**Converts green to float.*/
-    fun floatGreen(): Float=g/255f
-    /**Converts blue to float.*/
-    fun floatBlue(): Float=b/255f
-    /**Converts alpha to float.*/
-    fun floatAlpha(): Float=a/255f
 }

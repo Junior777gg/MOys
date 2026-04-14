@@ -109,7 +109,7 @@ class StorageApp(
     }
 
     fun MutableList<View>.file(file: File){
-        Row(modifier = Modifier.height(80).width(640).paddingLeft(60).onClick {
+        Row(modifier = Modifier.height(80).fillMaxWidth().onClick {
             if (file.isDirectory) {
                 currentPath = file.absolutePath
                 main()
@@ -121,7 +121,7 @@ class StorageApp(
                 }
                 gs.redraw()
             }
-        }, this).layout {
+        }, horizontalArrangement = HorizontalArrangement.Left(), parent = this).layout {
             //Determine icon.
             var iconId=0
             if (file.isFile) {
@@ -136,8 +136,8 @@ class StorageApp(
             }
             //Place icon if the file is
             if (file.isFile || file.isDirectory)
-                Image(modifier = Modifier.size(60), File("${Mother.getSystemPath()}/data/storage/${iconList[iconId]}"),this)
-            Text(modifier = Modifier.height(60).width(640), file.name,17, Color.black, parent = this)
+                Image(modifier = Modifier.size(60), File("${Mother.systemPath}/data/storage/${iconList[iconId]}"),this)
+            Text(modifier = Modifier.height(60).fillMaxWidth(), file.name,17, Color.black, parent = this)
         }
     }
 

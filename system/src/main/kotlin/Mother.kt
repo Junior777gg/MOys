@@ -22,40 +22,37 @@ class Mother(
 ) {
     companion object {
         /*These paths are accessible to mortal API (SDK)*/
-        private val systemFolderPath = System.getProperty("user.home") + "/MOys"
-        private val tempFolderPath = "$systemFolderPath/temp"
+        val systemPath: String
+            get()=System.getProperty("user.home") + "/MOys"
+        val tempPath: String
+            get()="$systemPath/temp"
+        val libsPath: String
+            get()="$systemPath/libs"
 
         /*These paths are private and kept behind API usage*/
-        private val installFolderPath = "$systemFolderPath/install"
-        private val registerFolderPath = "$systemFolderPath/register"
-
-        fun getSystemPath(): String {
-            return systemFolderPath;
-        }
-
-        fun getTempPath(): String {
-            return tempFolderPath;
-        }
+        private val installPath: String
+            get()="$systemPath/install"
+        private val registerPath: String
+            get()="$systemPath/register"
     }
-    private val libsFolderPath = "$systemFolderPath/libs"
 
     init {
-        val systemFolder = File(systemFolderPath)
+        val systemFolder = File(systemPath)
         if (!systemFolder.exists()) {
             systemFolder.mkdirs()
         }
 
-        val registerFolder = File(registerFolderPath)
+        val registerFolder = File(registerPath)
         if (!registerFolder.exists()) {
             registerFolder.mkdirs()
         }
 
-        val libsFolder = File(libsFolderPath)
+        val libsFolder = File(libsPath)
         if (!libsFolder.exists()) {
             libsFolder.mkdirs()
         }
 
-        val appsRegisterFile = File(registerFolderPath, "system.json")
+        val appsRegisterFile = File(registerPath, "system.json")
         if (!appsRegisterFile.exists()) {
             appsRegisterFile.createNewFile()
             appsRegisterFile.writeText(Json.encodeToString(Apps(mutableListOf())))
@@ -64,22 +61,18 @@ class Mother(
 
     val systemLauncher = SystemLauncher(graphicService, deviceManager, this)
     fun start() {
-        InstallationService().run(systemFolderPath)
+        InstallationService().run(systemPath)
         systemLauncher.runLaunch()
         Timer.start()
     }
     fun shutdown() {
         Timer.stop()
-        graphicService.shutdown(systemFolderPath)
+        graphicService.shutdown(systemPath)
     }
 
-    fun getLibsPath(): String {
-        return libsFolderPath
-    }
-
-    /**Copies app to temp directory*/
+    /** Copies app to temp directory */
     fun unpackApp(jarp: File, needToUnpack: Boolean = true) : Manifest? {
-        val tempDir = File(tempFolderPath+"/install_"+getFilename(jarp.name))
+        val tempDir = File(tempPath+"/install_"+getFilename(jarp.name))
         if (!tempDir.exists()) {
             tempDir.mkdirs()
         }
@@ -102,7 +95,16 @@ class Mother(
                 }
             }
             val manifest = File(tempDir, "manifest.json")
-            return Json.decodeFromString<Manifest>(manifest.readText())
+            val decoded = Json.decodeFromString<Manifest>(manifest.readText())
+            if(!File(decoded.jar_file_name).exists()||!File(decoded.icon_file_name).exists()) {
+                Log.error("Couldn't install app \"${jarp.name}\": Manifest contains non-existent file references")
+                if (tempDir.exists()) {
+                    tempDir.deleteRecursively()
+                    tempDir.delete()
+                }
+                return null
+            }
+            return decoded
         } catch (e: SerializationException) {
             Log.error("Couldn't install app \"${jarp.name}\": ${e.message.toString()}")
         } catch (e: IllegalArgumentException) {
@@ -116,7 +118,7 @@ class Mother(
         return null
     }
 
-    /**Returns filename without extension.*/
+    /** Returns filename without extension */
     private fun getFilename(filename: String): String {
         val dotIndex = filename.lastIndexOf('.')
         return if (dotIndex == -1) filename else filename.substring(0, dotIndex)
@@ -124,20 +126,20 @@ class Mother(
 
     /** Installs the application from the .jarp archive */
     fun installApp(jarp: File) {
-        val installationDir = File(installFolderPath)
+        val installationDir = File(installPath)
         if (!installationDir.exists()) {
             installationDir.mkdirs()
         }
 
         var needToUnpack = true
-        val tempDir = File(tempFolderPath+"/install_"+getFilename(jarp.name))
+        val tempDir = File(tempPath+"/install_"+getFilename(jarp.name))
         if (!tempDir.exists()) {
             tempDir.mkdirs()
         } else needToUnpack = false
         try {
             val manifestObj = unpackApp(jarp, needToUnpack)
             if (manifestObj == null) return
-            val outputFile = File(installFolderPath, manifestObj.app_id)
+            val outputFile = File(installPath, manifestObj.app_id)
             if (outputFile.exists()) {
                 Log.warn("Duplicate app entry \"${manifestObj.app_id}\". Updating...")
                 outputFile.deleteRecursively()
@@ -184,7 +186,7 @@ class Mother(
     fun deleteApp(appId: String) {
         try {
             //Delete app from register.
-            val registerFile = File(registerFolderPath, "system.json")
+            val registerFile = File(registerPath, "system.json")
             val register = Json.decodeFromString<Apps>(registerFile.readText())
             var removedRegistryKey = false
             for (e in register.apps) {
@@ -197,7 +199,7 @@ class Mother(
             }
             if (!removedRegistryKey) Log.warn("Register entry for \"$appId\" not found")
             //Delete app from storage.
-            val outputFile = File("$installFolderPath/$appId")
+            val outputFile = File("$installPath/$appId")
             if (outputFile.exists()) outputFile.deleteRecursively()
             else Log.warn("Install directory for \"$appId\" not found")
 
@@ -210,10 +212,10 @@ class Mother(
     /** Starts the application in a separate ClassLoader using the appId */
     fun runNewAppProcess(appId: String, jarName: String, activityName: String) {
         try {
-            val jarFile = File("$installFolderPath/$appId/$jarName")
+            val jarFile = File("$installPath/$appId/$jarName")
             val load = buildList<URL>{
                 add(jarFile.toURI().toURL())
-                File(getLibsPath()).listFiles().forEach { libFile ->
+                File(libsPath).listFiles().forEach { libFile ->
                     add(libFile.toURI().toURL())
                 }
             }.toTypedArray()
@@ -238,7 +240,7 @@ class Mother(
 
     /** Saves application information in the registry */
     private fun registerNewApp(app: App) {
-        val registerFile = File(registerFolderPath, "system.json")
+        val registerFile = File(registerPath, "system.json")
         val register = Json.decodeFromString<Apps>(registerFile.readText())
         //No duplicates (replace with error if possible, because the method is 'registerNewApp' and the id already exists)
         var entryFound = false
@@ -256,13 +258,13 @@ class Mother(
 
     /** Returns a list of all installed applications from the registry */
     fun getRegisteredApps(): List<App> {
-        val register = File("$registerFolderPath/system.json").readText()
+        val register = File("$registerPath/system.json").readText()
         return Json.decodeFromString<Apps>(register).apps
     }
 
     /** Removes duplicates from registry */
     private fun registryCleanup() {
-        val registerFile = File(registerFolderPath, "system.json")
+        val registerFile = File(registerPath, "system.json")
         val register = Json.decodeFromString<Apps>(registerFile.readText())
         val newRegister = Apps(register.apps.toList().distinct().toMutableList())
         registerFile.writeText(Json.encodeToString(newRegister))

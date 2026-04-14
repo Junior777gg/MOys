@@ -119,7 +119,12 @@ class GraphicService : GLEventListener, GraphicServiceI {
                     isMouseDragged = true
                     val deltaY = e.y.toDouble() - lastMouseY
                     lastMouseY = e.y.toDouble()
-                    lazyColumn[0].offset += deltaY
+                    val list = lazyColumn[0]
+                    list.offset += deltaY
+                    val containerHeight = list.modifier.get<Height>()?.height?.toDouble()
+                        ?: list.modifier.get<FillMaxHeight>()?.let { getScreenHeight().toDouble() }
+                        ?: getScreenHeight().toDouble()
+                    list.updateScrollBound(containerHeight)
                     redraw()
                 }
             }
