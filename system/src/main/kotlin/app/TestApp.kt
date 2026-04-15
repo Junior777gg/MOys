@@ -1,7 +1,7 @@
 package app
 
 import Activity
-import AudioService
+import service.AudioService
 import service.GraphicService
 import service.StorageService
 import service.DeviceManager
@@ -9,12 +9,14 @@ import Button
 import Text
 import TextField
 import Column
+import MultilineText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import common.Color
 import modifier.HorizontalAlignment
 import modifier.Modifier
+import modifier.TextAlignment
 import modifier.VerticalArrangement
 import modifier.background
 import modifier.cornerRadius
@@ -30,8 +32,9 @@ class TestApp(
     override val deviceManager: DeviceManager,
 ) : Activity{
     override fun main() {
-        val sound = AudioService
-        sound.setSound("/mnt/c/Users/MSI/Desktop/discord.mp3")
+        //Idk if this even works. It doesn't for me.
+        //val sound = AudioService
+        //sound.setSound("/mnt/c/Users/MSI/Desktop/discord.mp3")
         gs.setContent(true) {
             Column(
                 modifier = Modifier.fillMaxSize().background(Color.CYAN),
@@ -44,6 +47,18 @@ class TestApp(
                 },parent = this).layout {
                     Text(modifier = Modifier.height(14).width(20), text = "Play sound", parent = this)
                 }
+                MultilineText(text = """
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    Sed id dictum sem. Duis quis porttitor sapien.
+                    Phasellus tincidunt elit leo, vitae suscipit mi ullamcorper nec.
+                    Sed vulputate magna vel purus dapibus placerat.
+                    Curabitur ac blandit enim, id placerat enim.
+                    Duis eu consectetur ex, nec fermentum nunc.
+                    Pellentesque egestas finibus mi, efficitur ultricies nisl commodo quis.
+                    Sed fringilla dapibus enim nec volutpat.
+                    Curabitur gravida pharetra elit non malesuada.
+                    Duis iaculis dui mauris, in vestibulum enim semper sit amet.
+                """.trimIndent(), lineSpacing = 1, textSize = 14, modifier = Modifier.fillMaxSize(), textAlign = TextAlignment.Top(), textColor = Color.BLACK, parent = this)
 
             }
         }

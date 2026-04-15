@@ -10,11 +10,15 @@ import View
 import Image
 import LazyColumn
 import Mother
+import MultilineText
 import Row
 import Text
 import common.Color
+import common.Log
+import impl.GraphicServiceImpl
 import modifier.HorizontalArrangement
 import modifier.Modifier
+import modifier.TextAlignment
 import modifier.VerticalArrangement
 import modifier.background
 import modifier.fillMaxSize
@@ -36,15 +40,23 @@ class StorageApp(
 ) : Activity {
     private var currentPath = "/"
     private var stuckInInstallation = false
+    private var fileViewOpen = false
     private var installationAppPath = ""
     private val iconList = listOf("folder.png","file.png","jarp.png", "archive_file.png", "audio_file.png", "image_file.png", "text_file.png", "unknown_file.png")
     override fun main() {
-        gs.setContent(true){
+        gs.setContent(true) {
             buildUI()
         }
         gs.redraw()
     }
-
+    fun MutableList<View>.buildUI() {
+        val files = File(currentPath).listFiles()
+        LazyColumn(modifier = Modifier.fillMaxSize().paddingBottom(60), this).layout {
+            files.forEach {
+                file(it)
+            }
+        }
+    }
     override fun onNavigationBack(): Boolean {
         if(stuckInInstallation) {
             stuckInInstallation=false
@@ -52,11 +64,11 @@ class StorageApp(
             gs.redraw()
             return false
         }
-        tryGoBack()
+        if(!fileViewOpen) tryGoBack()
+        else fileViewOpen=false
         return true
     }
-
-    fun tryGoBack() {
+    private fun tryGoBack() {
         if(currentPath=="/") return
         currentPath = Path(currentPath).parent.toString()
     }
@@ -100,26 +112,42 @@ class StorageApp(
             }
         }
     }
-
-    fun MutableList<View>.buildUI() {
-        val files = File(currentPath).listFiles()
-        LazyColumn(modifier = Modifier.fillMaxSize().paddingBottom(60), this).layout {
-            files.forEach {
-                file(it)
+    private fun openImage(img: File) {
+        fileViewOpen = true
+        gs.setContent(true) {
+            Column(modifier = Modifier.fillMaxSize().background(Color.BLACK), parent = this). layout {
+                val calcSize=GraphicServiceImpl.getScreenSize()/3
+                Image(modifier = Modifier.size(calcSize.x), file = img, parent = this)
+            }
+        }
+    }
+    private fun openText(text: File) {
+        fileViewOpen = true
+        gs.setContent(true) {
+            LazyColumn(modifier = Modifier.fillMaxSize().background(Color.BLACK), parent = this). layout {
+                MultilineText(modifier = Modifier.fillMaxSize(), textAlign = TextAlignment.TopLeft(), textSize = 16, text = text.readText(), parent = this)
             }
         }
     }
 
-    fun MutableList<View>.file(file: File){
+    private fun MutableList<View>.file(file: File){
         Row(modifier = Modifier.height(80).fillMaxWidth().onClick {
             if (file.isDirectory) {
                 currentPath = file.absolutePath
                 main()
-            } else if (file.extension=="jarp") {
-                stuckInInstallation = true
-                installationAppPath = file.absolutePath
-                gs.injectUI {
-                    installationPopup()
+            } else {
+                when (file.extension) {
+                    "jarp"->{
+                        stuckInInstallation = true
+                        installationAppPath = file.absolutePath
+                        gs.injectUI {
+                            installationPopup()
+                        }
+                    }
+                    "zip","rar","7z","gz","tar"->Log.warn("Error: Unzipping files not implemented")
+                    "mp3","wav","ogg"->Log.warn("Error: Audio Service not implemented")
+                    "png","jpg","jpeg"->openImage(file)
+                    "txt","md","cfg","json"->openText(file)
                 }
                 gs.redraw()
             }
@@ -133,13 +161,13 @@ class StorageApp(
                     "zip","rar","7z","gz","tar"->iconId=3
                     "mp3","wav","ogg"->iconId=4
                     "png","jpg","jpeg"->iconId=5
-                    "txt","md"->iconId=6
+                    "txt","md","cfg","json"->iconId=6
                 }
             }
             //Place icon if the file is
             if (file.isFile || file.isDirectory)
                 Image(modifier = Modifier.size(60), File("${Mother.systemPath}/data/storage/${iconList[iconId]}"),this)
-            Text(modifier = Modifier.height(60).fillMaxWidth(), file.name,17, Color.BLACK, parent = this)
+            Text(modifier = Modifier.height(60).fillMaxWidth(), text = file.name, textSize = 17, textColor = Color.BLACK, parent = this)
         }
     }
 

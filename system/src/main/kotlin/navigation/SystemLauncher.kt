@@ -127,7 +127,7 @@ class SystemLauncher(
                     graphicService.setActivity(act)
                     act.main()
                 },
-                appName = "Testing common.App"
+                appName = "Testing App"
             )
         })
     }

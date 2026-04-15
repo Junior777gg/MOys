@@ -83,13 +83,13 @@ class Renderer(
             TextAlignment.H_LEFT -> x1
             TextAlignment.H_CENTER -> x1 + offsetx / 2
             TextAlignment.H_RIGHT -> x1 + offsetx
-            else -> x1
+            else -> x1 + offsetx / 2
         }
         val y = when (TextAlignment.getVertical(align)) {
             TextAlignment.V_TOP -> y2
             TextAlignment.V_CENTER -> y2 - offsety / 2
             TextAlignment.V_BOTTOM -> y2 - offsety
-            else -> y2
+            else -> y2 - offsety / 2
         }
         return Vec2(x, y)
     }
@@ -307,6 +307,47 @@ class Renderer(
                 val offsety = (y2 - y1) - textRenderer.getBounds(view.text).bounds.height
                 val alignVec = getTextAlign(view.textAlign, x1, y2, offsetx, offsety)
                 textRenderer.draw(view.text, alignVec.x.toInt(), screenHeight - alignVec.y.toInt())
+                textRenderer.endRendering()
+            }
+
+            is MultilineText -> {
+                val textRenderer = getTextRenderer(view.textSize)
+                textRenderer.beginRendering(screenWidth, screenHeight)
+                textRenderer.setColor(toJavaAwtColor(view.textColor))
+                //Check if there is any text contents.
+                val lines = view.lines
+                if (lines.isEmpty()) {
+                    textRenderer.endRendering()
+                    return
+                }
+                var offsetYGlobal = 0.0
+                val lineHeights = lines.map { textRenderer.getBounds(it).bounds.height }
+                var blockSize = 0
+                for(h in lineHeights) {
+                    blockSize += h + view.lineSpacing
+                }
+                var align = view.textAlign
+                if(!TextAlignment.isValidAlignment(align)) align = TextAlignment.Center()
+
+                offsetYGlobal = when (TextAlignment.getVertical(view.textAlign)) {
+                    TextAlignment.V_TOP->0.0
+                    TextAlignment.V_CENTER ->blockSize/2.0
+                    TextAlignment.V_BOTTOM ->blockSize.toDouble()
+                    else->blockSize/2.0
+                }
+
+                for(line in lines) {
+                    val offsetx = (x2 - x1) - textRenderer.getBounds(line).bounds.width
+                    val alignHorizontal = when (TextAlignment.getHorizontal(align)) {
+                        TextAlignment.H_LEFT -> x1
+                        TextAlignment.H_CENTER -> x1 + offsetx / 2
+                        TextAlignment.H_RIGHT -> x1 + offsetx
+                        else -> x1 + offsetx / 2
+                    }
+                    offsetYGlobal += textRenderer.getBounds(line).bounds.height + view.lineSpacing
+                    val offsety = (y2 - y1) - offsetYGlobal
+                    textRenderer.draw(line, alignHorizontal.toInt(), offsety.toInt())
+                }
                 textRenderer.endRendering()
             }
 

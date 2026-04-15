@@ -41,6 +41,7 @@ class GraphicServiceImpl : GLEventListener, GraphicService {
     companion object {
         var config: GraphicalConfig=GraphicalConfig(1920,1080)
 
+        fun getScreenSize(): Vec2i=Vec2i(config.width,config.height)
         fun getScreenHeight(): Int=config.height
         fun getScreenWidth(): Int=config.width
         fun isDesktopResolution(): Boolean=config.width>config.height
