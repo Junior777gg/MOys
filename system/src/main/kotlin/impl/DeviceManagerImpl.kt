@@ -1,6 +1,9 @@
-import common.Log
+package impl
 
-class DeviceManager: DeviceManagerI {
+import common.Log
+import service.DeviceManager
+
+class DeviceManagerImpl: DeviceManager {
     fun initialize() {
         Log.info("Device manager initialized")
     }

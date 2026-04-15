@@ -1,3 +1,5 @@
+package common
+
 data class Bounds(
     val x1: Double,
     val y1: Double,

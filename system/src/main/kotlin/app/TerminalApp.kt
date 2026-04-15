@@ -1,10 +1,10 @@
 package app
 
 import Activity
-import DeviceManagerI
-import GraphicServiceI
+import service.DeviceManager
+import service.GraphicService
 import Mother
-import StorageServiceI
+import service.StorageService
 import View
 import Box
 import TextField
@@ -13,24 +13,25 @@ import Row
 import LazyColumn
 import Text
 import Image
-import background
 import common.Log
-import fillMaxHeight
-import fillMaxSize
-import fillMaxWidth
-import height
-import onClick
-import paddingTop
-import size
-import width
-import java.awt.Color
+import common.Color
+import modifier.HorizontalAlignment
+import modifier.Modifier
+import modifier.TextAlignment
+import modifier.background
+import modifier.fillMaxSize
+import modifier.fillMaxWidth
+import modifier.height
+import modifier.onClick
+import modifier.paddingTop
+import modifier.width
 import java.io.File
 
 class TerminalApp(
     val mother: Mother,
-    override val gs: GraphicServiceI,
-    override val storage: StorageServiceI,
-    override val deviceManager: DeviceManagerI
+    override val gs: GraphicService,
+    override val storage: StorageService,
+    override val deviceManager: DeviceManager
 ) : Activity {
     var maxExecuteStore=1024
     var executeStore=mutableListOf<String>("Console Output")
@@ -87,13 +88,13 @@ class TerminalApp(
             }
 
             LazyColumn(
-                modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)).paddingTop(50),
+                modifier = Modifier.fillMaxSize().background(Color.TRANSPARENT).paddingTop(50),
                 horizontalAlignment = HorizontalAlignment.Left(),
                 parent = this
             ).layout {
                 for (e in executeStore) {
                     Text(
-                        modifier = Modifier.fillMaxWidth().height(20).background(Color(0,0,0,0)),
+                        modifier = Modifier.fillMaxWidth().height(20).background(Color.TRANSPARENT),
                         textAlign = TextAlignment.Left(),
                         textSize = 16,
                         text = e,

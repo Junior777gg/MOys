@@ -1,3 +1,5 @@
+import modifier.Modifier
+
 interface View {
     val modifier: Modifier
     val children: MutableList<View>

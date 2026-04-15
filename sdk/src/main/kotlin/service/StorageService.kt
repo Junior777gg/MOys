@@ -1,4 +1,6 @@
-interface StorageServiceI {
+package service
+
+interface StorageService {
     fun createFileWithText(appId: String, path: String): Boolean
     fun writeText(appId: String, path: String, content: String): Boolean
     fun writeBytes(appId: String, path: String, content: ByteArray): Boolean

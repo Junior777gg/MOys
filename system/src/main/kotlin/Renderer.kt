@@ -2,9 +2,31 @@ import com.jogamp.opengl.GL2
 import com.jogamp.opengl.util.awt.TextRenderer
 import com.jogamp.opengl.util.texture.Texture
 import com.jogamp.opengl.util.texture.TextureIO
+import common.Bounds
 import common.Log
 import common.Vec2
-import java.awt.Color
+import common.Color
+import impl.GraphicServiceImpl
+import modifier.Background
+import modifier.CornerRadius
+import modifier.FillMaxHeight
+import modifier.FillMaxSize
+import modifier.FillMaxWidth
+import modifier.Height
+import modifier.HorizontalAlignment
+import modifier.HorizontalArrangement
+import modifier.OnClick
+import modifier.OnHold
+import modifier.Padding
+import modifier.PaddingBottom
+import modifier.PaddingLeft
+import modifier.PaddingRight
+import modifier.PaddingTop
+import modifier.Size
+import modifier.TextAlignment
+import modifier.VerticalAlignment
+import modifier.VerticalArrangement
+import modifier.Width
 import java.awt.Font
 import java.io.File
 import kotlin.math.PI
@@ -16,7 +38,7 @@ import kotlin.math.sin
  * Caches fonts and textures for performance.
  */
 class Renderer(
-    val gs: GraphicService,
+    val gs: GraphicServiceImpl,
     val bounds: MutableList<Bounds>,
     val lazyColumn: MutableList<LazyColumn>,
     var screenHeight: Int,
@@ -54,9 +76,9 @@ class Renderer(
         }
     }
 
-    fun getTextAlign(textAlign: Int, x1: Double, y2: Double, offsetx: Double, offsety: Double): Vec2 {
+    private fun getTextAlign(textAlign: Int, x1: Double, y2: Double, offsetx: Double, offsety: Double): Vec2 {
         var align=textAlign
-        if(!TextAlignment.isValidAlignment(align)) align=TextAlignment.Center()
+        if(!TextAlignment.isValidAlignment(align)) align= TextAlignment.Center()
         val x = when (TextAlignment.getHorizontal(align)) {
             TextAlignment.H_LEFT -> x1
             TextAlignment.H_CENTER -> x1 + offsetx / 2
@@ -71,6 +93,7 @@ class Renderer(
         }
         return Vec2(x, y)
     }
+    private fun toJavaAwtColor(color: Color): java.awt.Color = java.awt.Color(color.r,color.g,color.b,color.a)
 
     /**
      * Recursively traverses the View-tree, calculates the coordinates (layout),
@@ -96,7 +119,7 @@ class Renderer(
         val fillMaxSize = modifiers.get<FillMaxSize>()
         val fillMaxWidth = modifiers.get<FillMaxWidth>()
         val fillMaxHeight = modifiers.get<FillMaxHeight>()
-        val color = modifiers.get<Background>()?.color ?: Color(255, 255, 255, 255)
+        val color = modifiers.get<Background>()?.color ?: Color.WHITE
         val paddingTop = modifiers.get<PaddingTop>()?.top ?: 0
         val paddingLeft = modifiers.get<PaddingLeft>()?.left ?: 0
         val paddingRight = modifiers.get<PaddingRight>()?.right ?: 0
@@ -141,7 +164,7 @@ class Renderer(
         if (view is TextField) {
             bounds.add(Bounds(x1, y1, x2, y2, {
                 onClick?.invoke()
-                Keyboard(gs, view).main()
+                SystemKeyboard(gs, view).main()
             }, null))
         } else if (onClick != null) {
             bounds.add(Bounds(x1, y1, x2, y2, onClick, onHold))
@@ -151,7 +174,7 @@ class Renderer(
         when (view) {
             is Button, is Box, is Column, is Row, is LazyColumn -> {
                 if (cornerRadius == 0) {
-                    gl.glColor4f(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
+                    gl.glColor4f(color.floatRed(), color.floatGreen(), color.floatBlue(), color.floatAlpha())
                     gl.glBegin(GL2.GL_QUADS)
                     gl.glVertex2f(x1.toFloat(), y1.toFloat())
                     gl.glVertex2f(x2.toFloat(), y1.toFloat())
@@ -159,7 +182,7 @@ class Renderer(
                     gl.glVertex2f(x1.toFloat(), y2.toFloat())
                     gl.glEnd()
                 } else {
-                    gl.glColor4f(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
+                    gl.glColor4f(color.floatRed(), color.floatGreen(), color.floatBlue(), color.floatAlpha())
                     val height = y2 - y1
                     val width = x2 - x1
                     val r = cornerRadius
@@ -196,8 +219,6 @@ class Renderer(
             }
 
             is TextField -> {
-                var bgColor = view.modifier.get<Background>()?.color
-                if (bgColor == null) bgColor = Color(1, 1, 1, 1)
                 if (cornerRadius == 0) {
                     gl.glColor4f(0f, 0f, 0f, 1f)
                     gl.glBegin(GL2.GL_QUADS)
@@ -206,7 +227,7 @@ class Renderer(
                     gl.glVertex2f(x2.toFloat(), y2.toFloat())
                     gl.glVertex2f(x1.toFloat(), y2.toFloat())
                     gl.glEnd()
-                    gl.glColor4f(bgColor.red / 255f, bgColor.green / 255f, bgColor.blue / 255f, bgColor.alpha / 255f)
+                    gl.glColor4f(color.floatRed(), color.floatGreen(), color.floatBlue(), color.floatAlpha())
                     gl.glBegin(GL2.GL_QUADS)
                     gl.glVertex2f((x1 + 2).toFloat(), (y1 + 2).toFloat())
                     gl.glVertex2f((x2 - 2).toFloat(), (y1 + 2).toFloat())
@@ -214,7 +235,7 @@ class Renderer(
                     gl.glVertex2f((x1 + 2).toFloat(), (y2 - 2).toFloat())
                     gl.glEnd()
                 } else {
-                    gl.glColor4f(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
+                    gl.glColor4f(color.floatRed(), color.floatGreen(), color.floatBlue(), color.floatAlpha())
                     val height = y2 - y1
                     val width = x2 - x1
                     val r = cornerRadius
@@ -249,7 +270,7 @@ class Renderer(
                     }
                     gl.glEnd()
 
-                    gl.glColor4f(bgColor.red / 255f, bgColor.green / 255f, bgColor.blue / 255f, bgColor.alpha / 255f)
+                    gl.glColor4f(color.floatRed(), color.floatGreen(), color.floatBlue(), color.floatAlpha())
                     gl.glBegin(GL2.GL_POLYGON)
                     for (i in 0..segments) {
                         gl.glVertex2f((cx_tl - r * sin[i]).toFloat() + 2f, (cy_tl - r * cos[i]).toFloat() + 2f)
@@ -270,7 +291,7 @@ class Renderer(
                 }
                 val textRenderer = getTextRenderer(view.textSize)
                 textRenderer.beginRendering(screenWidth, screenHeight)
-                textRenderer.setColor(view.textColor)
+                textRenderer.setColor(toJavaAwtColor(view.textColor))
                 val offsetx = (x2 - x1) - textRenderer.getBounds(view.text).bounds.width
                 val offsety = (y2 - y1) - textRenderer.getBounds(view.text).bounds.height
                 val alignVec = getTextAlign(view.textAlign, x1, y2, offsetx, offsety)
@@ -281,7 +302,7 @@ class Renderer(
             is Text -> {
                 val textRenderer = getTextRenderer(view.textSize)
                 textRenderer.beginRendering(screenWidth, screenHeight)
-                textRenderer.setColor(view.textColor)
+                textRenderer.setColor(toJavaAwtColor(view.textColor))
                 val offsetx = (x2 - x1) - textRenderer.getBounds(view.text).bounds.width
                 val offsety = (y2 - y1) - textRenderer.getBounds(view.text).bounds.height
                 val alignVec = getTextAlign(view.textAlign, x1, y2, offsetx, offsety)

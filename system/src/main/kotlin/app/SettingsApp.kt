@@ -2,34 +2,35 @@ package app
 
 import Activity
 import Button
-import Column
-import DeviceManagerI
-import GraphicService
+import service.DeviceManager
+import impl.GraphicServiceImpl
 import Image
 import LazyColumn
 import Mother
 import Row
-import StorageServiceI
+import service.StorageService
 import View
 import Text
-import background
-import fillMaxHeight
-import fillMaxSize
-import fillMaxWidth
-import height
-import onClick
-import padding
-import paddingLeft
-import size
-import width
-import java.awt.Color
+import common.Color
+import modifier.HorizontalArrangement
+import modifier.Modifier
+import modifier.TextAlignment
+import modifier.background
+import modifier.fillMaxSize
+import modifier.fillMaxWidth
+import modifier.height
+import modifier.onClick
+import modifier.padding
+import modifier.paddingLeft
+import modifier.size
+import modifier.width
 import java.io.File
 
 class SettingsApp(
     val mother: Mother,
-    override val gs: GraphicService,
-    override val storage: StorageServiceI,
-    override val deviceManager: DeviceManagerI
+    override val gs: GraphicServiceImpl,
+    override val storage: StorageService,
+    override val deviceManager: DeviceManager
 ) : Activity {
     override fun main() {
         render(true)
@@ -60,7 +61,7 @@ class SettingsApp(
                 horizontalArrangement = HorizontalArrangement.Left(),
                 parent = this
             ).layout {
-                if(!GraphicService.isDesktopResolution()) {
+                if(!GraphicServiceImpl.isDesktopResolution()) {
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/1.png") },
                         file = File("${Mother.systemPath}/data/launcher/backgrounds/mobile/1.png"),
@@ -149,7 +150,7 @@ class SettingsApp(
                 textAlign = TextAlignment.Left(),
                 parent = this
             )
-            for (r in GraphicService.RESOLUTIONS.R_ALL) {
+            for (r in GraphicServiceImpl.RESOLUTIONS.R_ALL) {
                 Button(
                     modifier = Modifier.fillMaxWidth().height(50).onClick { gs.setScreenResolution(r) },
                     parent = this
@@ -171,7 +172,7 @@ class SettingsApp(
                 textAlign = TextAlignment.Left(),
                 parent = this
             )
-            for (s in GraphicService.RESOLUTIONS.R_ALL) {
+            for (s in GraphicServiceImpl.RESOLUTIONS.R_ALL) {
                 val r = s.swap()
                 Button(
                     modifier = Modifier.width(100).height(50).onClick { gs.setScreenResolution(r) },

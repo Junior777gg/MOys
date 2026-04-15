@@ -1,3 +1,5 @@
+package modifier
+
 object TextAlignment {
     //Basic attributes (binary)
     const val H_LEFT = 1 shl 0

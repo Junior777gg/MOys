@@ -1,4 +1,6 @@
-interface AudioServiceI {
+package service
+
+interface AudioService {
     fun setSound(path: String)
     fun play()
     fun pause()

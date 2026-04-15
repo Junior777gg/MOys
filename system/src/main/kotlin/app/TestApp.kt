@@ -2,30 +2,32 @@ package app
 
 import Activity
 import AudioService
-import GraphicServiceI
-import StorageServiceI
-import DeviceManagerI
+import service.GraphicService
+import service.StorageService
+import service.DeviceManager
 import Button
 import Text
 import TextField
-import background
-import fillMaxSize
 import Column
-import MavenRepository
-import cornerRadius
-import fillMaxWidth
-import height
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import onClick
-import width
-import java.awt.Color
+import common.Color
+import modifier.HorizontalAlignment
+import modifier.Modifier
+import modifier.VerticalArrangement
+import modifier.background
+import modifier.cornerRadius
+import modifier.fillMaxSize
+import modifier.fillMaxWidth
+import modifier.height
+import modifier.onClick
+import modifier.width
 
 class TestApp(
-    override val gs: GraphicServiceI,
-    override val storage: StorageServiceI,
-    override val deviceManager: DeviceManagerI,
+    override val gs: GraphicService,
+    override val storage: StorageService,
+    override val deviceManager: DeviceManager,
 ) : Activity{
     override fun main() {
         val sound = AudioService

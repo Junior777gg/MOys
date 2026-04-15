@@ -1,3 +1,5 @@
+import modifier.Modifier
+
 class Box(
     override val modifier: Modifier, override val parent: MutableList<View>,
 ) : View{

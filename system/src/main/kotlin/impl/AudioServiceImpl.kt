@@ -1,3 +1,6 @@
+package impl
+
+import service.AudioService
 import common.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -15,7 +18,7 @@ import javax.sound.sampled.SourceDataLine
 import kotlin.math.log10
 import kotlin.math.pow
 
-object AudioService : AudioServiceI {
+object AudioServiceImpl : AudioService {
     private lateinit var playerCoroutine: Job
 
     private var currentPath = ""

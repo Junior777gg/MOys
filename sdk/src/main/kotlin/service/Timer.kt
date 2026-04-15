@@ -1,4 +1,6 @@
-interface TimerI {
+package service
+
+interface Timer {
     fun subscribe(id: String, callback: (currentTimeMs: Long)->Unit, intervalS: Long=1L)
     fun unsubscribe(id: String)
 

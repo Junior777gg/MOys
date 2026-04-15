@@ -1,9 +1,11 @@
-import common.Log
+package security
+
 import java.net.URL
 import java.net.URLClassLoader
 
 class SecurityClassLoader(url: Array<URL>, parent: ClassLoader) : URLClassLoader(url, parent) {
     private val blockedClasses = listOf(
+        //Files.
         "java.io.File",
         "java.io.FileInputStream",
         "java.io.FileOutputStream",
@@ -11,29 +13,29 @@ class SecurityClassLoader(url: Array<URL>, parent: ClassLoader) : URLClassLoader
         "java.nio.file.",
         "java.nio.channels.FileChannel",
 
-        // Сеть
+        //Network.
         "java.net.Socket",
         "java.net.ServerSocket",
         "java.net.URL",
         "java.net.HttpURLConnection",
         "java.net.URLConnection",
 
-        // Процессы и Runtime
+        //Processes and Runtime.
         "java.lang.Runtime",
         "java.lang.ProcessBuilder",
         "java.lang.Process",
 
-        // Рефлексия (обход песочницы)
+        //Reflection (sandbox bypass).
         "java.lang.reflect.",
         "sun.reflect.",
         "sun.misc.",
         "jdk.internal.",
 
-        // ClassLoader (создание своего загрузчика)
+        //ClassLoader (creation of custom class loader).
         "java.lang.ClassLoader",
         "java.net.URLClassLoader",
 
-        // Небезопасные операции
+        //Unsafe operations.
         "sun.misc.Unsafe",
         "jdk.internal.misc.Unsafe",
     )
@@ -52,7 +54,7 @@ class SecurityClassLoader(url: Array<URL>, parent: ClassLoader) : URLClassLoader
 
         return try {
             findClass(name)
-        } catch (e: ClassNotFoundException) {
+        } catch (_: ClassNotFoundException) {
             parent.loadClass(name)
         }
     }

@@ -1,9 +1,22 @@
+import common.App
+import common.Apps
 import common.Log
+import common.Manifest
+import impl.DeviceManagerImpl
+import impl.GraphicServiceImpl
+import impl.StorageServiceImpl
+import impl.TimerImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import navigation.SystemLauncher
 import org.jsoup.SerializationException
+import security.MavenRepository
+import security.SecurityClassLoader
+import service.GraphicService
+import service.DeviceManager
+import service.StorageService
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -16,9 +29,9 @@ import java.util.zip.ZipInputStream
  * It manages the installation of applications, the registry, and the launch of processes.
  */
 class Mother(
-    val graphicService: GraphicService,
-    val deviceManager: DeviceManager,
-    val storageService: StorageService,
+    val graphicService: GraphicServiceImpl,
+    val deviceManager: DeviceManagerImpl,
+    val storageService: StorageServiceImpl,
 ) {
     companion object {
         /*These paths are accessible to mortal API (SDK)*/
@@ -63,10 +76,10 @@ class Mother(
     fun start() {
         InstallationService().run(systemPath)
         systemLauncher.runLaunch()
-        Timer.start()
+        TimerImpl.start()
     }
     fun shutdown() {
-        Timer.stop()
+        TimerImpl.stop()
         graphicService.shutdown(systemPath)
     }
 
@@ -97,7 +110,7 @@ class Mother(
             val manifest = File(tempDir, "manifest.json")
             val decoded = Json.decodeFromString<Manifest>(manifest.readText())
             if(!File(decoded.jar_file_name).exists()||!File(decoded.icon_file_name).exists()) {
-                Log.error("Couldn't install app \"${jarp.name}\": Manifest contains non-existent file references")
+                Log.error("Couldn't install app \"${jarp.name}\": common.Manifest contains non-existent file references")
                 if (tempDir.exists()) {
                     tempDir.deleteRecursively()
                     tempDir.delete()
@@ -223,9 +236,9 @@ class Mother(
                 classLoader.use { classLoader ->
                 val clazz = classLoader.loadClass(activityName)!!
                 val constructor = clazz.getDeclaredConstructor(
-                    GraphicServiceI::class.java,
-                    StorageServiceI::class.java,
-                    DeviceManagerI::class.java
+                    GraphicService::class.java,
+                    StorageService::class.java,
+                    DeviceManager::class.java
                 )
                 val instance = constructor.newInstance(graphicService, storageService, deviceManager)
                 graphicService.setActivity(instance as Activity)

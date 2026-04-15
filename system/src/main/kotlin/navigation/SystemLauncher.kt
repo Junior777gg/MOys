@@ -1,3 +1,11 @@
+package navigation
+
+import Column
+import Image
+import Mother
+import Row
+import Text
+import View
 import app.BrowserApp
 import app.CalculatorApp
 import app.SettingsApp
@@ -8,12 +16,27 @@ import common.Log
 import javafx.application.Application
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import java.awt.Color
+import common.Color
+import impl.DeviceManagerImpl
+import impl.GraphicServiceImpl
+import impl.StorageServiceImpl
+import modifier.HorizontalAlignment
+import modifier.HorizontalArrangement
+import modifier.Modifier
+import modifier.VerticalArrangement
+import modifier.background
+import modifier.fillMaxSize
+import modifier.height
+import modifier.onClick
+import modifier.onHold
+import modifier.padding
+import modifier.size
+import modifier.width
 import java.io.File
 
 class SystemLauncher(
-    val graphicService: GraphicService,
-    val deviceManager: DeviceManager,
+    val graphicService: GraphicServiceImpl,
+    val deviceManager: DeviceManagerImpl,
     val mother: Mother
 ) {
     @Serializable
@@ -46,7 +69,7 @@ class SystemLauncher(
             label(
                 icon = File("${Mother.systemPath}/install/calculator/icon.png"),
                 click = {
-                    val act=CalculatorApp(graphicService, StorageService(), deviceManager)
+                    val act=CalculatorApp(graphicService, StorageServiceImpl(), deviceManager)
                     graphicService.setActivity(act)
                     act.main()
                 },
@@ -57,7 +80,7 @@ class SystemLauncher(
             label(
                 icon = File("${Mother.systemPath}/install/settings/icon.png"),
                 click = {
-                    val act=SettingsApp(mother, graphicService, StorageService(), deviceManager)
+                    val act=SettingsApp(mother, graphicService, StorageServiceImpl(), deviceManager)
                     graphicService.setActivity(act)
                     act.main()
                 },
@@ -68,7 +91,7 @@ class SystemLauncher(
             label(
                 icon = File("${Mother.systemPath}/install/storage/icon.png"),
                 click = {
-                    val act=StorageApp(mother, graphicService, StorageService(), deviceManager)
+                    val act=StorageApp(mother, graphicService, StorageServiceImpl(), deviceManager)
                     graphicService.setActivity(act)
                     act.main()
                 },
@@ -79,7 +102,7 @@ class SystemLauncher(
             label(
                 icon = File("${Mother.systemPath}/install/terminal/icon.png"),
                 click = {
-                    val act= TerminalApp(mother, graphicService, StorageService(), deviceManager)
+                    val act= TerminalApp(mother, graphicService, StorageServiceImpl(), deviceManager)
                     graphicService.setActivity(act)
                     act.main()
                 },
@@ -100,11 +123,11 @@ class SystemLauncher(
         labels.add({
             label(
                 click = {
-                    val act=TestApp(graphicService, StorageService(), deviceManager)
+                    val act=TestApp(graphicService, StorageServiceImpl(), deviceManager)
                     graphicService.setActivity(act)
                     act.main()
                 },
-                appName = "Testing App"
+                appName = "Testing common.App"
             )
         })
     }
@@ -124,12 +147,12 @@ class SystemLauncher(
 
     fun MutableList<View>.screen() {
         Image(modifier = Modifier.fillMaxSize(), File(Mother.systemPath+"/data/launcher/${config.background}"), this).layout {
-            Column(modifier = Modifier.fillMaxSize().background(Color(0,0,0,0)),
+            Column(modifier = Modifier.fillMaxSize().background(Color.TRANSPARENT),
                 verticalArrangement = VerticalArrangement.SpaceEvenly(),
                 horizontalAlignment = HorizontalAlignment.Center(), parent = this).layout {
                 var count = 0
                 for (i in 0..6) {
-                    Row(modifier = Modifier.height(130).width(640).background(Color(0,0,0,0)), horizontalArrangement = getAppsArrangement(), parent = this).layout {
+                    Row(modifier = Modifier.height(130).width(640).background(Color.TRANSPARENT), horizontalArrangement = getAppsArrangement(), parent = this).layout {
                         while (this.size < 5) {
                             if (count > labels.size - 1) break
                             labels[count](this)
@@ -153,13 +176,12 @@ class SystemLauncher(
     fun MutableList<View>.label(icon: File? = null, appName: String, click: () -> Unit, hold: (() -> Unit) = { Log.warn("Can't remove system app")}) {
         var textColor = Color.WHITE
         if(config.textDark) textColor = Color.BLACK
-        if(!config.textDisplay) textColor = Color(0,0,0,0)
         Column(
             modifier = Modifier.padding(20).height(130).width(110)
-                .onClick { click() }.onHold { hold.invoke() } .background(Color(0,0,0,0)), this
+                .onClick { click() }.onHold { hold.invoke() } .background(Color.TRANSPARENT), this
         ).layout {
             Image(modifier = Modifier.size(70), icon ?: File("${Mother.systemPath}/data/launcher/basic.png"), this)
-            Text(modifier = Modifier.width(70).height(20), text = appName, textColor = textColor, textSize = 15, parent = this)
+            if(config.textDisplay) Text(modifier = Modifier.width(70).height(20), text = appName, textColor = textColor, textSize = 15, parent = this)
         }
     }
 

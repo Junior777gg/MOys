@@ -3,34 +3,36 @@ package app
 import Activity
 import Button
 import Column
-import GraphicServiceI
-import StorageServiceI
-import DeviceManagerI
+import service.GraphicService
+import service.StorageService
+import service.DeviceManager
 import View
 import Image
 import LazyColumn
 import Mother
 import Row
 import Text
-import background
-import fillMaxSize
-import fillMaxWidth
-import height
-import onClick
-import paddingBottom
-import paddingLeft
-import paddingTop
-import size
-import width
-import java.awt.Color
+import common.Color
+import modifier.HorizontalArrangement
+import modifier.Modifier
+import modifier.VerticalArrangement
+import modifier.background
+import modifier.fillMaxSize
+import modifier.fillMaxWidth
+import modifier.height
+import modifier.onClick
+import modifier.paddingBottom
+import modifier.paddingTop
+import modifier.size
+import modifier.width
 import java.io.File
 import kotlin.io.path.Path
 
 class StorageApp(
     val mother: Mother,
-    override val gs: GraphicServiceI,
-    override val storage: StorageServiceI,
-    override val deviceManager: DeviceManagerI
+    override val gs: GraphicService,
+    override val storage: StorageService,
+    override val deviceManager: DeviceManager
 ) : Activity {
     private var currentPath = "/"
     private var stuckInInstallation = false
@@ -137,7 +139,7 @@ class StorageApp(
             //Place icon if the file is
             if (file.isFile || file.isDirectory)
                 Image(modifier = Modifier.size(60), File("${Mother.systemPath}/data/storage/${iconList[iconId]}"),this)
-            Text(modifier = Modifier.height(60).fillMaxWidth(), file.name,17, Color.black, parent = this)
+            Text(modifier = Modifier.height(60).fillMaxWidth(), file.name,17, Color.BLACK, parent = this)
         }
     }
 

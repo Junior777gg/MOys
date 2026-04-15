@@ -1,3 +1,5 @@
+package modifier
+
 sealed class HorizontalAlignment{
     class Left:HorizontalAlignment()
     class Right:HorizontalAlignment()

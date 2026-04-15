@@ -1,3 +1,7 @@
+import modifier.HorizontalArrangement
+import modifier.Modifier
+import modifier.VerticalAlignment
+
 class Row(
     override val modifier: Modifier,
     override val parent: MutableList<View>,

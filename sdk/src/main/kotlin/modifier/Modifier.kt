@@ -1,4 +1,6 @@
-import java.awt.Color
+package modifier
+
+import common.Color
 
 interface ModifierElements
 

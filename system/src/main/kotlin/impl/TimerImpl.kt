@@ -1,9 +1,10 @@
+package impl
+
+import service.Timer
 import common.Log
-import TimerI
 import java.lang.Exception
 import java.util.Calendar
-import kotlin.collections.removeAll
-import kotlin.collections.toList
+import kotlin.collections.iterator
 import kotlin.concurrent.thread
 import kotlin.math.max
 import kotlin.math.min
@@ -12,10 +13,10 @@ import kotlin.math.min
  * Simple timer executed on independent thread in given interval.
  * Outside of testing might be useful for periodic updates, animations and status-bars.
 */
-object Timer: TimerI {
+object TimerImpl: Timer {
     private var timerTread: Thread?=null
     private var isRunning=false
-    private var callbacks=mutableMapOf<String,TimerI.TimerCallback>()
+    private var callbacks=mutableMapOf<String,Timer.TimerCallback>()
     private val SYSTEM_TIMERS=listOf<String>("TOP_PANEL_CLOCK")
 
     /**Adds [callback] to the stack and calls it every [intervalS] seconds.*/
@@ -25,7 +26,7 @@ object Timer: TimerI {
             return
         }
         synchronized(callbacks) {
-            callbacks.put(id, TimerI.TimerCallback(max(intervalS * 1000L, 1000L), callback, System.currentTimeMillis()))
+            callbacks.put(id, Timer.TimerCallback(max(intervalS * 1000L, 1000L), callback, System.currentTimeMillis()))
         }
     }
     /**
@@ -56,7 +57,7 @@ object Timer: TimerI {
                     val snapshot = callbacks.toMap()
                     //Execute all callbacks if time is met.
                     for (v in snapshot) {
-                        val c=v.value
+                        val c = v.value
                         if (now - c.lastTriggered >= c.intervalMs) {
                             try {
                                 c.callback(now)
@@ -72,7 +73,8 @@ object Timer: TimerI {
                 val sleep = min(1000L - elapsed, 1000L - calendar.get(Calendar.MILLISECOND))
                 try {
                     Thread.sleep(sleep)
-                } catch (_: InterruptedException) { }
+                } catch (_: InterruptedException) {
+                }
                 lastTick = System.currentTimeMillis()
             }
         })

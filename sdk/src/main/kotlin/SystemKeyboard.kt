@@ -1,8 +1,18 @@
-import java.awt.Color
+import common.Color
+import modifier.Modifier
+import modifier.VerticalAlignment
+import modifier.background
+import modifier.fillMaxSize
+import modifier.height
+import modifier.onClick
+import modifier.padding
+import modifier.paddingBottom
+import modifier.width
+import service.GraphicService
 
-class Keyboard(
-    val gs: GraphicServiceI,
-    val contract: KeyboardInterface
+class SystemKeyboard(
+    val gs: GraphicService,
+    val contract: IKeyboard
 ) {
     private val russianAlphabet= listOf("Й", "Ц", "У", "К", "Е", "Н", "Г", "Ш", "Щ", "З", "Х","Ф", "Ы", "В", "А", "П", "Р",
         "О", "Л", "Д", "Ж", "Э","^", "Я", "Ч", "С", "М", "И", "Т", "Ь", "Б", "Ю", "<","123", "ABC", ",", " ", ".", "ОК",)
@@ -22,12 +32,12 @@ class Keyboard(
                 modifier = Modifier
                     .fillMaxSize()
                     .paddingBottom(60)
-                    .background(Color(0, 0, 0, 0)),
+                    .background(Color.TRANSPARENT),
                 verticalAlignment = VerticalAlignment.Bottom(),
                 parent = this
             ).layout {
                 Column(
-                    modifier = Modifier.height(260).width(640).background(Color(200, 200, 200, 255)),
+                    modifier = Modifier.height(260).width(640).background(Color(200, 200, 200)),
                     this@layout
                 ).layout {
 

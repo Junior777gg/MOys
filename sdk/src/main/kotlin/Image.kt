@@ -1,3 +1,4 @@
+import modifier.Modifier
 import java.io.File
 
 class Image(

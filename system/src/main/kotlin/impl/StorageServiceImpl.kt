@@ -1,7 +1,10 @@
+package impl
+
 import common.Log
+import service.StorageService
 import java.io.File
 
-class StorageService : StorageServiceI {
+class StorageServiceImpl : StorageService {
     private val MOUNTS_PATH = "/proc/mounts"
 
     private val virtualFileSystems =

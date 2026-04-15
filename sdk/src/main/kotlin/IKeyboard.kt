@@ -1,3 +1,3 @@
-interface KeyboardInterface {
+interface IKeyboard {
     fun onKeyPress(key: String): Boolean
  }

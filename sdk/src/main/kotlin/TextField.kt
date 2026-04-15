@@ -1,4 +1,6 @@
-import java.awt.Color
+import common.Color
+import modifier.Modifier
+import modifier.TextAlignment
 
 class TextField(
     override val modifier: Modifier,
@@ -7,7 +9,7 @@ class TextField(
     var textColor: Color = Color.BLACK,
     val textAlign: Int = TextAlignment.Center(),
     override val parent: MutableList<View>,
-) : View, KeyboardInterface {
+) : View, IKeyboard {
     override val children: MutableList<View> = mutableListOf()
 
     init {

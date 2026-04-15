@@ -1,4 +1,6 @@
-import java.awt.Color
+import common.Color
+import modifier.Modifier
+import modifier.TextAlignment
 
 class Text(
     override val modifier: Modifier,

@@ -6,10 +6,10 @@ class Stack<T> {
         list.add(value)
     }
 
-    fun popBackStack() {
+    fun popBack() {
         list.removeLast()
     }
 
     fun peek(): T = list.last()
-    fun stackSize(): Int = list.size
+    fun size(): Int = list.size
 }

@@ -1,3 +1,9 @@
+import modifier.FillMaxHeight
+import modifier.Height
+import modifier.HorizontalAlignment
+import modifier.Modifier
+import modifier.Size
+
 class LazyColumn(
     override val modifier: Modifier,
     override val parent: MutableList<View>,
