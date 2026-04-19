@@ -9,11 +9,11 @@ import Button
 import Text
 import TextField
 import Column
+import Image
 import MultilineText
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import View
 import common.Color
+import impl.DeviceManagerImpl
 import modifier.HorizontalAlignment
 import modifier.Modifier
 import modifier.TextAlignment
@@ -25,42 +25,51 @@ import modifier.fillMaxWidth
 import modifier.height
 import modifier.onClick
 import modifier.width
+import org.bytedeco.javacv.Java2DFrameConverter
+import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent
+import java.awt.BorderLayout
+import java.io.File
+import java.time.LocalDate
+import java.time.LocalTime
+import java.util.Date
+import javax.imageio.ImageIO
+import javax.swing.JFrame
+import javax.swing.WindowConstants.EXIT_ON_CLOSE
 
 class TestApp(
     override val gs: GraphicService,
     override val storage: StorageService,
     override val deviceManager: DeviceManager,
-) : Activity{
+) : Activity {
     override fun main() {
-        //Idk if this even works. It doesn't for me.
-        //val sound = AudioService
-        //sound.setSound("/mnt/c/Users/MSI/Desktop/discord.mp3")
         gs.setContent(true) {
-            Column(
-                modifier = Modifier.fillMaxSize().background(Color.CYAN),
-                parent = this, verticalArrangement = VerticalArrangement.SpaceEvenly(),
-                horizontalAlignment = HorizontalAlignment.Left()
-            ).layout {
-                TextField(modifier = Modifier.fillMaxWidth().height(100).background(Color.YELLOW).cornerRadius(40), textColor = Color.BLACK, parent = this)
-                Button(modifier = Modifier.height(100).fillMaxWidth().background(Color.GREEN).onClick {
-                    CoroutineScope(Dispatchers.IO).launch {}
-                },parent = this).layout {
-                    Text(modifier = Modifier.height(14).width(20), text = "Play sound", parent = this)
-                }
-                MultilineText(text = """
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Sed id dictum sem. Duis quis porttitor sapien.
-                    Phasellus tincidunt elit leo, vitae suscipit mi ullamcorper nec.
-                    Sed vulputate magna vel purus dapibus placerat.
-                    Curabitur ac blandit enim, id placerat enim.
-                    Duis eu consectetur ex, nec fermentum nunc.
-                    Pellentesque egestas finibus mi, efficitur ultricies nisl commodo quis.
-                    Sed fringilla dapibus enim nec volutpat.
-                    Curabitur gravida pharetra elit non malesuada.
-                    Duis iaculis dui mauris, in vestibulum enim semper sit amet.
-                """.trimIndent(), lineSpacing = 1, textSize = 14, modifier = Modifier.fillMaxSize(), textAlign = TextAlignment.Top(), textColor = Color.BLACK, parent = this)
+            buildUI()
+        }
+        gs.redraw()
+        val vlcPlayer = EmbeddedMediaPlayerComponent()
+        JFrame("📹 Камера").apply {
+            contentPane.add(vlcPlayer, BorderLayout.CENTER)
+            size = java.awt.Dimension(800, 600)
+            isVisible = true
+        }
+        vlcPlayer.mediaPlayer().media().play("http://192.168.0.15:8080/video")
+        vlcPlayer.stopped(vlcPlayer.mediaPlayer())
+        vlcPlayer.remove(vlcPlayer)
+    }
 
-            }
+    fun MutableList<View>.buildUI() {
+        Column(
+            modifier = Modifier.fillMaxSize().background(Color.CYAN),
+            parent = this, verticalArrangement = VerticalArrangement.SpaceEvenly(),
+            horizontalAlignment = HorizontalAlignment.Left()
+        ).layout {
+
+        }
+    }
+
+    fun updateUI() {
+        gs.setContent {
+            buildUI()
         }
         gs.redraw()
     }

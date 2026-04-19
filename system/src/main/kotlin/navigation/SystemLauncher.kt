@@ -8,6 +8,7 @@ import Text
 import View
 import app.BrowserApp
 import app.CalculatorApp
+import app.CameraApp
 import app.SettingsApp
 import app.StorageApp
 import app.TerminalApp
@@ -123,6 +124,16 @@ class SystemLauncher(
         labels.add({
             label(
                 click = {
+                    val act= CameraApp(graphicService, StorageServiceImpl(), deviceManager)
+                    graphicService.setActivity(act)
+                    act.main()
+                },
+                appName = "Камера"
+            )
+        })
+        labels.add({
+            label(
+                click = {
                     val act=TestApp(graphicService, StorageServiceImpl(), deviceManager)
                     graphicService.setActivity(act)
                     act.main()
@@ -146,7 +157,7 @@ class SystemLauncher(
     }
 
     fun MutableList<View>.screen() {
-        Image(modifier = Modifier.fillMaxSize(), File(Mother.systemPath+"/data/launcher/${config.background}"), this).layout {
+        Image(modifier = Modifier.fillMaxSize(), File(Mother.systemPath+"/data/launcher/${config.background}"), parent = this).layout {
             Column(modifier = Modifier.fillMaxSize().background(Color.TRANSPARENT),
                 verticalArrangement = VerticalArrangement.SpaceEvenly(),
                 horizontalAlignment = HorizontalAlignment.Center(), parent = this).layout {
@@ -180,7 +191,7 @@ class SystemLauncher(
             modifier = Modifier.padding(20).height(130).width(110)
                 .onClick { click() }.onHold { hold.invoke() } .background(Color.TRANSPARENT), this
         ).layout {
-            Image(modifier = Modifier.size(70), icon ?: File("${Mother.systemPath}/data/launcher/basic.png"), this)
+            Image(modifier = Modifier.size(70), icon ?: File("${Mother.systemPath}/data/launcher/basic.png"), parent = this)
             if(config.textDisplay) Text(modifier = Modifier.width(70).height(20), text = appName, textColor = textColor, textSize = 15, parent = this)
         }
     }

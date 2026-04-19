@@ -28,7 +28,10 @@ import modifier.VerticalAlignment
 import modifier.VerticalArrangement
 import modifier.Width
 import java.awt.Font
+import java.awt.image.BufferedImage
+import java.awt.image.DataBufferByte
 import java.io.File
+import java.nio.ByteBuffer
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -65,6 +68,38 @@ class Renderer(
         }
     }
 
+    fun getTextureFromBufferedImage(gl: GL2, bufferedImage: BufferedImage): Int {
+        val idBuf = IntArray(1)
+        gl.glGenTextures(1, idBuf, 0)
+        val texId = idBuf[0]
+
+        gl.glBindTexture(GL2.GL_TEXTURE_2D, texId)
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR)
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR)
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE)
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE)
+
+        // Конвертируем BufferedImage → ByteBuffer
+        gl.glPixelStorei(GL2.GL_UNPACK_ALIGNMENT, 1)
+
+        val raster = bufferedImage.raster
+        val dataBuffer = raster.dataBuffer as DataBufferByte
+        val pixelData = dataBuffer.data // BGR байты
+
+        val buffer = ByteBuffer.wrap(pixelData).apply { rewind() }
+        gl.glTexImage2D(
+            GL2.GL_TEXTURE_2D, 0, GL2.GL_RGB8,
+            bufferedImage.width, bufferedImage.height, 0,
+            GL2.GL_BGR, GL2.GL_UNSIGNED_BYTE, buffer
+        )
+        gl.glTexSubImage2D(
+            GL2.GL_TEXTURE_2D, 0, 0, 0,
+            bufferedImage.width, bufferedImage.height,
+            GL2.GL_BGR, GL2.GL_UNSIGNED_BYTE, buffer
+        )
+        return texId
+    }
+
     fun clearCache() {
         textRenderers.clear()
         textures.clear()
@@ -77,8 +112,8 @@ class Renderer(
     }
 
     private fun getTextAlign(textAlign: Int, x1: Double, y2: Double, offsetx: Double, offsety: Double): Vec2 {
-        var align=textAlign
-        if(!TextAlignment.isValidAlignment(align)) align= TextAlignment.Center()
+        var align = textAlign
+        if (!TextAlignment.isValidAlignment(align)) align = TextAlignment.Center()
         val x = when (TextAlignment.getHorizontal(align)) {
             TextAlignment.H_LEFT -> x1
             TextAlignment.H_CENTER -> x1 + offsetx / 2
@@ -93,7 +128,8 @@ class Renderer(
         }
         return Vec2(x, y)
     }
-    private fun toJavaAwtColor(color: Color): java.awt.Color = java.awt.Color(color.r,color.g,color.b,color.a)
+
+    private fun toJavaAwtColor(color: Color): java.awt.Color = java.awt.Color(color.r, color.g, color.b, color.a)
 
     /**
      * Recursively traverses the View-tree, calculates the coordinates (layout),
@@ -152,7 +188,7 @@ class Renderer(
             x2 = x1 + width.toDouble()
             y2 = avy2
         } else {
-            Log.warn("$view doesnt have anough size")
+            Log.warn("$view doesnt have enough size")
         }
         if (x2 > avx2) x2 = avx2
         if (y2 > avy2) y2 = avy2
@@ -323,20 +359,20 @@ class Renderer(
                 var offsetYGlobal = 0.0
                 val lineHeights = lines.map { textRenderer.getBounds(it).bounds.height }
                 var blockSize = 0
-                for(h in lineHeights) {
+                for (h in lineHeights) {
                     blockSize += h + view.lineSpacing
                 }
                 var align = view.textAlign
-                if(!TextAlignment.isValidAlignment(align)) align = TextAlignment.Center()
+                if (!TextAlignment.isValidAlignment(align)) align = TextAlignment.Center()
 
                 offsetYGlobal = when (TextAlignment.getVertical(view.textAlign)) {
-                    TextAlignment.V_TOP->0.0
-                    TextAlignment.V_CENTER ->blockSize/2.0
-                    TextAlignment.V_BOTTOM ->blockSize.toDouble()
-                    else->blockSize/2.0
+                    TextAlignment.V_TOP -> 0.0
+                    TextAlignment.V_CENTER -> blockSize / 2.0
+                    TextAlignment.V_BOTTOM -> blockSize.toDouble()
+                    else -> blockSize / 2.0
                 }
 
-                for(line in lines) {
+                for (line in lines) {
                     val offsetx = (x2 - x1) - textRenderer.getBounds(line).bounds.width
                     val alignHorizontal = when (TextAlignment.getHorizontal(align)) {
                         TextAlignment.H_LEFT -> x1
@@ -350,7 +386,6 @@ class Renderer(
                 }
                 textRenderer.endRendering()
             }
-
             is Image -> {
                 val texture = getTexture(view.file)
                 gl.glColor3f(1f, 1f, 1f)

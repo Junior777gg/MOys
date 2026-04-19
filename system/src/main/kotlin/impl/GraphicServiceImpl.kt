@@ -299,7 +299,6 @@ class GraphicServiceImpl : GLEventListener, GraphicService {
         viewTree.forEach {
             renderer.parse(gl, it)
         }
-        gl.glFlush()
     }
     //Called when canvas size was changed.
     override fun reshape(p0: GLAutoDrawable?, x: Int, y: Int, w: Int, h: Int) {

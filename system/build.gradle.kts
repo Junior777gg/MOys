@@ -37,6 +37,9 @@ dependencies {
     //OGG/Vorbis playback support.
     implementation("com.googlecode.soundlibs:vorbisspi:1.0.3.3")
 
+    implementation("org.bytedeco:javacv-platform:1.5.10")
+    implementation("uk.co.caprica:vlcj:4.7.0")
+
 }
 
 kotlin {
