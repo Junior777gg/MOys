@@ -6,6 +6,9 @@ import impl.StorageServiceImpl
 fun main() {
     Log.info("Initialization")
 
+    System.setProperty("skiko.renderApi", "SOFTWARE_FAST")
+    // System.setProperty("skiko.renderApi", "SOFTWARE")
+
     val deviceManagerInstance = DeviceManagerImpl()
     deviceManagerInstance.initialize()
 

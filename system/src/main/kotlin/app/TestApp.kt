@@ -10,7 +10,6 @@ import Text
 import TextField
 import Column
 import Image
-import MultilineText
 import View
 import common.Color
 import impl.DeviceManagerImpl
@@ -23,18 +22,7 @@ import modifier.cornerRadius
 import modifier.fillMaxSize
 import modifier.fillMaxWidth
 import modifier.height
-import modifier.onClick
-import modifier.width
-import org.bytedeco.javacv.Java2DFrameConverter
-import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent
-import java.awt.BorderLayout
-import java.io.File
-import java.time.LocalDate
-import java.time.LocalTime
-import java.util.Date
-import javax.imageio.ImageIO
-import javax.swing.JFrame
-import javax.swing.WindowConstants.EXIT_ON_CLOSE
+
 
 class TestApp(
     override val gs: GraphicService,
@@ -46,15 +34,6 @@ class TestApp(
             buildUI()
         }
         gs.redraw()
-        val vlcPlayer = EmbeddedMediaPlayerComponent()
-        JFrame("📹 Камера").apply {
-            contentPane.add(vlcPlayer, BorderLayout.CENTER)
-            size = java.awt.Dimension(800, 600)
-            isVisible = true
-        }
-        vlcPlayer.mediaPlayer().media().play("http://192.168.0.15:8080/video")
-        vlcPlayer.stopped(vlcPlayer.mediaPlayer())
-        vlcPlayer.remove(vlcPlayer)
     }
 
     fun MutableList<View>.buildUI() {
@@ -63,7 +42,7 @@ class TestApp(
             parent = this, verticalArrangement = VerticalArrangement.SpaceEvenly(),
             horizontalAlignment = HorizontalAlignment.Left()
         ).layout {
-
+            TextField(modifier = Modifier.fillMaxWidth().height(100).background(Color.ORANGE).cornerRadius(100), parent = this)
         }
     }
 

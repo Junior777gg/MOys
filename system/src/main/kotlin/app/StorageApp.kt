@@ -10,7 +10,6 @@ import View
 import Image
 import LazyColumn
 import Mother
-import MultilineText
 import Row
 import Text
 import common.Color
@@ -125,7 +124,7 @@ class StorageApp(
         fileViewOpen = true
         gs.setContent(true) {
             LazyColumn(modifier = Modifier.fillMaxSize().background(Color.BLACK), parent = this). layout {
-                MultilineText(modifier = Modifier.fillMaxSize(), textAlign = TextAlignment.TopLeft(), textSize = 16, text = text.readText(), parent = this)
+                Text(modifier = Modifier.fillMaxSize(), textAlign = TextAlignment.TopLeft(), textSize = 16, text = text.readText(), parent = this)
             }
         }
     }

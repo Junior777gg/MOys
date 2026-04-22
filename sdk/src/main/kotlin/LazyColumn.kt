@@ -10,6 +10,7 @@ class LazyColumn(
     val horizontalAlignment: HorizontalAlignment = HorizontalAlignment.Center(),
 ) : View {
     override val children = mutableListOf<View>()
+    override var nodes: Nodes? = null
     var offset = 0.0
     private var calculatedContentHeight: Double? = null
     init {

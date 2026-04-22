@@ -8,6 +8,8 @@ version = "0.0.1-Alpha"
 
 repositories {
     mavenCentral()
+    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    google() // на всякий случай
 }
 
 val javafxVersion = "21"
@@ -29,8 +31,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:2.3.6")
 
     //Window handling.
-    implementation("org.jogamp.gluegen:gluegen-rt-main:2.3.2")
-    implementation("org.jogamp.jogl:jogl-all-main:2.3.2")
+    implementation("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:0.7.97")
 
     //MP3 playback support.
     implementation("com.googlecode.soundlibs:mp3spi:1.9.5.4")

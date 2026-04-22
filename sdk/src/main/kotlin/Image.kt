@@ -7,6 +7,7 @@ class Image(
     override val parent: MutableList<View>
 ) : View {
     override val children: MutableList<View> = mutableListOf()
+    override var nodes: Nodes? = null
     init {
         parent.add(this)
     }

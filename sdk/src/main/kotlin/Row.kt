@@ -8,6 +8,7 @@ class Row(
     val verticalAlignment: VerticalAlignment = VerticalAlignment.Center(),
     val horizontalArrangement: HorizontalArrangement = HorizontalArrangement.Center()) : View {
     override val children: MutableList<View> = mutableListOf()
+    override var nodes: Nodes? = null
     init {
         parent.add(this)
     }

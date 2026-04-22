@@ -8,7 +8,7 @@ class Column(
     val horizontalAlignment: HorizontalAlignment = HorizontalAlignment.Center(),
     val verticalArrangement: VerticalArrangement = VerticalArrangement.Center()) : View {
     override val children: MutableList<View> = mutableListOf()
-
+    override var nodes: Nodes? = null
     init {
         parent.add(this)
     }

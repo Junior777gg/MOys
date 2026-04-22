@@ -1,7 +1,3 @@
-import com.jogamp.opengl.GL2
-import com.jogamp.opengl.util.awt.TextRenderer
-import com.jogamp.opengl.util.texture.Texture
-import com.jogamp.opengl.util.texture.TextureIO
 import common.Bounds
 import common.Log
 import common.Vec2
@@ -27,14 +23,24 @@ import modifier.TextAlignment
 import modifier.VerticalAlignment
 import modifier.VerticalArrangement
 import modifier.Width
-import java.awt.Font
-import java.awt.image.BufferedImage
-import java.awt.image.DataBufferByte
-import java.io.File
-import java.nio.ByteBuffer
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
+import org.jetbrains.skia.Canvas
+import org.jetbrains.skia.Font
+import org.jetbrains.skia.FontMgr
+import org.jetbrains.skia.FontStyle
+import org.jetbrains.skia.Paint
+import org.jetbrains.skia.PaintMode
+import org.jetbrains.skia.RRect
+import org.jetbrains.skia.Rect
+import org.jetbrains.skia.Typeface
+import org.jetbrains.skia.paragraph.Alignment
+import org.jetbrains.skia.paragraph.Direction
+import org.jetbrains.skia.paragraph.FontCollection
+import org.jetbrains.skia.paragraph.Paragraph
+import org.jetbrains.skia.paragraph.ParagraphBuilder
+import org.jetbrains.skia.paragraph.ParagraphStyle
+import org.jetbrains.skia.paragraph.TextStyle
+import java.util.IdentityHashMap
+import kotlin.div
 
 /**
  * Renderer. Traverses the View tree and renders elements using OpenGL.
@@ -47,70 +53,6 @@ class Renderer(
     var screenHeight: Int,
     var screenWidth: Int,
 ) {
-    private val textRenderers = mutableMapOf<Int, TextRenderer>()
-    private val textures = mutableMapOf<File, Texture>()
-    private val segments = 16
-    private val cos = FloatArray(segments + 1)
-    private val sin = FloatArray(segments + 1)
-
-    init {
-        for (i in 0..segments) {
-            val corner = (i.toFloat() / segments) * (PI / 2).toFloat()
-            cos[i] = cos(corner)
-            sin[i] = sin(corner)
-        }
-
-    }
-
-    fun getTexture(file: File): Texture {
-        return textures.getOrPut(file) {
-            TextureIO.newTexture(file, true)
-        }
-    }
-
-    fun getTextureFromBufferedImage(gl: GL2, bufferedImage: BufferedImage): Int {
-        val idBuf = IntArray(1)
-        gl.glGenTextures(1, idBuf, 0)
-        val texId = idBuf[0]
-
-        gl.glBindTexture(GL2.GL_TEXTURE_2D, texId)
-        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR)
-        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR)
-        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE)
-        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE)
-
-        // Конвертируем BufferedImage → ByteBuffer
-        gl.glPixelStorei(GL2.GL_UNPACK_ALIGNMENT, 1)
-
-        val raster = bufferedImage.raster
-        val dataBuffer = raster.dataBuffer as DataBufferByte
-        val pixelData = dataBuffer.data // BGR байты
-
-        val buffer = ByteBuffer.wrap(pixelData).apply { rewind() }
-        gl.glTexImage2D(
-            GL2.GL_TEXTURE_2D, 0, GL2.GL_RGB8,
-            bufferedImage.width, bufferedImage.height, 0,
-            GL2.GL_BGR, GL2.GL_UNSIGNED_BYTE, buffer
-        )
-        gl.glTexSubImage2D(
-            GL2.GL_TEXTURE_2D, 0, 0, 0,
-            bufferedImage.width, bufferedImage.height,
-            GL2.GL_BGR, GL2.GL_UNSIGNED_BYTE, buffer
-        )
-        return texId
-    }
-
-    fun clearCache() {
-        textRenderers.clear()
-        textures.clear()
-    }
-
-    fun getTextRenderer(size: Int): TextRenderer {
-        return textRenderers.getOrPut(size) {
-            TextRenderer(Font("SansSerif", Font.PLAIN, size))
-        }
-    }
-
     private fun getTextAlign(textAlign: Int, x1: Double, y2: Double, offsetx: Double, offsety: Double): Vec2 {
         var align = textAlign
         if (!TextAlignment.isValidAlignment(align)) align = TextAlignment.Center()
@@ -140,12 +82,12 @@ class Renderer(
      *  centeringHeight — the vertical alignment of children (TOP, CENTER, BOTTOM)
      */
     fun parse(
-        gl: GL2,
+        canvas: Canvas,
         view: View,
-        avx1: Double = 0.0,
-        avy1: Double = 0.0,
-        avx2: Double = screenWidth.toDouble(),
-        avy2: Double = screenHeight.toDouble(),
+        avx1: Float = 0.0f,
+        avy1: Float = 0.0f,
+        avx2: Float = screenWidth.toFloat(),
+        avy2: Float = screenHeight.toFloat(),
     ) {
         val modifiers = view.modifier
         val width = modifiers.get<Width>()?.width
@@ -155,7 +97,7 @@ class Renderer(
         val fillMaxSize = modifiers.get<FillMaxSize>()
         val fillMaxWidth = modifiers.get<FillMaxWidth>()
         val fillMaxHeight = modifiers.get<FillMaxHeight>()
-        val color = modifiers.get<Background>()?.color ?: Color.WHITE
+        val backgroundColor = modifiers.get<Background>()?.color ?: Color.WHITE
         val paddingTop = modifiers.get<PaddingTop>()?.top ?: 0
         val paddingLeft = modifiers.get<PaddingLeft>()?.left ?: 0
         val paddingRight = modifiers.get<PaddingRight>()?.right ?: 0
@@ -170,22 +112,22 @@ class Renderer(
 
         var x1 = avx1
         var y1 = avy1
-        var x2 = 0.0
-        var y2 = 0.0
+        var x2 = 0.0f
+        var y2 = 0.0f
         if (width != null && height != null) {
-            x2 = x1 + width.toDouble()
-            y2 = y1 + height.toDouble()
+            x2 = x1 + width.toFloat()
+            y2 = y1 + height.toFloat()
         } else if (size != null) {
-            x2 = x1 + size.toDouble()
-            y2 = y1 + size.toDouble()
+            x2 = x1 + size.toFloat()
+            y2 = y1 + size.toFloat()
         } else if (fillMaxSize != null) {
             x2 = avx2
             y2 = avy2
         } else if (fillMaxWidth != null && height != null) {
             x2 = avx2
-            y2 = y1 + height.toDouble()
+            y2 = y1 + height.toFloat()
         } else if (fillMaxHeight != null && width != null) {
-            x2 = x1 + width.toDouble()
+            x2 = x1 + width.toFloat()
             y2 = avy2
         } else {
             Log.warn("$view doesnt have enough size")
@@ -193,10 +135,10 @@ class Renderer(
         if (x2 > avx2) x2 = avx2
         if (y2 > avy2) y2 = avy2
 
-        x1 = x1 + paddingLeft.toDouble() + padding.toDouble()
-        y1 = y1 + paddingTop.toDouble() + padding.toDouble()
-        x2 = x2 - paddingRight.toDouble() - padding.toDouble()
-        y2 = y2 - paddingBottom.toDouble() - padding.toDouble()
+        x1 = x1 + paddingLeft.toFloat() + padding.toFloat()
+        y1 = y1 + paddingTop.toFloat() + padding.toFloat()
+        x2 = x2 - paddingRight.toFloat() - padding.toFloat()
+        y2 = y2 - paddingBottom.toFloat() - padding.toFloat()
         if (view is TextField) {
             bounds.add(Bounds(x1, y1, x2, y2, {
                 onClick?.invoke()
@@ -209,157 +151,133 @@ class Renderer(
         }
         when (view) {
             is Button, is Box, is Column, is Row, is LazyColumn -> {
-                if (cornerRadius == 0) {
-                    gl.glColor4f(color.floatRed(), color.floatGreen(), color.floatBlue(), color.floatAlpha())
-                    gl.glBegin(GL2.GL_QUADS)
-                    gl.glVertex2f(x1.toFloat(), y1.toFloat())
-                    gl.glVertex2f(x2.toFloat(), y1.toFloat())
-                    gl.glVertex2f(x2.toFloat(), y2.toFloat())
-                    gl.glVertex2f(x1.toFloat(), y2.toFloat())
-                    gl.glEnd()
-                } else {
-                    gl.glColor4f(color.floatRed(), color.floatGreen(), color.floatBlue(), color.floatAlpha())
-                    val height = y2 - y1
-                    val width = x2 - x1
-                    val r = cornerRadius
-                    val right = x1 + width
-                    val bottom = y1 + height
-                    val cx_tl = x1 + r      // center x, top-left
-                    val cy_tl = y1 + r      // center y, top-left
-                    val cx_tr = right - r  // center x, top-right
-                    val cy_tr = y1 + r
-                    val cx_bl = x1 + r
-                    val cy_bl = bottom - r
-                    val cx_br = right - r
-                    val cy_br = bottom - r
-
-                    gl.glBegin(GL2.GL_POLYGON)
-
-                    for (i in 0..segments) {
-                        gl.glVertex2f((cx_tl - r * sin[i]).toFloat(), (cy_tl - r * cos[i]).toFloat())
+                canvas.drawRRect(
+                    RRect.makeXYWH(x1, y1, x2 - x1, y2 - y1, cornerRadius.toFloat()),
+                    paint = Paint().apply {
+                        color = org.jetbrains.skia.Color.makeARGB(
+                            backgroundColor.a,
+                            backgroundColor.r,
+                            backgroundColor.g,
+                            backgroundColor.b
+                        )
+                        mode = PaintMode.FILL
+                        isAntiAlias = true
                     }
-
-                    for (i in 0..segments) {
-                        gl.glVertex2f((cx_bl - r * cos[i]).toFloat(), (cy_bl + r * sin[i]).toFloat())
-                    }
-
-                    for (i in 0..segments) {
-                        gl.glVertex2f((cx_br + r * sin[i]).toFloat(), (cy_br + r * cos[i]).toFloat())
-                    }
-
-                    for (i in 0..segments) {
-                        gl.glVertex2f((cx_tr + r * cos[i]).toFloat(), (cy_tr - r * sin[i]).toFloat())
-                    }
-                    gl.glEnd()
-                }
+                )
             }
 
             is TextField -> {
-                if (cornerRadius == 0) {
-                    gl.glColor4f(0f, 0f, 0f, 1f)
-                    gl.glBegin(GL2.GL_QUADS)
-                    gl.glVertex2f(x1.toFloat(), y1.toFloat())
-                    gl.glVertex2f(x2.toFloat(), y1.toFloat())
-                    gl.glVertex2f(x2.toFloat(), y2.toFloat())
-                    gl.glVertex2f(x1.toFloat(), y2.toFloat())
-                    gl.glEnd()
-                    gl.glColor4f(color.floatRed(), color.floatGreen(), color.floatBlue(), color.floatAlpha())
-                    gl.glBegin(GL2.GL_QUADS)
-                    gl.glVertex2f((x1 + 2).toFloat(), (y1 + 2).toFloat())
-                    gl.glVertex2f((x2 - 2).toFloat(), (y1 + 2).toFloat())
-                    gl.glVertex2f((x2 - 2).toFloat(), (y2 - 2).toFloat())
-                    gl.glVertex2f((x1 + 2).toFloat(), (y2 - 2).toFloat())
-                    gl.glEnd()
-                } else {
-                    gl.glColor4f(color.floatRed(), color.floatGreen(), color.floatBlue(), color.floatAlpha())
-                    val height = y2 - y1
-                    val width = x2 - x1
-                    val r = cornerRadius
-                    val right = x1 + width
-                    val bottom = y1 + height
-                    val cx_tl = x1 + r      // center x, top-left
-                    val cy_tl = y1 + r      // center y, top-left
-                    val cx_tr = right - r  // center x, top-right
-                    val cy_tr = y1 + r
-                    val cx_bl = x1 + r
-                    val cy_bl = bottom - r
-                    val cx_br = right - r
-                    val cy_br = bottom - r
-
-                    gl.glColor4f(0f, 0f, 0f, 1f)
-                    gl.glBegin(GL2.GL_POLYGON)
-
-                    for (i in 0..segments) {
-                        gl.glVertex2f((cx_tl - r * sin[i]).toFloat(), (cy_tl - r * cos[i]).toFloat())
+                canvas.drawRRect(
+                    RRect.makeXYWH(x1, y1, x2-x1, y2-y1, cornerRadius.toFloat()),
+                    paint = Paint().apply {
+                        color = org.jetbrains.skia.Color.makeRGB(0, 0, 0)
+                        mode = PaintMode.FILL
+                        isAntiAlias = true
                     }
-
-                    for (i in 0..segments) {
-                        gl.glVertex2f((cx_bl - r * cos[i]).toFloat(), (cy_bl + r * sin[i]).toFloat())
+                )
+                canvas.drawRRect(
+                    RRect.makeXYWH(x1+2, y1+2, x2-x1-4, y2-y1-4, cornerRadius.toFloat()),
+                    paint = Paint().apply {
+                        color = org.jetbrains.skia.Color.makeARGB(
+                            backgroundColor.a,
+                            backgroundColor.r,
+                            backgroundColor.g,
+                            backgroundColor.b
+                        )
+                        mode = PaintMode.FILL
+                        isAntiAlias = true
                     }
-
-                    for (i in 0..segments) {
-                        gl.glVertex2f((cx_br + r * sin[i]).toFloat(), (cy_br + r * cos[i]).toFloat())
-                    }
-
-                    for (i in 0..segments) {
-                        gl.glVertex2f((cx_tr + r * cos[i]).toFloat(), (cy_tr - r * sin[i]).toFloat())
-                    }
-                    gl.glEnd()
-
-                    gl.glColor4f(color.floatRed(), color.floatGreen(), color.floatBlue(), color.floatAlpha())
-                    gl.glBegin(GL2.GL_POLYGON)
-                    for (i in 0..segments) {
-                        gl.glVertex2f((cx_tl - r * sin[i]).toFloat() + 2f, (cy_tl - r * cos[i]).toFloat() + 2f)
-                    }
-
-                    for (i in 0..segments) {
-                        gl.glVertex2f((cx_bl - r * cos[i]).toFloat() + 2f, (cy_bl + r * sin[i]).toFloat() - 2f)
-                    }
-
-                    for (i in 0..segments) {
-                        gl.glVertex2f((cx_br + r * sin[i]).toFloat() - 2f, (cy_br + r * cos[i]).toFloat() - 2f)
-                    }
-
-                    for (i in 0..segments) {
-                        gl.glVertex2f((cx_tr + r * cos[i]).toFloat() - 2f, (cy_tr - r * sin[i]).toFloat() + 2f)
-                    }
-                    gl.glEnd()
+                )
+                val textStyle = TextStyle().apply {
+                    color = org.jetbrains.skia.Color.makeRGB(
+                        view.textColor.r,
+                        view.textColor.g,
+                        view.textColor.b
+                    )
+                    fontSize = view.textSize.toFloat()
+                    fontFamilies = arrayOf("Arial")
                 }
-                val textRenderer = getTextRenderer(view.textSize)
-                textRenderer.beginRendering(screenWidth, screenHeight)
-                textRenderer.setColor(toJavaAwtColor(view.textColor))
-                val offsetx = (x2 - x1) - textRenderer.getBounds(view.text).bounds.width
-                val offsety = (y2 - y1) - textRenderer.getBounds(view.text).bounds.height
-                val alignVec = getTextAlign(view.textAlign, x1, y2, offsetx, offsety)
-                textRenderer.draw(view.text, alignVec.x.toInt(), screenHeight - alignVec.y.toInt())
-                textRenderer.endRendering()
+                val paragraphStyle = ParagraphStyle().apply {
+                    direction = Direction.LTR
+                    alignment = when {
+                        TextAlignment.getHorizontal(view.textAlign) == TextAlignment.H_LEFT -> Alignment.LEFT
+                        TextAlignment.getHorizontal(view.textAlign) == TextAlignment.H_CENTER -> Alignment.CENTER
+                        TextAlignment.getHorizontal(view.textAlign) == TextAlignment.H_RIGHT -> Alignment.RIGHT
+                        else -> Alignment.LEFT
+                    }
+                }
+                val paragraphBuilder = ParagraphBuilder(paragraphStyle, FontCollection().apply {
+                    setDefaultFontManager(FontMgr.default)
+                })
+                paragraphBuilder.pushStyle(textStyle)
+                paragraphBuilder.addText(view.text)
+
+                val paragraph = paragraphBuilder.build()
+                paragraph.layout(x2-x1)
+
+                val paragraphHeight = paragraph.height
+                val offsetY = when (TextAlignment.getVertical(view.textAlign)) {
+                    TextAlignment.V_TOP -> y1
+                    TextAlignment.V_CENTER -> y1 + (y2-y1 - paragraphHeight) / 2
+                    TextAlignment.V_BOTTOM -> y2 - paragraphHeight
+                    else -> y1 + (y2-y1 - paragraphHeight) / 2
+                }
+
+                paragraph.paint(canvas, x1, offsetY)
             }
 
             is Text -> {
-                val textRenderer = getTextRenderer(view.textSize)
-                textRenderer.beginRendering(screenWidth, screenHeight)
-                textRenderer.setColor(toJavaAwtColor(view.textColor))
-                val offsetx = (x2 - x1) - textRenderer.getBounds(view.text).bounds.width
-                val offsety = (y2 - y1) - textRenderer.getBounds(view.text).bounds.height
-                val alignVec = getTextAlign(view.textAlign, x1, y2, offsetx, offsety)
-                textRenderer.draw(view.text, alignVec.x.toInt(), screenHeight - alignVec.y.toInt())
-                textRenderer.endRendering()
+                val textStyle = TextStyle().apply {
+                    color = org.jetbrains.skia.Color.makeRGB(
+                        view.textColor.r,
+                        view.textColor.g,
+                        view.textColor.b
+                    )
+                    fontSize = view.textSize.toFloat()
+                    fontFamilies = arrayOf("Arial")
+                }
+                val paragraphStyle = ParagraphStyle().apply {
+                    direction = Direction.LTR
+                    alignment = when {
+                        TextAlignment.getHorizontal(view.textAlign) == TextAlignment.H_LEFT -> Alignment.LEFT
+                        TextAlignment.getHorizontal(view.textAlign) == TextAlignment.H_CENTER -> Alignment.CENTER
+                        TextAlignment.getHorizontal(view.textAlign) == TextAlignment.H_RIGHT -> Alignment.RIGHT
+                        else -> Alignment.LEFT
+                    }
+                }
+                val paragraphBuilder = ParagraphBuilder(paragraphStyle, FontCollection().apply {
+                    setDefaultFontManager(FontMgr.default)
+                })
+                paragraphBuilder.pushStyle(textStyle)
+                paragraphBuilder.addText(view.text)
+
+                val paragraph = paragraphBuilder.build()
+                paragraph.layout(x2-x1)
+                val paragraphHeight = paragraph.height
+                val offsetY = when (TextAlignment.getVertical(view.textAlign)) {
+                    TextAlignment.V_TOP -> y1
+                    TextAlignment.V_CENTER -> y1 + (y2-y1 - paragraphHeight) / 2
+                    TextAlignment.V_BOTTOM -> y2 - paragraphHeight
+                    else -> y1 + (y2-y1 - paragraphHeight) / 2
+                }
+
+                paragraph.paint(canvas, x1, offsetY)
             }
 
-            is MultilineText -> {
-                val textRenderer = getTextRenderer(view.textSize)
-                textRenderer.beginRendering(screenWidth, screenHeight)
-                textRenderer.setColor(toJavaAwtColor(view.textColor))
-                //Check if there is any text contents.
-                val lines = view.lines
-                if (lines.isEmpty()) {
-                    textRenderer.endRendering()
-                    return
-                }
-                var offsetYGlobal = 0.0
-                val lineHeights = lines.map { textRenderer.getBounds(it).bounds.height }
-                var blockSize = 0
-                for (h in lineHeights) {
+            /*is MultilineText -> {
+                    val textRenderer = getTextRenderer(view.textSize)
+                    textRenderer.beginRendering(screenWidth, screenHeight)
+                    textRenderer.setColor(toJavaAwtColor(view.textColor))
+                    //Check if there is any text contents.
+                    val lines = view.lines
+                    if (lines.isEmpty()) {
+                        textRenderer.endRendering()
+                        return
+                    }
+                    var offsetYGlobal = 0.0
+                    val lineHeights = lines.map { textRenderer.getBounds(it).bounds.height }
+                    var blockSize = 0
+                    for (h in lineHeights) {
                     blockSize += h + view.lineSpacing
                 }
                 var align = view.textAlign
@@ -385,23 +303,12 @@ class Renderer(
                     textRenderer.draw(line, alignHorizontal.toInt(), offsety.toInt())
                 }
                 textRenderer.endRendering()
-            }
+            }*/
             is Image -> {
-                val texture = getTexture(view.file)
-                gl.glColor3f(1f, 1f, 1f)
-                gl.glEnable(GL2.GL_TEXTURE_2D)
-                texture.bind(gl)
-                gl.glBegin(GL2.GL_QUADS)
-                gl.glTexCoord2f(0f, 1f)
-                gl.glVertex2f(x1.toFloat(), y1.toFloat())
-                gl.glTexCoord2f(1f, 1f)
-                gl.glVertex2f(x2.toFloat(), y1.toFloat())
-                gl.glTexCoord2f(1f, 0f)
-                gl.glVertex2f(x2.toFloat(), y2.toFloat())
-                gl.glTexCoord2f(0f, 0f)
-                gl.glVertex2f(x1.toFloat(), y2.toFloat())
-                gl.glEnd()
-                gl.glDisable(GL2.GL_TEXTURE_2D)
+                canvas.drawImageRect(
+                    image = org.jetbrains.skia.Image.makeFromEncoded(view.file.readBytes()),
+                    dst = Rect.makeXYWH(x1, y1, x2 - x1, y2 - y1),
+                )
             }
         }
 
@@ -410,14 +317,14 @@ class Renderer(
         } else {
             when (view) {
                 is LazyColumn -> {
-                    gl.glEnable(GL2.GL_SCISSOR_TEST)
-                    gl.glScissor(x1.toInt(), screenHeight - y2.toInt(), (x2 - x1).toInt(), (y2 - y1).toInt())
-                    var currenty1 = y1 + view.offset
+                    //gl.glEnable(GL2.GL_SCISSOR_TEST)
+                    //gl.glScissor(x1.toInt(), screenHeight - y2.toInt(), (x2 - x1).toInt(), (y2 - y1).toInt())
+                    var currenty1 = y1 + view.offset.toFloat()
 
                     view.children.forEach {
-                        var currentx1 = 0.0
-                        var currentWidth = 0.0
-                        var currentHeight = 0.0
+                        var currentx1 = 0.0f
+                        var currentWidth = 0.0f
+                        var currentHeight = 0.0f
                         val heightChild = it.modifier.get<Height>()?.height
                         val widthChild = it.modifier.get<Width>()?.width
                         val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
@@ -425,10 +332,10 @@ class Renderer(
                         val sizeChild = it.modifier.get<Size>()?.size
                         val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
                         if (widthChild != null) {
-                            currentWidth = widthChild.toDouble()
+                            currentWidth = widthChild.toFloat()
                         }
                         if (heightChild != null) {
-                            currentHeight = heightChild.toDouble()
+                            currentHeight = heightChild.toFloat()
                         }
                         if (fillMaxWidthChild != null) {
                             currentWidth = x2 - x1
@@ -437,8 +344,8 @@ class Renderer(
                             currentHeight = y2 - y1
                         }
                         if (sizeChild != null) {
-                            currentWidth = sizeChild.toDouble()
-                            currentHeight = sizeChild.toDouble()
+                            currentWidth = sizeChild.toFloat()
+                            currentHeight = sizeChild.toFloat()
                         }
                         if (fillMaxSizeChild != null) {
                             currentHeight = x2 - x1
@@ -462,20 +369,20 @@ class Renderer(
                             null
                         } else {
                             parse(
-                                gl, it, currentx1, currenty1,
+                                canvas, it, currentx1, currenty1,
                                 x2, y2
                             )
                         }
                         currenty1 += currentHeight
                     }
-                    gl.glDisable(GL2.GL_SCISSOR_TEST)
+                    //gl.glDisable(GL2.GL_SCISSOR_TEST)
                 }
 
                 is Column -> {
-                    var currenty1 = 0.0
-                    var gap = 0.0
-                    var childrenHeight = 0.0
-                    var heightSmallChildren = 0.0
+                    var currenty1 = 0.0f
+                    var gap = 0.0f
+                    var childrenHeight = 0.0f
+                    var heightSmallChildren = 0.0f
                     var fillMaxHeightChildCount = 0
                     view.children.forEach {
                         val heightChild = it.modifier.get<Height>()?.height
@@ -483,11 +390,11 @@ class Renderer(
                         val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
                         val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
                         if (heightChild != null) {
-                            childrenHeight += heightChild.toDouble()
-                            heightSmallChildren += heightChild.toDouble()
+                            childrenHeight += heightChild.toFloat()
+                            heightSmallChildren += heightChild.toFloat()
                         } else if (sizeChild != null) {
-                            childrenHeight += sizeChild.toDouble()
-                            heightSmallChildren += sizeChild.toDouble()
+                            childrenHeight += sizeChild.toFloat()
+                            heightSmallChildren += sizeChild.toFloat()
                         } else if (fillMaxHeightChild != null) {
                             childrenHeight = y2 - y1
                             fillMaxHeightChildCount++
@@ -510,15 +417,15 @@ class Renderer(
                         }
 
                         is VerticalArrangement.SpaceEvenly -> {
-                            gap = ((y2 - y1) - childrenHeight) / (view.children.size.toDouble() + 1.0)
+                            gap = ((y2 - y1) - childrenHeight) / (view.children.size.toFloat() + 1.0f)
                             currenty1 = y1 + gap
                         }
 
                     }
                     view.children.forEach {
-                        var currentx1 = 0.0
-                        var currentWidth = 0.0
-                        var currentHeight = 0.0
+                        var currentx1 = 0.0f
+                        var currentWidth = 0.0f
+                        var currentHeight = 0.0f
                         val heightChild = it.modifier.get<Height>()?.height
                         val widthChild = it.modifier.get<Width>()?.width
                         val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
@@ -526,14 +433,14 @@ class Renderer(
                         val sizeChild = it.modifier.get<Size>()?.size
                         val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
                         if (widthChild != null) {
-                            currentWidth = widthChild.toDouble()
+                            currentWidth = widthChild.toFloat()
                         }
                         if (heightChild != null) {
-                            currentHeight = heightChild.toDouble()
+                            currentHeight = heightChild.toFloat()
                         }
                         if (sizeChild != null) {
-                            currentWidth = sizeChild.toDouble()
-                            currentHeight = sizeChild.toDouble()
+                            currentWidth = sizeChild.toFloat()
+                            currentHeight = sizeChild.toFloat()
                         }
                         if (fillMaxHeightChild != null) {
                             currentHeight = (childrenHeight - heightSmallChildren) / fillMaxHeightChildCount
@@ -559,7 +466,7 @@ class Renderer(
                             }
                         }
                         parse(
-                            gl, it, currentx1, currenty1,
+                            canvas, it, currentx1, currenty1,
                             x2, y2
                         )
                         currenty1 += currentHeight + gap
@@ -568,10 +475,10 @@ class Renderer(
 
                 //Row
                 is Row -> {
-                    var gap = 0.0
-                    var currentx1 = 0.0
-                    var childrenWidth = 0.0
-                    var widthSmallChildren = 0.0
+                    var gap = 0.0f
+                    var currentx1 = 0.0f
+                    var childrenWidth = 0.0f
+                    var widthSmallChildren = 0.0f
                     var fillMaxWidthChildCount = 0
                     view.children.forEach {
                         val widthChild = it.modifier.get<Width>()?.width
@@ -579,14 +486,14 @@ class Renderer(
                         val sizeChild = it.modifier.get<Size>()?.size
                         val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
                         if (widthChild != null) {
-                            childrenWidth += widthChild.toDouble()
-                            widthSmallChildren += widthChild.toDouble()
+                            childrenWidth += widthChild
+                            widthSmallChildren += widthChild
                         } else if (fillMaxWidthChild != null) {
                             childrenWidth = x2 - x1
                             fillMaxWidthChildCount++
                         } else if (sizeChild != null) {
-                            childrenWidth += sizeChild.toDouble()
-                            widthSmallChildren += sizeChild.toDouble()
+                            childrenWidth += sizeChild
+                            widthSmallChildren += sizeChild
                         } else if (fillMaxSizeChild != null) {
                             childrenWidth = x2 - x1
                             fillMaxWidthChildCount++
@@ -606,15 +513,15 @@ class Renderer(
                         }
 
                         is HorizontalArrangement.SpaceEvenly -> {
-                            gap = ((x2 - x1) - childrenWidth) / (view.children.size.toDouble() + 1.0)
+                            gap = ((x2 - x1) - childrenWidth) / (view.children.size.toFloat() + 1.0f)
                             currentx1 = x1 + gap
                         }
 
                     }
                     view.children.forEach {
-                        var currenty1 = 0.0
-                        var currentWidth = 0.0
-                        var currentHeight = 0.0
+                        var currenty1 = 0.0f
+                        var currentWidth = 0.0f
+                        var currentHeight = 0.0f
                         val heightChild = it.modifier.get<Height>()?.height
                         val widthChild = it.modifier.get<Width>()?.width
                         val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
@@ -622,14 +529,14 @@ class Renderer(
                         val sizeChild = it.modifier.get<Size>()?.size
                         val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
                         if (widthChild != null) {
-                            currentWidth = widthChild.toDouble()
+                            currentWidth = widthChild.toFloat()
                         }
                         if (heightChild != null) {
-                            currentHeight = heightChild.toDouble()
+                            currentHeight = heightChild.toFloat()
                         }
                         if (sizeChild != null) {
-                            currentWidth = sizeChild.toDouble()
-                            currentHeight = sizeChild.toDouble()
+                            currentWidth = sizeChild.toFloat()
+                            currentHeight = sizeChild.toFloat()
                         }
                         if (fillMaxWidthChild != null) {
                             currentWidth = (childrenWidth - widthSmallChildren) / fillMaxWidthChildCount
@@ -655,7 +562,7 @@ class Renderer(
                             }
                         }
                         parse(
-                            gl, it, currentx1, currenty1,
+                            canvas, it, currentx1, currenty1,
                             x2, y2
                         )
                         currentx1 += currentWidth + gap
@@ -665,7 +572,7 @@ class Renderer(
                 else -> {
                     view.children.forEach {
                         parse(
-                            gl, it, x1, y1,
+                            canvas, it, x1, y1,
                             x2, y2
                         )
 
