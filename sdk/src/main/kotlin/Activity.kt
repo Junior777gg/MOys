@@ -20,4 +20,5 @@ interface Activity {
      * Isn't called on return home.
     */
     fun onNavigationBack(): Boolean = true
+    fun onDestroy(): Unit = Unit
 }

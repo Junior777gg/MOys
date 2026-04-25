@@ -94,6 +94,8 @@ class GraphicServiceImpl : GraphicService {
     private val renderer = Renderer(this, bounds, lazyColumn, getScreenHeight(), getScreenWidth())
     private val navigationLambda = SystemNavigation(this).setUpNavigation()
 
+    lateinit var globcanvas: Canvas
+
     fun initialize(systemPath: String) {
         Log.dbg("Getting config")
         val cfg = File("${systemPath}/register/video.json")
@@ -113,6 +115,7 @@ class GraphicServiceImpl : GraphicService {
                 canvas.clear(org.jetbrains.skia.Color.makeRGB(0, 0, 0))
                 renderer.screenWidth = width
                 renderer.screenHeight = height
+                globcanvas = canvas
 
                 if (viewTree.isEmpty()) return
                 lazyColumn.clear()
@@ -197,6 +200,7 @@ class GraphicServiceImpl : GraphicService {
     //Removes all stack elements aside from launcher.
     fun clearStack() {
         if (stack.size() <= 1) return
+        focusedActivity?.onDestroy()
         focusedActivity = null
         while (stack.size() > 1) stack.popBack()
         updateStack()
@@ -265,7 +269,10 @@ class GraphicServiceImpl : GraphicService {
     //Return to the previous screen in the navigation stack
     override fun popBackStack() {
         if (stack.size() <= 1) return
-        if (focusedActivity?.onNavigationBack() == true) stack.popBack()
+        if (focusedActivity?.onNavigationBack() == true){
+            focusedActivity?.onDestroy()
+            stack.popBack()
+        }
         updateStack()
         if (stack.size() <= 1) focusedActivity = null
     }

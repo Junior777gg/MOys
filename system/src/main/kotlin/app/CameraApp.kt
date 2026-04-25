@@ -33,8 +33,7 @@ class CameraApp(
 ) : Activity {
     override fun main() {
         DeviceManagerImpl.Camera.cameraPath = "http://192.168.0.15:8080/video"
-        val player = VideoPlayerImpl
-        player.createVideoPlayer(DeviceManagerImpl.Camera.cameraPath)
+        DeviceManagerImpl.Camera.startCamera()
         gs.setContent(true){
             buildGeneralUI()
             buildPhotoUI()
@@ -80,12 +79,12 @@ class CameraApp(
     fun MutableList<View>.buildVideoUI(){
         Column(modifier = Modifier.fillMaxSize().background(Color.TRANSPARENT), verticalArrangement = VerticalArrangement.Center(), parent = this).layout{
             Button(modifier = Modifier.size(70).background(Color.BLUE).onClick {
-                takeVideo()
+                //takeVideo()
             }, this).layout {
                 Text(modifier = Modifier.fillMaxSize(), text = "Видео!", parent = this)
             }
             Button(modifier = Modifier.size(70).background(Color.BLUE).onClick {
-                stopVideo()
+                //stopVideo()
             }, this).layout {
                 Text(modifier = Modifier.fillMaxSize(), text = "Стоп!", parent = this)
             }
@@ -100,7 +99,7 @@ class CameraApp(
         ImageIO.write(image, "png", file)
     }
 
-    fun takeVideo(){
+    /*fun takeVideo(){
         val player = VideoPlayerImpl
         player.createVideoPlayer(DeviceManagerImpl.Camera.cameraPath)
     }
@@ -108,5 +107,5 @@ class CameraApp(
     fun stopVideo(){
         val player = VideoPlayerImpl
         player.stopPlayer()
-    }
+    }*/
 }

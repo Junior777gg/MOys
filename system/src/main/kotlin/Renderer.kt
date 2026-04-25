@@ -23,24 +23,21 @@ import modifier.TextAlignment
 import modifier.VerticalAlignment
 import modifier.VerticalArrangement
 import modifier.Width
+import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Canvas
-import org.jetbrains.skia.Font
 import org.jetbrains.skia.FontMgr
-import org.jetbrains.skia.FontStyle
 import org.jetbrains.skia.Paint
 import org.jetbrains.skia.PaintMode
 import org.jetbrains.skia.RRect
 import org.jetbrains.skia.Rect
-import org.jetbrains.skia.Typeface
 import org.jetbrains.skia.paragraph.Alignment
 import org.jetbrains.skia.paragraph.Direction
 import org.jetbrains.skia.paragraph.FontCollection
-import org.jetbrains.skia.paragraph.Paragraph
 import org.jetbrains.skia.paragraph.ParagraphBuilder
 import org.jetbrains.skia.paragraph.ParagraphStyle
 import org.jetbrains.skia.paragraph.TextStyle
-import java.util.IdentityHashMap
-import kotlin.div
+import org.jetbrains.skiko.toBitmap
+
 
 /**
  * Renderer. Traverses the View tree and renders elements using OpenGL.
@@ -168,7 +165,7 @@ class Renderer(
 
             is TextField -> {
                 canvas.drawRRect(
-                    RRect.makeXYWH(x1, y1, x2-x1, y2-y1, cornerRadius.toFloat()),
+                    RRect.makeXYWH(x1, y1, x2 - x1, y2 - y1, cornerRadius.toFloat()),
                     paint = Paint().apply {
                         color = org.jetbrains.skia.Color.makeRGB(0, 0, 0)
                         mode = PaintMode.FILL
@@ -176,7 +173,7 @@ class Renderer(
                     }
                 )
                 canvas.drawRRect(
-                    RRect.makeXYWH(x1+2, y1+2, x2-x1-4, y2-y1-4, cornerRadius.toFloat()),
+                    RRect.makeXYWH(x1 + 2, y1 + 2, x2 - x1 - 4, y2 - y1 - 4, cornerRadius.toFloat()),
                     paint = Paint().apply {
                         color = org.jetbrains.skia.Color.makeARGB(
                             backgroundColor.a,
@@ -213,14 +210,14 @@ class Renderer(
                 paragraphBuilder.addText(view.text)
 
                 val paragraph = paragraphBuilder.build()
-                paragraph.layout(x2-x1)
+                paragraph.layout(x2 - x1)
 
                 val paragraphHeight = paragraph.height
                 val offsetY = when (TextAlignment.getVertical(view.textAlign)) {
                     TextAlignment.V_TOP -> y1
-                    TextAlignment.V_CENTER -> y1 + (y2-y1 - paragraphHeight) / 2
+                    TextAlignment.V_CENTER -> y1 + (y2 - y1 - paragraphHeight) / 2
                     TextAlignment.V_BOTTOM -> y2 - paragraphHeight
-                    else -> y1 + (y2-y1 - paragraphHeight) / 2
+                    else -> y1 + (y2 - y1 - paragraphHeight) / 2
                 }
 
                 paragraph.paint(canvas, x1, offsetY)
@@ -252,63 +249,30 @@ class Renderer(
                 paragraphBuilder.addText(view.text)
 
                 val paragraph = paragraphBuilder.build()
-                paragraph.layout(x2-x1)
+                paragraph.layout(x2 - x1)
                 val paragraphHeight = paragraph.height
                 val offsetY = when (TextAlignment.getVertical(view.textAlign)) {
                     TextAlignment.V_TOP -> y1
-                    TextAlignment.V_CENTER -> y1 + (y2-y1 - paragraphHeight) / 2
+                    TextAlignment.V_CENTER -> y1 + (y2 - y1 - paragraphHeight) / 2
                     TextAlignment.V_BOTTOM -> y2 - paragraphHeight
-                    else -> y1 + (y2-y1 - paragraphHeight) / 2
+                    else -> y1 + (y2 - y1 - paragraphHeight) / 2
                 }
 
                 paragraph.paint(canvas, x1, offsetY)
             }
 
-            /*is MultilineText -> {
-                    val textRenderer = getTextRenderer(view.textSize)
-                    textRenderer.beginRendering(screenWidth, screenHeight)
-                    textRenderer.setColor(toJavaAwtColor(view.textColor))
-                    //Check if there is any text contents.
-                    val lines = view.lines
-                    if (lines.isEmpty()) {
-                        textRenderer.endRendering()
-                        return
-                    }
-                    var offsetYGlobal = 0.0
-                    val lineHeights = lines.map { textRenderer.getBounds(it).bounds.height }
-                    var blockSize = 0
-                    for (h in lineHeights) {
-                    blockSize += h + view.lineSpacing
-                }
-                var align = view.textAlign
-                if (!TextAlignment.isValidAlignment(align)) align = TextAlignment.Center()
-
-                offsetYGlobal = when (TextAlignment.getVertical(view.textAlign)) {
-                    TextAlignment.V_TOP -> 0.0
-                    TextAlignment.V_CENTER -> blockSize / 2.0
-                    TextAlignment.V_BOTTOM -> blockSize.toDouble()
-                    else -> blockSize / 2.0
-                }
-
-                for (line in lines) {
-                    val offsetx = (x2 - x1) - textRenderer.getBounds(line).bounds.width
-                    val alignHorizontal = when (TextAlignment.getHorizontal(align)) {
-                        TextAlignment.H_LEFT -> x1
-                        TextAlignment.H_CENTER -> x1 + offsetx / 2
-                        TextAlignment.H_RIGHT -> x1 + offsetx
-                        else -> x1 + offsetx / 2
-                    }
-                    offsetYGlobal += textRenderer.getBounds(line).bounds.height + view.lineSpacing
-                    val offsety = (y2 - y1) - offsetYGlobal
-                    textRenderer.draw(line, alignHorizontal.toInt(), offsety.toInt())
-                }
-                textRenderer.endRendering()
-            }*/
             is Image -> {
-                canvas.drawImageRect(
-                    image = org.jetbrains.skia.Image.makeFromEncoded(view.file.readBytes()),
-                    dst = Rect.makeXYWH(x1, y1, x2 - x1, y2 - y1),
-                )
+                if (view.file != null) {
+                    canvas.drawImageRect(
+                        image = org.jetbrains.skia.Image.makeFromEncoded(view.file!!.readBytes()),
+                        dst = Rect.makeXYWH(x1, y1, x2 - x1, y2 - y1),
+                    )
+                } else if (view.image != null) {
+                    canvas.drawImageRect(
+                        image = view.image!!as org.jetbrains.skia.Image,
+                        dst = Rect.makeXYWH(x1, y1, x2 - x1, y2 - y1),
+                    )
+                }
             }
         }
 

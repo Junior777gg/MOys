@@ -12,44 +12,45 @@ import Column
 import Image
 import View
 import common.Color
+import common.Log
+import common.Stack
+import impl.AudioServiceImpl
 import impl.DeviceManagerImpl
+import impl.GraphicServiceImpl
+import impl.VideoPlayerImpl
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import modifier.HorizontalAlignment
 import modifier.Modifier
 import modifier.TextAlignment
 import modifier.VerticalArrangement
 import modifier.background
-import modifier.cornerRadius
 import modifier.fillMaxSize
-import modifier.fillMaxWidth
-import modifier.height
+import org.bytedeco.javacv.Java2DFrameConverter
+import org.jetbrains.skiko.toBitmap
+import java.awt.image.BufferedImage
 
 
 class TestApp(
-    override val gs: GraphicService,
+    override val gs: GraphicServiceImpl,
     override val storage: StorageService,
     override val deviceManager: DeviceManager,
 ) : Activity {
+    val player = VideoPlayerImpl(gs)
     override fun main() {
-        gs.setContent(true) {
-            buildUI()
+        gs.setContent(true){
+            Column(modifier = Modifier.fillMaxSize().background(Color.BLUE), this).layout {
+                player.createVideoPlayer("/mnt/c/Users/MSI/Desktop/zxc2.mp4")
+                player.startVideoPlayer(this@layout)
+            }
         }
         gs.redraw()
     }
 
-    fun MutableList<View>.buildUI() {
-        Column(
-            modifier = Modifier.fillMaxSize().background(Color.CYAN),
-            parent = this, verticalArrangement = VerticalArrangement.SpaceEvenly(),
-            horizontalAlignment = HorizontalAlignment.Left()
-        ).layout {
-            TextField(modifier = Modifier.fillMaxWidth().height(100).background(Color.ORANGE).cornerRadius(100), parent = this)
-        }
-    }
-
-    fun updateUI() {
-        gs.setContent {
-            buildUI()
-        }
-        gs.redraw()
+    override fun onDestroy() {
+        player.removeVideoPlayer()
     }
 }

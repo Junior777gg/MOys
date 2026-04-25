@@ -1,6 +1,7 @@
 package impl
 
 import common.Log
+import org.bytedeco.ffmpeg.global.avutil
 import org.bytedeco.javacv.FFmpegFrameGrabber
 import org.bytedeco.javacv.Frame
 import service.DeviceManager
@@ -13,11 +14,15 @@ class DeviceManagerImpl: DeviceManager {
     }
     object Camera{
         var cameraPath = "/dev/video0"
+        var grabber: FFmpegFrameGrabber? = null
+
+        fun startCamera(){
+            grabber?.stop()
+            grabber = FFmpegFrameGrabber.createDefault(cameraPath)
+            grabber?.start()
+            }
         fun cameraDataFrame(path: String = cameraPath): Frame? {
-            val grabber = FFmpegFrameGrabber(path)
-            grabber.start()
-            val frame = grabber.grab()
-            return frame
+            return grabber?.grab()
         }
     }
     @Deprecated("not done yet")

@@ -12,4 +12,6 @@ class Stack<T> {
 
     fun peek(): T = list.last()
     fun size(): Int = list.size
+    fun first (): T = list.first()
+    fun popFirst() : T = list.removeFirst()
 }

@@ -3,7 +3,8 @@ import java.io.File
 
 class Image(
     override val modifier: Modifier,
-    val file: File,
+    val file: File? = null,
+    var image: Any? = null,
     override val parent: MutableList<View>
 ) : View {
     override val children: MutableList<View> = mutableListOf()
