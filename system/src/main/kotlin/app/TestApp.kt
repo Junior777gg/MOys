@@ -41,16 +41,15 @@ class TestApp(
 ) : Activity {
     val player = VideoPlayerImpl(gs)
     override fun main() {
-        gs.setContent(true){
-            Column(modifier = Modifier.fillMaxSize().background(Color.BLUE), this).layout {
-                player.createVideoPlayer("/mnt/c/Users/MSI/Desktop/zxc2.mp4")
-                player.startVideoPlayer(this@layout)
-            }
+        gs.setContent(true) {
+            player.createVideoPlayer("/mnt/c/Users/MSI/Desktop/zxc2.mp4")
+            player.startVideoPlayer(this)
         }
         gs.redraw()
     }
 
     override fun onDestroy() {
+        super.onDestroy()
         player.removeVideoPlayer()
     }
 }

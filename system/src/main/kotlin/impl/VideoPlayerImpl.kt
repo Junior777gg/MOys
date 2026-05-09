@@ -19,9 +19,6 @@ import org.bytedeco.javacv.Java2DFrameConverter
 import org.bytedeco.librealsense.frame
 import org.jetbrains.skiko.toBitmap
 import service.GraphicService
-import uk.co.caprica.vlcj.factory.MediaPlayerFactory
-import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent
-import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer
 import java.awt.BorderLayout
 import java.awt.image.BufferedImage
 import java.nio.ByteBuffer
@@ -83,7 +80,7 @@ class VideoPlayerImpl(val gs: GraphicService) {
                             shortBuffer.get(shorts)
                             shortBuffer.rewind()
 
-                            // Конвертируем ShortArray в ByteArray (little-endian)
+
                             val bytes = ByteArray(shorts.size * 2)
                             for (i in shorts.indices) {
                                 bytes[i * 2] = (shorts[i].toInt() and 0xFF).toByte()

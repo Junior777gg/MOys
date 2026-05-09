@@ -9,14 +9,17 @@ import common.Bounds
 import common.Log
 import common.Stack
 import common.Vec2i
+import javafx.embed.swing.JFXPanel
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import modifier.FillMaxHeight
 import modifier.Height
 import org.jetbrains.skia.Canvas
+import org.jetbrains.skia.Color
 import org.jetbrains.skiko.SkiaLayer
 import org.jetbrains.skiko.SkikoView
 import service.GraphicService
+import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
@@ -24,7 +27,9 @@ import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionAdapter
 import java.io.File
+import javax.swing.JButton
 import javax.swing.JFrame
+import javax.swing.JPanel
 import javax.swing.SwingUtilities
 
 //The main graphical service. Controls the window, rendering, and input processing.
@@ -67,7 +72,7 @@ class GraphicServiceImpl : GraphicService {
         val R_ALL = listOf(R_360p, R_480p, R_960p, R_HD, R_720p, R_HD_PLUS, R_FULL_HD, R_WUXGA, R_2K)
     }
 
-    private lateinit var frame: JFrame
+    lateinit var frame: JFrame
     private lateinit var skikoLayer: SkiaLayer
 
     //The current View-element tree that is rendered on the screen
@@ -94,7 +99,6 @@ class GraphicServiceImpl : GraphicService {
     private val renderer = Renderer(this, bounds, lazyColumn, getScreenHeight(), getScreenWidth())
     private val navigationLambda = SystemNavigation(this).setUpNavigation()
 
-    lateinit var globcanvas: Canvas
 
     fun initialize(systemPath: String) {
         Log.dbg("Getting config")
@@ -115,13 +119,12 @@ class GraphicServiceImpl : GraphicService {
                 canvas.clear(org.jetbrains.skia.Color.makeRGB(0, 0, 0))
                 renderer.screenWidth = width
                 renderer.screenHeight = height
-                globcanvas = canvas
 
                 if (viewTree.isEmpty()) return
                 lazyColumn.clear()
                 bounds.clear()
                 viewTree.forEach {
-                renderer.parse(canvas, it)
+                    renderer.parse(canvas, it)
                 }
             }
         }
@@ -129,6 +132,7 @@ class GraphicServiceImpl : GraphicService {
             preferredSize = Dimension(getScreenWidth(), getScreenHeight())
         }
         skikoLayer.skikoView = skikoView
+
         frame.add(skikoLayer)
         Log.dbg("Done JFRAME")
         frame.pack()
@@ -206,6 +210,15 @@ class GraphicServiceImpl : GraphicService {
         updateStack()
     }
 
+    fun restoreSkiko() {
+        SwingUtilities.invokeLater {
+            frame.contentPane.removeAll()
+            frame.add(skikoLayer)
+            frame.revalidate()
+            skikoLayer.needRedraw()
+        }
+    }
+
     //Updates screen resolution and current screen.
     fun setScreenResolution(resolution: Vec2i) {
         val x = resolution.x
@@ -269,7 +282,7 @@ class GraphicServiceImpl : GraphicService {
     //Return to the previous screen in the navigation stack
     override fun popBackStack() {
         if (stack.size() <= 1) return
-        if (focusedActivity?.onNavigationBack() == true){
+        if (focusedActivity?.onNavigationBack() == true) {
             focusedActivity?.onDestroy()
             stack.popBack()
         }

@@ -9,9 +9,9 @@ import impl.TimerImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import navigation.SystemLauncher
-import org.jsoup.SerializationException
 import security.MavenRepository
 import security.SecurityClassLoader
 import service.GraphicService

@@ -115,7 +115,9 @@ class SystemLauncher(
                 icon = File("${Mother.systemPath}/install/browser/icon.png"),
                 click = {
                     Thread {
-                        Application.launch(BrowserApp::class.java)
+                        val browserApp = BrowserApp()
+                        browserApp.init()
+                        browserApp.createBrowser(graphicService)
                     }.start()
                 },
                 appName = "Браузер"
