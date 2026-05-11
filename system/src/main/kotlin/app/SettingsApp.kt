@@ -175,7 +175,7 @@ class SettingsApp(
             for (s in GraphicServiceImpl.RESOLUTIONS.R_ALL) {
                 val r = s.swap()
                 Button(
-                    modifier = Modifier.width(100).height(50).onClick { gs.setScreenResolution(r) },
+                    modifier = Modifier.fillMaxWidth().height(50).onClick { gs.setScreenResolution(r) },
                     parent = this
                 ).layout {
                     Text(
@@ -191,7 +191,7 @@ class SettingsApp(
     }
     private fun checkbox(get: Boolean, set: (Boolean)->Unit, text: String, parent: MutableList<View>) {
         Row(
-            modifier = Modifier.height(50).width(500),
+            modifier = Modifier.height(50).fillMaxWidth(),
             horizontalArrangement = HorizontalArrangement.Left(),
             parent = parent
         ).layout {
@@ -202,7 +202,7 @@ class SettingsApp(
                 render(false)
             }, parent = this)
             Text(
-                modifier = Modifier.height(50).width(50).paddingLeft(200),
+                modifier = Modifier.height(50).width(500).paddingLeft(200),
                 text = text,
                 textSize = 24,
                 textAlign = TextAlignment.Left(),

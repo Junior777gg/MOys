@@ -60,8 +60,14 @@ object TimerImpl: Timer {
                         val c = v.value
                         if (now - c.lastTriggered >= c.intervalMs) {
                             try {
-                                c.callback(now)
-                                c.lastTriggered = now
+                                val timerExecTime = System.currentTimeMillis()
+                                c.callback(timerExecTime)
+                                c.lastTriggered = timerExecTime
+                                var elapsed=System.currentTimeMillis()-timerExecTime
+                                if(elapsed>=1000) {
+                                    Log.dbg("${v.key} has been removed from timer stack: took ${elapsed}ms to run, max - ${1000}ms")
+                                    unsubscribe(v.key)
+                                }
                             } catch (e: Exception) {
                                 Log.warn("Timer callback \"${v.key}\" failed to run: ${e.message}")
                             }

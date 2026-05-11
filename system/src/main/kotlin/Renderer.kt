@@ -50,25 +50,17 @@ class Renderer(
     var screenHeight: Int,
     var screenWidth: Int,
 ) {
-    private fun getTextAlign(textAlign: Int, x1: Double, y2: Double, offsetx: Double, offsety: Double): Vec2 {
-        var align = textAlign
-        if (!TextAlignment.isValidAlignment(align)) align = TextAlignment.Center()
-        val x = when (TextAlignment.getHorizontal(align)) {
-            TextAlignment.H_LEFT -> x1
-            TextAlignment.H_CENTER -> x1 + offsetx / 2
-            TextAlignment.H_RIGHT -> x1 + offsetx
-            else -> x1 + offsetx / 2
+    private val imageCache=HashMap<String, org.jetbrains.skia.Image>()
+    private fun getImage(file: java.io.File): org.jetbrains.skia.Image {
+        return imageCache.getOrPut(file.absolutePath) {
+            org.jetbrains.skia.Image.makeFromEncoded(file.readBytes())
         }
-        val y = when (TextAlignment.getVertical(align)) {
-            TextAlignment.V_TOP -> y2
-            TextAlignment.V_CENTER -> y2 - offsety / 2
-            TextAlignment.V_BOTTOM -> y2 - offsety
-            else -> y2 - offsety / 2
-        }
-        return Vec2(x, y)
     }
-
-    private fun toJavaAwtColor(color: Color): java.awt.Color = java.awt.Color(color.r, color.g, color.b, color.a)
+    fun clearCache() {
+        imageCache.clear()
+    }
+    private lateinit var fontColection : FontCollection
+    private var initializedFonts=false
 
     /**
      * Recursively traverses the View-tree, calculates the coordinates (layout),
@@ -103,6 +95,13 @@ class Renderer(
         val onClick = modifiers.get<OnClick>()?.onClick
         val onHold = modifiers.get<OnHold>()?.onHold
 
+        if(!initializedFonts) {
+            initializedFonts=true
+            fontColection=FontCollection().apply {
+                setDefaultFontManager(FontMgr.default)
+            }
+        }
+
         if (view is LazyColumn) {
             lazyColumn.add(view)
         }
@@ -127,7 +126,7 @@ class Renderer(
             x2 = x1 + width.toFloat()
             y2 = avy2
         } else {
-            Log.warn("$view doesnt have enough size")
+            Log.warn("View \"$view\" doesn't have enough size")
         }
         if (x2 > avx2) x2 = avx2
         if (y2 > avy2) y2 = avy2
@@ -203,9 +202,7 @@ class Renderer(
                         else -> Alignment.LEFT
                     }
                 }
-                val paragraphBuilder = ParagraphBuilder(paragraphStyle, FontCollection().apply {
-                    setDefaultFontManager(FontMgr.default)
-                })
+                val paragraphBuilder = ParagraphBuilder(paragraphStyle, fontColection)
                 paragraphBuilder.pushStyle(textStyle)
                 paragraphBuilder.addText(view.text)
 
@@ -242,9 +239,7 @@ class Renderer(
                         else -> Alignment.LEFT
                     }
                 }
-                val paragraphBuilder = ParagraphBuilder(paragraphStyle, FontCollection().apply {
-                    setDefaultFontManager(FontMgr.default)
-                })
+                val paragraphBuilder = ParagraphBuilder(paragraphStyle, fontColection)
                 paragraphBuilder.pushStyle(textStyle)
                 paragraphBuilder.addText(view.text)
 
@@ -264,7 +259,7 @@ class Renderer(
             is Image -> {
                 if (view.file != null) {
                     canvas.drawImageRect(
-                        image = org.jetbrains.skia.Image.makeFromEncoded(view.file!!.readBytes()),
+                        image = getImage(view.file!!),
                         dst = Rect.makeXYWH(x1, y1, x2 - x1, y2 - y1),
                     )
                 } else if (view.image != null) {
