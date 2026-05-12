@@ -2,6 +2,7 @@ import common.App
 import common.Apps
 import common.Log
 import common.Manifest
+import common.SystemConfig
 import impl.DeviceManagerImpl
 import impl.GraphicServiceImpl
 import impl.StorageServiceImpl
@@ -65,7 +66,13 @@ class Mother(
             libsFolder.mkdirs()
         }
 
-        val appsRegisterFile = File(registerPath, "system.json")
+        val appsRegisterFile = File(registerPath, "apps.json")
+        //Migration "system.json"->"apps.json"
+        var oldSysApps=File(registerPath, "system.json")
+        if(oldSysApps.exists()) {
+            oldSysApps.copyTo(appsRegisterFile,true)
+            oldSysApps.delete()
+        }
         if (!appsRegisterFile.exists()) {
             appsRegisterFile.createNewFile()
             appsRegisterFile.writeText(Json.encodeToString(Apps(mutableListOf())))
@@ -75,10 +82,13 @@ class Mother(
     val systemLauncher = SystemLauncher(graphicService, deviceManager, this)
     fun start() {
         InstallationService().run(systemPath)
+
+        SystemConfig.load("${registerPath}/config.json")
         systemLauncher.runLaunch()
         TimerImpl.start()
     }
     fun shutdown() {
+        SystemConfig.save("${registerPath}/config.json")
         TimerImpl.stop()
         graphicService.shutdown(systemPath)
     }
@@ -199,7 +209,7 @@ class Mother(
     fun deleteApp(appId: String) {
         try {
             //Delete app from register.
-            val registerFile = File(registerPath, "system.json")
+            val registerFile = File(registerPath, "apps.json")
             val register = Json.decodeFromString<Apps>(registerFile.readText())
             var removedRegistryKey = false
             for (e in register.apps) {
@@ -253,7 +263,7 @@ class Mother(
 
     /** Saves application information in the registry */
     private fun registerNewApp(app: App) {
-        val registerFile = File(registerPath, "system.json")
+        val registerFile = File(registerPath, "apps.json")
         val register = Json.decodeFromString<Apps>(registerFile.readText())
         //No duplicates (replace with error if possible, because the method is 'registerNewApp' and the id already exists)
         var entryFound = false
@@ -271,13 +281,13 @@ class Mother(
 
     /** Returns a list of all installed applications from the registry */
     fun getRegisteredApps(): List<App> {
-        val register = File("$registerPath/system.json").readText()
+        val register = File("$registerPath/apps.json").readText()
         return Json.decodeFromString<Apps>(register).apps
     }
 
     /** Removes duplicates from registry */
     private fun registryCleanup() {
-        val registerFile = File(registerPath, "system.json")
+        val registerFile = File(registerPath, "apps.json")
         val register = Json.decodeFromString<Apps>(registerFile.readText())
         val newRegister = Apps(register.apps.toList().distinct().toMutableList())
         registerFile.writeText(Json.encodeToString(newRegister))

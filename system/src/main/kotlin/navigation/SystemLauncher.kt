@@ -46,10 +46,26 @@ class SystemLauncher(
         var textDark: Boolean = false,
         var textDisplay: Boolean = true,
         var appsCentering: Boolean = false,
-    )
+    ) {
+        companion object {
+            var Instance=LauncherConfig()
+            fun save() {
+                val cfg = File("${Mother.systemPath}/data/launcher/config.json")
+                cfg.writeText(Json.encodeToString<LauncherConfig>(Instance))
+            }
+            fun load() {
+                val cfg = File("${Mother.systemPath}/data/launcher/config.json")
+                if(cfg.exists()) {
+                    Instance=Json.decodeFromString<LauncherConfig>(cfg.readText())
+                    //Check if background exists.
+                    if(!File("${Mother.systemPath}/data/launcher/${Instance.background}").exists())
+                        Instance.background="backgrounds/1.png"
+                }
+            }
+        }
+    }
 
     private val labels = mutableListOf<MutableList<View>.() -> Unit>()
-    private var config = LauncherConfig("backgrounds/mobile/1.png",false)
     private fun updateLabels() {
         labels.clear()
         mother.getRegisteredApps().forEach { app ->
@@ -145,7 +161,7 @@ class SystemLauncher(
         })
     }
     fun runLaunch() {
-        loadConfig()
+        LauncherConfig.load()
         updateLabels()
         graphicService.setContent(true) {
             screen()
@@ -154,12 +170,12 @@ class SystemLauncher(
     }
 
     private fun getAppsArrangement(): HorizontalArrangement {
-        if(config.appsCentering) return HorizontalArrangement.Center()
+        if(getAppsCentering()) return HorizontalArrangement.Center()
         else return HorizontalArrangement.Left()
     }
 
     fun MutableList<View>.screen() {
-        Image(modifier = Modifier.fillMaxSize(), File(Mother.systemPath+"/data/launcher/${config.background}"), parent = this).layout {
+        Image(modifier = Modifier.fillMaxSize(), File(Mother.systemPath+"/data/launcher/${getBackground()}"), parent = this).layout {
             Column(modifier = Modifier.fillMaxSize().background(Color.TRANSPARENT),
                 verticalArrangement = VerticalArrangement.SpaceEvenly(),
                 horizontalAlignment = HorizontalAlignment.Center(), parent = this).layout {
@@ -178,7 +194,7 @@ class SystemLauncher(
     }
 
     fun updateScreen(redraw: Boolean) {
-        loadConfig()
+        LauncherConfig.load()
         updateLabels()
         graphicService.setContent(false) {
             screen()
@@ -188,63 +204,50 @@ class SystemLauncher(
 
     fun MutableList<View>.label(icon: File? = null, appName: String, click: () -> Unit, hold: (() -> Unit) = { Log.warn("Can't remove system app")}) {
         var textColor = Color.WHITE
-        if(config.textDark) textColor = Color.BLACK
+        if(getTextDark()) textColor = Color.BLACK
         Column(
             modifier = Modifier.padding(20).height(130).width(110)
                 .onClick { click() }.onHold { hold.invoke() } .background(Color.TRANSPARENT), this
         ).layout {
             Image(modifier = Modifier.size(70), icon ?: File("${Mother.systemPath}/data/launcher/basic.png"), parent = this)
-            if(config.textDisplay) Text(modifier = Modifier.width(70).height(20), text = appName, textColor = textColor, textSize = 15, parent = this)
+            if(getTextDisplay()) Text(modifier = Modifier.width(70).height(20), text = appName, textColor = textColor, textSize = 14, parent = this)
         }
     }
 
     fun getBackground(): String {
-        return config.background
+        return LauncherConfig.Instance.background
     }
     fun setBackground(path: String) {
         Log.dbg("Set launcher background as: \"$path\"")
-        config.background = path
-        val cfg = File("${Mother.systemPath}/data/launcher/config.json")
-        cfg.writeText(Json.encodeToString<LauncherConfig>(config))
+        LauncherConfig.Instance.background=path
+        LauncherConfig.save()
         updateScreen(false)
     }
     fun getTextDark(): Boolean {
-        return config.textDark
+        return LauncherConfig.Instance.textDark
     }
     fun setTextDark(v: Boolean) {
         Log.dbg("Set launcher text dark to: \"$v\"")
-        config.textDark = v
-        val cfg = File("${Mother.systemPath}/data/launcher/config.json")
-        cfg.writeText(Json.encodeToString<LauncherConfig>(config))
+        LauncherConfig.Instance.textDark=v
+        LauncherConfig.save()
         updateScreen(false)
     }
     fun getTextDisplay(): Boolean {
-        return config.textDisplay
+        return LauncherConfig.Instance.textDisplay
     }
     fun setTextDisplay(v: Boolean) {
         Log.dbg("Set launcher text display to: \"$v\"")
-        config.textDisplay = v
-        val cfg = File("${Mother.systemPath}/data/launcher/config.json")
-        cfg.writeText(Json.encodeToString<LauncherConfig>(config))
+        LauncherConfig.Instance.textDisplay=v
+        LauncherConfig.save()
         updateScreen(false)
     }
     fun getAppsCentering(): Boolean {
-        return config.appsCentering
+        return LauncherConfig.Instance.appsCentering
     }
     fun setAppsCentering(v: Boolean) {
         Log.dbg("Set launcher apps centering to: \"$v\"")
-        config.appsCentering = v
-        val cfg = File("${Mother.systemPath}/data/launcher/config.json")
-        cfg.writeText(Json.encodeToString<LauncherConfig>(config))
+        LauncherConfig.Instance.appsCentering=v
+        LauncherConfig.save()
         updateScreen(false)
-    }
-    fun loadConfig() {
-        val cfg = File("${Mother.systemPath}/data/launcher/config.json")
-        if(cfg.exists()) {
-            config = Json.decodeFromString<LauncherConfig>(cfg.readText())
-            //Check if background exists.
-            if(!File("${Mother.systemPath}/data/launcher/${config.background}").exists())
-                config.background="backgrounds/1.png"
-        }
     }
 }

@@ -1,6 +1,8 @@
 package common
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import java.io.File
 
 @Serializable
 data class App(
@@ -28,4 +30,21 @@ data class Manifest(
     val activity_name: String,
     val libs: List<String>,
 )
-
+@Serializable
+data class SystemConfig (
+    var timerProcessTimeThresholdMs: Int = 1000,
+    var ignoreOnBackCancel: Boolean = false,
+) {
+    companion object {
+        var Instance=SystemConfig()
+        fun load(path: String) {
+            val file=File(path)
+            if(file.exists()) Instance=Json.decodeFromString<SystemConfig>(file.readText())
+            else file.createNewFile()
+        }
+        fun save(path: String) {
+            val cfg = File(path)
+            cfg.writeText(Json.encodeToString<SystemConfig>(Instance))
+        }
+    }
+}

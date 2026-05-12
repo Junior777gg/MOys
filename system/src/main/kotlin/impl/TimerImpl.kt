@@ -2,6 +2,7 @@ package impl
 
 import service.Timer
 import common.Log
+import common.SystemConfig
 import java.lang.Exception
 import java.util.Calendar
 import kotlin.collections.iterator
@@ -55,6 +56,7 @@ object TimerImpl: Timer {
                 synchronized(callbacks) {
                     //Copy the callbacks list to prevent object blocking.
                     val snapshot = callbacks.toMap()
+                    val thresholdMs=SystemConfig.Instance.timerProcessTimeThresholdMs
                     //Execute all callbacks if time is met.
                     for (v in snapshot) {
                         val c = v.value
@@ -64,8 +66,8 @@ object TimerImpl: Timer {
                                 c.callback(timerExecTime)
                                 c.lastTriggered = timerExecTime
                                 var elapsed=System.currentTimeMillis()-timerExecTime
-                                if(elapsed>=1000) {
-                                    Log.dbg("${v.key} has been removed from timer stack: took ${elapsed}ms to run, max - ${1000}ms")
+                                if(elapsed>thresholdMs) {
+                                    Log.dbg("${v.key} has been removed from timer stack: took ${elapsed}ms to run, max - ${thresholdMs}ms")
                                     unsubscribe(v.key)
                                 }
                             } catch (e: Exception) {

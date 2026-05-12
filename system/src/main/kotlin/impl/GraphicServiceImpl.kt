@@ -8,18 +8,16 @@ import View
 import common.Bounds
 import common.Log
 import common.Stack
+import common.SystemConfig
 import common.Vec2i
-import javafx.embed.swing.JFXPanel
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import modifier.FillMaxHeight
 import modifier.Height
 import org.jetbrains.skia.Canvas
-import org.jetbrains.skia.Color
 import org.jetbrains.skiko.SkiaLayer
 import org.jetbrains.skiko.SkikoView
 import service.GraphicService
-import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
@@ -27,9 +25,7 @@ import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionAdapter
 import java.io.File
-import javax.swing.JButton
 import javax.swing.JFrame
-import javax.swing.JPanel
 import javax.swing.SwingUtilities
 
 //The main graphical service. Controls the window, rendering, and input processing.
@@ -47,29 +43,6 @@ class GraphicServiceImpl : GraphicService {
         fun getScreenHeight(): Int = config.height
         fun getScreenWidth(): Int = config.width
         fun isDesktopResolution(): Boolean = config.width > config.height
-    }
-
-    object RESOLUTIONS {
-        val R_144p = Vec2i(256, 144)
-        val R_240p = Vec2i(426, 420)
-        val R_360p = Vec2i(640, 360)
-        val R_480p = Vec2i(640, 480)
-        val R_960p = Vec2i(960, 640)
-        val R_HD = Vec2i(1366, 768)
-        val R_720p = Vec2i(1280, 720)
-        val R_HD_PLUS = Vec2i(1600, 900)
-        val R_FULL_HD = Vec2i(1920, 1080)
-        val R_WUXGA = Vec2i(1920, 1200)
-        val R_2K = Vec2i(2560, 1440)
-        val R_WQXGA = Vec2i(2560, 1600)
-        val R_UWQHD = Vec2i(3440, 1440)
-        val R_4K = Vec2i(3840, 2160)
-        val R_WQUXGA = Vec2i(3840, 2400)
-        val R_5K = Vec2i(5120, 2880)
-        val R_8K = Vec2i(7680, 4320)
-
-        //All default resolutions in a list.
-        val R_ALL = listOf(R_360p, R_480p, R_960p, R_HD, R_720p, R_HD_PLUS, R_FULL_HD, R_WUXGA, R_2K)
     }
 
     lateinit var frame: JFrame
@@ -191,6 +164,8 @@ class GraphicServiceImpl : GraphicService {
     }
 
     fun shutdown(systemPath: String) {
+        renderer.clearCacheFull()
+
         val cfg = File("${systemPath}/register/video.json")
         cfg.writeText(Json.encodeToString<GraphicalConfig>(config))
         Log.dbg("Saved graphical settings")
@@ -207,10 +182,11 @@ class GraphicServiceImpl : GraphicService {
         focusedActivity?.onDestroy()
         focusedActivity = null
         while (stack.size() > 1) stack.popBack()
+        renderer.clearCacheFull()
         updateStack()
     }
 
-    fun restoreSkiko() {
+    fun restore() {
         SwingUtilities.invokeLater {
             frame.contentPane.removeAll()
             frame.add(skikoLayer)
@@ -282,12 +258,15 @@ class GraphicServiceImpl : GraphicService {
     //Return to the previous screen in the navigation stack
     override fun popBackStack() {
         if (stack.size() <= 1) return
-        if (focusedActivity?.onNavigationBack() == true) {
+        if (focusedActivity?.onNavigationBack() == true || SystemConfig.Instance.ignoreOnBackCancel) {
             focusedActivity?.onDestroy()
             stack.popBack()
         }
         updateStack()
-        if (stack.size() <= 1) focusedActivity = null
+        if (stack.size() <= 1) {
+            focusedActivity = null
+            renderer.clearCacheFull()
+        }
     }
 
     //Rerender screen must call after setContent or injectUI

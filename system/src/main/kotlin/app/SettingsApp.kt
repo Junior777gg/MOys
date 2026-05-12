@@ -12,6 +12,7 @@ import service.StorageService
 import View
 import Text
 import common.Color
+import common.SystemConfig
 import modifier.HorizontalArrangement
 import modifier.Modifier
 import modifier.TextAlignment
@@ -24,6 +25,7 @@ import modifier.padding
 import modifier.paddingLeft
 import modifier.size
 import modifier.width
+import service.GraphicService
 import java.io.File
 
 class SettingsApp(
@@ -150,7 +152,7 @@ class SettingsApp(
                 textAlign = TextAlignment.Left(),
                 parent = this
             )
-            for (r in GraphicServiceImpl.RESOLUTIONS.R_ALL) {
+            for (r in GraphicService.RESOLUTIONS.R_ALL) {
                 Button(
                     modifier = Modifier.fillMaxWidth().height(50).onClick { gs.setScreenResolution(r) },
                     parent = this
@@ -172,7 +174,7 @@ class SettingsApp(
                 textAlign = TextAlignment.Left(),
                 parent = this
             )
-            for (s in GraphicServiceImpl.RESOLUTIONS.R_ALL) {
+            for (s in GraphicService.RESOLUTIONS.R_ALL) {
                 val r = s.swap()
                 Button(
                     modifier = Modifier.fillMaxWidth().height(50).onClick { gs.setScreenResolution(r) },
@@ -187,6 +189,19 @@ class SettingsApp(
                     )
                 }
             }
+            Text(
+                modifier = Modifier.fillMaxWidth().height(50),
+                text = "Developer",
+                textSize = 24,
+                textColor = Color.BLACK,
+                parent = this
+            )
+            checkbox(
+                get = SystemConfig.Instance.ignoreOnBackCancel,
+                set = { v -> SystemConfig.Instance.ignoreOnBackCancel=v },
+                text = "Ignore \"onBack\" cancel",
+                parent = this
+            )
         }
     }
     private fun checkbox(get: Boolean, set: (Boolean)->Unit, text: String, parent: MutableList<View>) {

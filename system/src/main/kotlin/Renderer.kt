@@ -1,6 +1,5 @@
 import common.Bounds
 import common.Log
-import common.Vec2
 import common.Color
 import impl.GraphicServiceImpl
 import modifier.Background
@@ -23,7 +22,6 @@ import modifier.TextAlignment
 import modifier.VerticalAlignment
 import modifier.VerticalArrangement
 import modifier.Width
-import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.FontMgr
 import org.jetbrains.skia.Paint
@@ -36,7 +34,6 @@ import org.jetbrains.skia.paragraph.FontCollection
 import org.jetbrains.skia.paragraph.ParagraphBuilder
 import org.jetbrains.skia.paragraph.ParagraphStyle
 import org.jetbrains.skia.paragraph.TextStyle
-import org.jetbrains.skiko.toBitmap
 
 
 /**
@@ -56,7 +53,7 @@ class Renderer(
             org.jetbrains.skia.Image.makeFromEncoded(file.readBytes())
         }
     }
-    fun clearCache() {
+    fun clearCacheFull() {
         imageCache.clear()
     }
     private lateinit var fontColection : FontCollection
@@ -64,7 +61,7 @@ class Renderer(
 
     /**
      * Recursively traverses the View-tree, calculates the coordinates (layout),
-     * and renders each element through OpenGL.
+     * and renders each element through Skiko.
      *
      *  avx1, avy1, avx2, avy2 — the available area for placing the View
      *  centeringWidth — the horizontal alignment of children (LEFT, CENTER, RIGHT)

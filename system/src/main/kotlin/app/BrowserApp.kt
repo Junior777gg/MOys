@@ -1,16 +1,11 @@
 package app
 
 import impl.GraphicServiceImpl
-import impl.GraphicServiceImpl.Companion.getScreenHeight
-import impl.GraphicServiceImpl.Companion.getScreenWidth
-import io.ktor.util.Platform
 import javafx.embed.swing.JFXPanel
 import javafx.scene.Scene
-import javafx.scene.control.Button
 import javafx.scene.web.WebView
 import java.awt.Dimension
 import javax.swing.JButton
-import javax.swing.JFrame
 import javax.swing.SwingUtilities
 
 
@@ -40,7 +35,7 @@ class BrowserApp : JFXPanel() {
                     try {
                         webView.engine.history.go(-1)
                     }catch (e: IndexOutOfBoundsException) {
-                        gs.restoreSkiko()
+                        gs.restore()
                     }
                 }
             }
