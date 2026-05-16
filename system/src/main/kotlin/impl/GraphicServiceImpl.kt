@@ -19,11 +19,14 @@ import org.jetbrains.skiko.SkiaLayer
 import org.jetbrains.skiko.SkikoView
 import service.GraphicService
 import java.awt.Dimension
+import java.awt.Rectangle
+import java.awt.Robot
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionAdapter
+import java.awt.image.BufferedImage
 import java.io.File
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
@@ -52,7 +55,8 @@ class GraphicServiceImpl : GraphicService {
     private val viewTree = mutableListOf<View>()
 
     //Stack of screens for navigating "back"
-    private val stack = Stack<MutableList<View>.() -> Unit>()
+    val runtimeStack = Stack<MutableList<View>.() -> Unit>()
+    val activityStack = mutableMapOf<Class<Activity>, Activity>()
 
     //The list of clickable areas on the current frame
     private val bounds = mutableListOf<Bounds>()
@@ -67,10 +71,10 @@ class GraphicServiceImpl : GraphicService {
     private var cursorHoldTimestamp = 0L
     private var isMouseDragged = false
     private var lastMouseY = 0.0
-    private var focusedActivity: Activity? = null
+    var focusedActivity: Activity? = null
 
     private val renderer = Renderer(this, bounds, lazyColumn, getScreenHeight(), getScreenWidth())
-    private val navigationLambda = SystemNavigation(this).setUpNavigation()
+    private val navigation = SystemNavigation(this)
 
 
     fun initialize(systemPath: String) {
@@ -173,15 +177,29 @@ class GraphicServiceImpl : GraphicService {
 
     //Set focus on given [newActivity]. All callbacks will be executed from it.
     fun setActivity(newActivity: Activity? = null) {
-        focusedActivity = newActivity
+        val activityClass = newActivity?.javaClass
+        val existingActivity = activityStack[activityClass]
+
+        if (existingActivity != null) {
+            focusedActivity = existingActivity
+            viewTree.clear()
+            viewTree.addAll(existingActivity.lastState ?: mutableListOf())
+            Log.dbg("Restored activity ${activityClass?.simpleName} with ${viewTree.size} views")
+            redraw()
+        } else {
+            activityStack[activityClass!!] = newActivity
+            focusedActivity = newActivity
+            Log.dbg("Created new activity ${activityClass.simpleName}")
+        }
     }
 
     //Removes all stack elements aside from launcher.
     fun clearStack() {
-        if (stack.size() <= 1) return
+        if (runtimeStack.size() <= 1) return
+        focusedActivity?.lastState = viewTree.toMutableList()
         focusedActivity?.onDestroy()
         focusedActivity = null
-        while (stack.size() > 1) stack.popBack()
+        while (runtimeStack.size() > 1) runtimeStack.popBack()
         renderer.clearCacheFull()
         updateStack()
     }
@@ -223,9 +241,9 @@ class GraphicServiceImpl : GraphicService {
             viewTree.clear()
             bounds.clear()
             viewTreeUntilInject.clear()
-            val lambda = stack.peek()
+            val lambda = runtimeStack.peek()
             viewTree.lambda()
-            navigationLambda(viewTree)
+            navigation.setUpNavigation(viewTree)
             skikoLayer.needRedraw()
         }
     }
@@ -235,9 +253,10 @@ class GraphicServiceImpl : GraphicService {
         viewTree.clear()
         lazyColumn.clear()
         viewTree.lambda()
-        navigationLambda(viewTree)
+        focusedActivity?.lastState = viewTree.toMutableList()
+        navigation.setUpNavigation(viewTree)
         if (itIsNewScreen) {
-            stack.push(lambda)
+            runtimeStack.push(lambda)
         }
     }
 
@@ -257,13 +276,19 @@ class GraphicServiceImpl : GraphicService {
 
     //Return to the previous screen in the navigation stack
     override fun popBackStack() {
-        if (stack.size() <= 1) return
-        if (focusedActivity?.onNavigationBack() == true || SystemConfig.Instance.ignoreOnBackCancel) {
-            focusedActivity?.onDestroy()
-            stack.popBack()
+        if (runtimeStack.size() <= 1) return
+        if (viewTreeUntilInject.isNotEmpty()) {
+            cancelInject()
         }
-        updateStack()
-        if (stack.size() <= 1) {
+        focusedActivity?.lastState = viewTree.toMutableList()
+        if (focusedActivity != null && !focusedActivity!!.onNavigationBack()) {
+            null
+        } else {
+            focusedActivity?.onDestroy()
+            runtimeStack.popBack()
+            updateStack()
+        }
+        if (runtimeStack.size() <= 1) {
             focusedActivity = null
             renderer.clearCacheFull()
         }

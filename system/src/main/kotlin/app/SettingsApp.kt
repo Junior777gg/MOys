@@ -32,7 +32,7 @@ class SettingsApp(
     val mother: Mother,
     override val gs: GraphicServiceImpl,
     override val storage: StorageService,
-    override val deviceManager: DeviceManager
+    override val deviceManager: DeviceManager, override var lastState: MutableList<View>?
 ) : Activity {
     override fun main() {
         render(true)

@@ -2,22 +2,32 @@ package impl
 
 import Column
 import Image
+import Row
+import Text
 import View
 import common.Color
+import javafx.scene.Parent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import modifier.HorizontalArrangement
 import modifier.Modifier
+import modifier.VerticalAlignment
+import modifier.VerticalArrangement
 import modifier.background
 import modifier.fillMaxSize
+import modifier.height
 import modifier.onClick
+import modifier.size
+import modifier.width
 import org.bytedeco.ffmpeg.global.avutil
 import org.bytedeco.javacv.FFmpegFrameGrabber
 import org.bytedeco.javacv.Java2DFrameConverter
 import org.bytedeco.librealsense.frame
 import org.jetbrains.skiko.toBitmap
+import org.jetbrains.skiko.toImage
 import service.GraphicService
 import java.awt.BorderLayout
 import java.awt.image.BufferedImage
@@ -49,6 +59,7 @@ class VideoPlayerImpl(val gs: GraphicService) {
         grabber.audioChannels = 2
         grabber.sampleRate = 44100
         grabber.start()
+        currentTimestamp = currentTimestamp.coerceIn(0, grabber.lengthInTime)
         audioFormat = AudioFormat(
             AudioFormat.Encoding.PCM_SIGNED,
             grabber.sampleRate.toFloat(),
@@ -64,46 +75,80 @@ class VideoPlayerImpl(val gs: GraphicService) {
         line!!.start()
     }
 
-    fun startVideoPlayer(context: MutableList<View>) {
-        image = Image(modifier = Modifier.fillMaxSize().onClick {
-            stopPlayer()
-        }, image = lastImage, parent = context)
+    fun playerUI(parent: MutableList<View>) {
+        Column(
+            modifier = Modifier.fillMaxSize().background(Color.TRANSPARENT),
+            verticalArrangement = VerticalArrangement.SpaceEvenly(),
+            parent = parent
+        ).layout {
+            Row(modifier = Modifier.fillMaxSize().background(Color.TRANSPARENT), this)
+            Row(
+                modifier = Modifier.fillMaxSize().background(Color.TRANSPARENT),
+                horizontalArrangement = HorizontalArrangement.Center(),
+                verticalAlignment = VerticalAlignment.Center(),
+                parent = this
+            ).layout {
+                Text(modifier = Modifier.size(100).onClick {
+                    currentTimestamp -= 10000000
+                }, text = "<-", textSize = 25, parent = this)
+                Text(modifier = Modifier.height(200).width(300), text = "Остановлено", textSize = 25, parent = this)
+                Text(modifier = Modifier.size(100).onClick {
+                    currentTimestamp += 10000000
+                }, text = "->", textSize = 25, parent = this)
+            }
+            Row(modifier = Modifier.fillMaxSize().background(Color.TRANSPARENT), this)
+        }
+    }
 
-        CoroutineScope(Dispatchers.IO).launch {
+    fun startVideoPlayer() {
+        gs.injectUI {
+            image = Image(modifier = Modifier.fillMaxSize().onClick {
+                stopPlayer()
+                image!!.layout {
+                    if (stopped) {
+                        playerUI(this)
+                    } else {
+                        this.clear()
+                    }
+                }
+                gs.redraw()
+
+            }, image = lastImage, parent = this)
+        }
+        Thread {
             while (true) {
                 try {
                     val frame = grabber.grab()
-                    when {
-                        frame.samples != null && line != null -> {
-                            val shortBuffer = frame.samples[0] as ShortBuffer
-                            val shorts = ShortArray(shortBuffer.remaining())
-                            shortBuffer.get(shorts)
-                            shortBuffer.rewind()
+
+                    if (frame.samples != null && line != null) {
+                        val shortBuffer = frame.samples[0] as ShortBuffer
+                        val shorts = ShortArray(shortBuffer.remaining())
+                        shortBuffer.get(shorts)
+                        shortBuffer.rewind()
 
 
-                            val bytes = ByteArray(shorts.size * 2)
-                            for (i in shorts.indices) {
-                                bytes[i * 2] = (shorts[i].toInt() and 0xFF).toByte()
-                                bytes[i * 2 + 1] = (shorts[i].toInt() shr 8 and 0xFF).toByte()
-                            }
-                            line!!.write(bytes, 0, bytes.size) // ← вот что забыли
+                        val bytes = ByteArray(shorts.size * 2)
+                        for (i in shorts.indices) {
+                            bytes[i * 2] = (shorts[i].toInt() and 0xFF).toByte()
+                            bytes[i * 2 + 1] = (shorts[i].toInt() shr 8 and 0xFF).toByte()
                         }
+                        line!!.write(bytes, 0, bytes.size) // ← вот что забыли
+                    }
 
-                        frame.image != null -> {
-                            lastImage = converter.convert(frame)
-                            if (image != null) {
-                                image!!.image = org.jetbrains.skia.Image.makeFromBitmap(lastImage!!.toBitmap())
-                                gs.redraw()
-                                frame.close()
-                                delay(33)
-                            }
+                    if (frame.image != null) {
+                        lastImage = converter.convert(frame)
+                        if (image != null) {
+                            image!!.image = lastImage?.toImage()
+                            gs.redraw()
+                            frame.close()
+                            Thread.sleep(33)
                         }
                     }
                 } catch (e: Exception) {
                     continue
                 }
             }
-        }
+        }.start()
     }
 
     fun stopPlayer() {
@@ -112,7 +157,7 @@ class VideoPlayerImpl(val gs: GraphicService) {
             line!!.stop()
             currentTimestamp = grabber.timestamp
             grabber.stop()
-        }else{
+        } else {
             line!!.start()
             grabber.start()
             grabber.timestamp = currentTimestamp

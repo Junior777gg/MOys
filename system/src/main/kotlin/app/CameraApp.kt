@@ -29,7 +29,7 @@ import javax.imageio.ImageIO
 class CameraApp(
     override val gs: GraphicService,
     override val storage: StorageService,
-    override val deviceManager: DeviceManager
+    override val deviceManager: DeviceManager, override var lastState: MutableList<View>?
 ) : Activity {
     val player = VideoPlayerImpl(gs)
     init {
@@ -46,7 +46,7 @@ class CameraApp(
     }
 
     fun MutableList<View>.buildGeneralUI(){
-        player.startVideoPlayer(this)
+        player.startVideoPlayer()
         Column(modifier = Modifier.fillMaxSize().background(Color.TRANSPARENT).paddingBottom(100), verticalArrangement = VerticalArrangement.Bottom(), parent = this).layout {
             Row(modifier = Modifier.fillMaxWidth().height(100).background(Color.WHITE), horizontalArrangement = HorizontalArrangement.SpaceEvenly(), parent = this).layout {
                 Button(modifier = Modifier.size(70).background(Color.RED).onClick {

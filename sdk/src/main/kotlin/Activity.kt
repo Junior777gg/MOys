@@ -3,6 +3,7 @@ import service.DeviceManager
 import service.StorageService
 
 interface Activity {
+    var lastState: MutableList<View>?
     val gs : GraphicService
     val storage : StorageService
     val deviceManager : DeviceManager

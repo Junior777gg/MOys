@@ -86,9 +86,9 @@ class SystemLauncher(
             label(
                 icon = File("${Mother.systemPath}/install/calculator/icon.png"),
                 click = {
-                    val act=CalculatorApp(graphicService, StorageServiceImpl(), deviceManager)
-                    graphicService.setActivity(act)
+                    val act=CalculatorApp(graphicService, StorageServiceImpl(), deviceManager, null)
                     act.main()
+                    graphicService.setActivity(act)
                 },
                 appName = "Калькулятор"
             )
@@ -97,9 +97,9 @@ class SystemLauncher(
             label(
                 icon = File("${Mother.systemPath}/install/settings/icon.png"),
                 click = {
-                    val act=SettingsApp(mother, graphicService, StorageServiceImpl(), deviceManager)
-                    graphicService.setActivity(act)
+                    val act=SettingsApp(mother, graphicService, StorageServiceImpl(), deviceManager, null)
                     act.main()
+                    graphicService.setActivity(act)
                 },
                 appName = "Настройки"
             )
@@ -108,9 +108,9 @@ class SystemLauncher(
             label(
                 icon = File("${Mother.systemPath}/install/storage/icon.png"),
                 click = {
-                    val act=StorageApp(mother, graphicService, StorageServiceImpl(), deviceManager)
-                    graphicService.setActivity(act)
+                    val act=StorageApp(mother, graphicService, StorageServiceImpl(), deviceManager, null)
                     act.main()
+                    graphicService.setActivity(act)
                 },
                 appName = "Проводник"
             )
@@ -119,9 +119,9 @@ class SystemLauncher(
             label(
                 icon = File("${Mother.systemPath}/install/terminal/icon.png"),
                 click = {
-                    val act= TerminalApp(mother, graphicService, StorageServiceImpl(), deviceManager)
-                    graphicService.setActivity(act)
+                    val act= TerminalApp(mother, graphicService, StorageServiceImpl(), deviceManager, null)
                     act.main()
+                    graphicService.setActivity(act)
                 },
                 appName = "Терминал"
             )
@@ -142,9 +142,9 @@ class SystemLauncher(
         labels.add({
             label(
                 click = {
-                    val act= CameraApp(graphicService, StorageServiceImpl(), deviceManager)
-                    graphicService.setActivity(act)
+                    val act= CameraApp(graphicService, StorageServiceImpl(), deviceManager, null)
                     act.main()
+                    graphicService.setActivity(act)
                 },
                 appName = "Камера"
             )
@@ -152,9 +152,9 @@ class SystemLauncher(
         labels.add({
             label(
                 click = {
-                    val act=TestApp(graphicService, StorageServiceImpl(), deviceManager)
-                    graphicService.setActivity(act)
+                    val act=TestApp(graphicService, StorageServiceImpl(), deviceManager, null)
                     act.main()
+                    graphicService.setActivity(act)
                 },
                 appName = "Testing App"
             )

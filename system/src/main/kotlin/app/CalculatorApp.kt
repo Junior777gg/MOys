@@ -23,7 +23,7 @@ import modifier.width
 class CalculatorApp(
     override val gs: GraphicService,
     override val storage: StorageService,
-    override val deviceManager: DeviceManager
+    override val deviceManager: DeviceManager, override var lastState: MutableList<View>?
 ) : Activity {
 
     private var display = "0"
