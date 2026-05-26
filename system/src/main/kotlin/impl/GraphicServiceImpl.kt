@@ -8,26 +8,30 @@ import View
 import common.Bounds
 import common.Log
 import common.Stack
-import common.SystemConfig
 import common.Vec2i
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import modifier.FillMaxHeight
 import modifier.Height
+import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Canvas
+import org.jetbrains.skia.ColorAlphaType
+import org.jetbrains.skia.ColorType
+import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skiko.SkiaLayer
 import org.jetbrains.skiko.SkikoView
 import service.GraphicService
 import java.awt.Dimension
-import java.awt.Rectangle
-import java.awt.Robot
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionAdapter
 import java.awt.image.BufferedImage
+import java.awt.image.DataBufferInt
 import java.io.File
+import java.nio.ByteBuffer
+import javax.imageio.ImageIO
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
 
@@ -66,12 +70,16 @@ class GraphicServiceImpl : GraphicService {
 
     private val lazyColumn = mutableListOf<LazyColumn>()
 
-    //After how much time click counts as hold
+    //After how much time click counts as hold (comment from V2)
     private val cursorHoldThreshold = 400L
     private var cursorHoldTimestamp = 0L
     private var isMouseDragged = false
     private var lastMouseY = 0.0
     var focusedActivity: Activity? = null
+
+    //Screenshoting.
+    private var saveScreenshot = false
+    private var screenshotPath = ""
 
     private val renderer = Renderer(this, bounds, lazyColumn, getScreenHeight(), getScreenWidth())
     private val navigation = SystemNavigation(this)
@@ -98,10 +106,64 @@ class GraphicServiceImpl : GraphicService {
                 renderer.screenHeight = height
 
                 if (viewTree.isEmpty()) return
+
+                // Изменения из V2: Новая система расчета дерева рендеринга и анимаций
+                renderer.currentRenderTree.clear()
                 lazyColumn.clear()
                 bounds.clear()
                 viewTree.forEach {
-                    renderer.parse(canvas, it)
+                    renderer.calculate(it)
+                }
+
+                renderer.currentRenderTree.forEach { renderNodes ->
+                    renderer.draw(canvas, renderNodes)
+                }
+
+                renderer.currentAnimations.forEach { animator, state ->
+                    if (state.update()) {
+                        null
+                    } else {
+                        renderer.draw(canvas, renderer.mapOfNodes[animator.parentView]!!)
+                        redraw()
+                    }
+                }
+
+                // Логика создания скриншотов из V1 (сохранена строго как в V1)
+                if(saveScreenshot) {
+                    saveScreenshot=false
+                    val screenshotBuffer = skikoLayer.screenshot()
+                    if (screenshotBuffer != null) {
+                        //Run on other thread to not take up additional render time.
+                        Thread {
+                            try {
+                                //Get raw BGRA byte channels.
+                                val bytes=screenshotBuffer.peekPixels()?.buffer?.bytes ?: return@Thread
+                                //Instantiate image buffer.
+                                val bufferedImage=BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
+                                val rasterData=(bufferedImage.raster.dataBuffer as DataBufferInt).data
+                                //Process raw pixels manually.
+                                //Skiko output format: Byte 0=B, Byte 1=G, Byte 2=R, Byte 3=A.
+                                val size=width * height
+                                for(i in 0 until size) {
+                                    val byteOffset=i * 4
+                                    if (byteOffset + 3 >= bytes.size) break
+                                    //Offset bytes and get their pixel color value.
+                                    val b=bytes[byteOffset+0].toInt() and 0xFF
+                                    val g=bytes[byteOffset+1].toInt() and 0xFF
+                                    val r=bytes[byteOffset+2].toInt() and 0xFF
+                                    //val a = bytes[byteOffset + 3].toInt() and 0xFF //Isn't needed for RGB picture.
+                                    //Pack channels into Java's standard packed INT representation (0xRRGGBB).
+                                    rasterData[i]=(r shl 16) or (g shl 8) or b
+                                }
+                                //Write screenshot to given file.
+                                ImageIO.write(bufferedImage, "png", File(screenshotPath))
+                                Log.info("JFrame Image saved to $screenshotPath")
+                            } catch (e: Exception) {
+                                Log.error("JFrame Image couldn't be captured")
+                                e.printStackTrace()
+                            }
+                        }.start()
+                    }
                 }
             }
         }
@@ -158,8 +220,11 @@ class GraphicServiceImpl : GraphicService {
             override fun keyPressed(e: KeyEvent?) {
                 if (e?.keyChar == null) return
                 val key = e.keyChar
-                if (key == 'q') popBackStack()
-                else if (key == 'w') clearStack()
+                when (key) {
+                    'q' -> popBackStack()
+                    'w' -> clearStack()
+                    'h' -> takeScreenshot("${systemPath}/screenshot.png")
+                }
                 Log.dbg("Pressed key '$key'")
             }
         })
@@ -248,8 +313,18 @@ class GraphicServiceImpl : GraphicService {
         }
     }
 
+    //Basically does a screenshot.
+    fun takeScreenshot(path: String) {
+        screenshotPath=path
+        saveScreenshot=true
+        skikoLayer.needRedraw()
+    }
+
     //Sets the content of the screen. If itIsNewScreen=true, adds the screen to the navigation stack
     override fun setContent(itIsNewScreen: Boolean, lambda: MutableList<View>.() -> Unit) {
+        // Изменение из V2: очистка анимаций
+        renderer.currentAnimations.clear()
+
         viewTree.clear()
         lazyColumn.clear()
         viewTree.lambda()

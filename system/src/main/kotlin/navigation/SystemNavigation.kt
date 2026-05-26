@@ -17,6 +17,7 @@ import modifier.fillMaxSize
 import modifier.fillMaxWidth
 import modifier.height
 import modifier.onClick
+import modifier.onHold
 import modifier.padding
 import modifier.size
 import modifier.width
@@ -45,33 +46,36 @@ class SystemNavigation(val graphicService: GraphicServiceImpl) {
             ).layout {
                 Image(
                     modifier = Modifier.size(50).onClick {
-                        if (onTabs) {
-                            onTabs = false
-                            graphicService.popBackStack()
-                        } else {
-                            onTabs = false
-                            graphicService.popBackStack()
-                        }
+                        onTabs = false
+                        graphicService.popBackStack()
                     },
-                    file = File(System.getProperty("user.home") + "/MOys/data/launcher/navigation/back.png"),
+                    file = File("${Mother.installPath}/launcher/res/navigation/back.png"),
                     parent = this
                 ).layout {}
                 Image(
                     modifier = Modifier.size(50).onClick {
-                        if (onTabs) {
+                        onTabs = false
+                        graphicService.clearStack()
+                        graphicService.redraw()
+                    },
+                    file = File("${Mother.installPath}/launcher/res/navigation/home.png"),
+                    parent = this
+                ).layout {}
+                Image(
+                    modifier = Modifier.size(50).onClick {
+                        if(onTabs) {
                             onTabs = false
-                            graphicService.activityStack.clear()
-                            graphicService.clearStack()
+                            graphicService.popBackStack()
                         } else {
                             onTabs = true
                             graphicService.setContent(true) {
                                 graphicService.focusedActivity = null
                                 this.showTabs()
                             }
-                            graphicService.redraw()
                         }
+                        graphicService.redraw()
                     },
-                    file = File(System.getProperty("user.home") + "/MOys/data/launcher/navigation/home.png"),
+                    file = File("${Mother.installPath}/launcher/res/navigation/tabs.png"),
                     parent = this
                 ).layout {}
             }
@@ -110,16 +114,39 @@ class SystemNavigation(val graphicService: GraphicServiceImpl) {
             LazyColumn(modifier = Modifier.fillMaxSize().background(Color.TRANSPARENT),this).layout {
                 graphicService.activityStack.values.forEach{activity ->
                     Column(modifier = Modifier.size(400).padding(10).onClick {
-                        graphicService.clearStack()
-                        graphicService.focusedActivity = activity
-                        graphicService.setContent(true) {
-                            this.addAll(activity.lastState!!.toMutableList())
+                        onTabs = false
+                        if(graphicService.focusedActivity?.javaClass!=activity.javaClass) {
+                            graphicService.clearStack()
+                            graphicService.focusedActivity = activity
+                            graphicService.setContent(true) {
+                                this.addAll(activity.lastState!!.toMutableList())
+                            }
+                        } else graphicService.popBackStack()
+                        graphicService.redraw()
+                    }.onHold {
+                        graphicService.activityStack.remove(activity.javaClass)
+                        if(graphicService.focusedActivity?.javaClass==activity.javaClass) {
+                            graphicService.clearStack()
+                        } else {
+                            graphicService.popBackStack()
+                            graphicService.setContent(true) {
+                                this.showTabs()
+                            }
                         }
                         graphicService.redraw()
-                        onTabs = false
                     }, parent = this).layout {
-                        Text(modifier = Modifier.fillMaxSize(), text = activity.javaClass.name, textSize = 17 , textColor = Color.BLACK ,parent = this)
+                        // Изменение из 2 варианта: textSize увеличен с 17 до 19
+                        Text(modifier = Modifier.fillMaxSize(), text = activity.javaClass.name, textSize = 19 , textColor = Color.BLACK ,parent = this)
                     }
+                }
+                Column(modifier = Modifier.width(400).height(100).padding(10).onClick {
+                    onTabs = false
+                    graphicService.activityStack.clear()
+                    graphicService.clearStack()
+                    graphicService.redraw()
+                }, parent = this).layout {
+                    // Изменение из 2 варианта: textSize увеличен с 17 до 19 для единообразия
+                    Text(modifier = Modifier.fillMaxSize(), text="Close all", textSize = 19 , textColor = Color.BLACK ,parent = this)
                 }
             }
         }

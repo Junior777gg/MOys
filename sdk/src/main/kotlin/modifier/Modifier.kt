@@ -1,5 +1,6 @@
 package modifier
 
+import Animator
 import common.Color
 
 interface ModifierElements
@@ -34,6 +35,8 @@ data class OnClick(val onClick: () -> Unit) : ModifierElements
 
 data class OnHold(val onHold: () -> Unit) : ModifierElements
 
+data class Animation(val animator: Animator) : ModifierElements
+
 open class Modifier private constructor(
     val elements : List<ModifierElements> = listOf()
     ){
@@ -64,5 +67,6 @@ fun Modifier.paddingLeft(padding: Int) = add(PaddingLeft(padding))
 fun Modifier.fillMaxSize() = add(FillMaxSize())
 fun Modifier.fillMaxWidth() = add(FillMaxWidth())
 fun Modifier.fillMaxHeight() = add(FillMaxHeight())
+fun Modifier.animation(animator: Animator) = add(Animation(animator))
 
 

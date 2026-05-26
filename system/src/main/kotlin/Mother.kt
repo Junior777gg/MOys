@@ -44,7 +44,7 @@ class Mother(
             get()="$systemPath/libs"
 
         /*These paths are private and kept behind API usage*/
-        private val installPath: String
+        val installPath: String
             get()="$systemPath/install"
         private val registerPath: String
             get()="$systemPath/register"

@@ -1,7 +1,23 @@
+import Animator.Companion.FADEIN
+import Animator.Companion.FADEOUT
+import Animator.Companion.NONE
+import Animator.Companion.ROTATE
+import Animator.Companion.SCALE_X
+import Animator.Companion.SCALE_Y
+import Animator.Companion.SHAKE
+import Animator.Companion.SLIDE_HORIZONTALLY
+import Animator.Companion.SLIDE_VERTICALLY
 import common.Bounds
 import common.Log
 import common.Color
 import impl.GraphicServiceImpl
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import modifier.Animation
 import modifier.Background
 import modifier.CornerRadius
 import modifier.FillMaxHeight
@@ -22,6 +38,7 @@ import modifier.TextAlignment
 import modifier.VerticalAlignment
 import modifier.VerticalArrangement
 import modifier.Width
+import modifier.background
 import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.FontMgr
 import org.jetbrains.skia.Paint
@@ -34,12 +51,27 @@ import org.jetbrains.skia.paragraph.FontCollection
 import org.jetbrains.skia.paragraph.ParagraphBuilder
 import org.jetbrains.skia.paragraph.ParagraphStyle
 import org.jetbrains.skia.paragraph.TextStyle
+import org.jetbrains.skia.svg.SVGCanvas
+import java.time.LocalTime
+import kotlin.math.E
+import kotlin.math.log
+import kotlin.math.log2
+import kotlin.math.roundToInt
+import kotlin.random.Random
 
 
 /**
  * Renderer. Traverses the View tree and renders elements using OpenGL.
  * Caches fonts and textures for performance.
  */
+data class RenderNodes(
+    val x1: Float,
+    val y1: Float,
+    val x2: Float,
+    val y2: Float,
+    val view: View
+)
+
 class Renderer(
     val gs: GraphicServiceImpl,
     val bounds: MutableList<Bounds>,
@@ -47,17 +79,24 @@ class Renderer(
     var screenHeight: Int,
     var screenWidth: Int,
 ) {
-    private val imageCache=HashMap<String, org.jetbrains.skia.Image>()
+    private val imageCache = HashMap<String, org.jetbrains.skia.Image>()
     private fun getImage(file: java.io.File): org.jetbrains.skia.Image {
         return imageCache.getOrPut(file.absolutePath) {
             org.jetbrains.skia.Image.makeFromEncoded(file.readBytes())
         }
     }
+
     fun clearCacheFull() {
         imageCache.clear()
     }
-    private lateinit var fontColection : FontCollection
-    private var initializedFonts=false
+
+    private lateinit var fontColection: FontCollection
+    private var initializedFonts = false
+
+    val currentRenderTree = mutableListOf<RenderNodes>()
+    val mapOfNodes = mutableMapOf<View, RenderNodes>()
+    val animatedViews = mutableListOf<View>()
+    val currentAnimations = mutableMapOf<Animator, AnimationState>()
 
     /**
      * Recursively traverses the View-tree, calculates the coordinates (layout),
@@ -67,8 +106,14 @@ class Renderer(
      *  centeringWidth — the horizontal alignment of children (LEFT, CENTER, RIGHT)
      *  centeringHeight — the vertical alignment of children (TOP, CENTER, BOTTOM)
      */
-    fun parse(
-        canvas: Canvas,
+    fun startAnimation(animator: Animator, view: View) {
+        currentAnimations[animator!!] = AnimationState(animator, System.nanoTime())
+        animator.parentView = view
+        gs.redraw()
+        println(currentAnimations.values)
+    }
+
+    fun calculate(
         view: View,
         avx1: Float = 0.0f,
         avy1: Float = 0.0f,
@@ -79,11 +124,9 @@ class Renderer(
         val width = modifiers.get<Width>()?.width
         val height = modifiers.get<Height>()?.height
         val size = modifiers.get<Size>()?.size
-        val cornerRadius = modifiers.get<CornerRadius>()?.cornerRadius ?: 0
         val fillMaxSize = modifiers.get<FillMaxSize>()
         val fillMaxWidth = modifiers.get<FillMaxWidth>()
         val fillMaxHeight = modifiers.get<FillMaxHeight>()
-        val backgroundColor = modifiers.get<Background>()?.color ?: Color.WHITE
         val paddingTop = modifiers.get<PaddingTop>()?.top ?: 0
         val paddingLeft = modifiers.get<PaddingLeft>()?.left ?: 0
         val paddingRight = modifiers.get<PaddingRight>()?.right ?: 0
@@ -91,12 +134,9 @@ class Renderer(
         val padding = modifiers.get<Padding>()?.padding ?: 0
         val onClick = modifiers.get<OnClick>()?.onClick
         val onHold = modifiers.get<OnHold>()?.onHold
-
-        if(!initializedFonts) {
-            initializedFonts=true
-            fontColection=FontCollection().apply {
-                setDefaultFontManager(FontMgr.default)
-            }
+        val animation = modifiers.get<Animation>()?.animator
+        if (animation != null) {
+            animatedViews.add(view)
         }
 
         if (view is LazyColumn) {
@@ -142,6 +182,357 @@ class Renderer(
         } else if (onHold != null) {
             bounds.add(Bounds(x1, y1, x2, y2, onClick, onHold))
         }
+        currentRenderTree.add(RenderNodes(x1, y1, x2, y2, view))
+        mapOfNodes.put(view, RenderNodes(x1, y1, x2, y2, view))
+        if (view.children.isEmpty()) {
+            return
+        } else {
+            when (view) {
+                is LazyColumn -> {
+                    var currenty1 = y1 + view.offset.toFloat()
+
+                    view.children.forEach {
+                        var currentx1 = 0.0f
+                        var currentWidth = 0.0f
+                        var currentHeight = 0.0f
+                        val heightChild = it.modifier.get<Height>()?.height
+                        val widthChild = it.modifier.get<Width>()?.width
+                        val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
+                        val fillMaxWidthChild = it.modifier.get<FillMaxWidth>()
+                        val sizeChild = it.modifier.get<Size>()?.size
+                        val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
+                        if (widthChild != null) {
+                            currentWidth = widthChild.toFloat()
+                        }
+                        if (heightChild != null) {
+                            currentHeight = heightChild.toFloat()
+                        }
+                        if (fillMaxWidthChild != null) {
+                            currentWidth = x2 - x1
+                        }
+                        if (fillMaxHeightChild != null) {
+                            currentHeight = y2 - y1
+                        }
+                        if (sizeChild != null) {
+                            currentWidth = sizeChild.toFloat()
+                            currentHeight = sizeChild.toFloat()
+                        }
+                        if (fillMaxSizeChild != null) {
+                            currentHeight = x2 - x1
+                            currentWidth = x2 - x1
+                        }
+                        when (view.horizontalAlignment) {
+                            is HorizontalAlignment.Left -> {
+                                currentx1 = x1
+                            }
+
+                            is HorizontalAlignment.Right -> {
+                                currentx1 = x2 - currentWidth
+                            }
+
+                            is HorizontalAlignment.Center -> {
+                                currentx1 = x1 + ((x2 - x1) - currentWidth) / 2
+                            }
+                        }
+
+                        if ((currenty1 + currentHeight) < y1 || currenty1 > y2) {
+                            null
+                        } else {
+                            calculate(
+                                it, currentx1, currenty1,
+                                x2, y2
+                            )
+                        }
+                        currenty1 += currentHeight
+                    }
+                }
+
+                is Column -> {
+                    var currenty1 = 0.0f
+                    var gap = 0.0f
+                    var childrenHeight = 0.0f
+                    var heightSmallChildren = 0.0f
+                    var fillMaxHeightChildCount = 0
+                    view.children.forEach {
+                        val heightChild = it.modifier.get<Height>()?.height
+                        val sizeChild = it.modifier.get<Size>()?.size
+                        val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
+                        val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
+                        if (heightChild != null) {
+                            childrenHeight += heightChild.toFloat()
+                            heightSmallChildren += heightChild.toFloat()
+                        } else if (sizeChild != null) {
+                            childrenHeight += sizeChild.toFloat()
+                            heightSmallChildren += sizeChild.toFloat()
+                        } else if (fillMaxHeightChild != null) {
+                            childrenHeight = y2 - y1
+                            fillMaxHeightChildCount++
+                        } else if (fillMaxSizeChild != null) {
+                            childrenHeight = y2 - y1
+                            fillMaxHeightChildCount++
+                        }
+                    }
+                    when (view.verticalArrangement) {
+                        is VerticalArrangement.Bottom -> {
+                            currenty1 = y2 - childrenHeight
+                        }
+
+                        is VerticalArrangement.Top -> {
+                            currenty1 = y1
+                        }
+
+                        is VerticalArrangement.Center -> {
+                            currenty1 = y1 + ((y2 - y1) - childrenHeight) / 2
+                        }
+
+                        is VerticalArrangement.SpaceEvenly -> {
+                            gap = ((y2 - y1) - childrenHeight) / (view.children.size.toFloat() + 1.0f)
+                            currenty1 = y1 + gap
+                        }
+
+                    }
+                    view.children.forEach {
+                        var currentx1 = 0.0f
+                        var currentWidth = 0.0f
+                        var currentHeight = 0.0f
+                        val heightChild = it.modifier.get<Height>()?.height
+                        val widthChild = it.modifier.get<Width>()?.width
+                        val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
+                        val fillMaxWidthChild = it.modifier.get<FillMaxWidth>()
+                        val sizeChild = it.modifier.get<Size>()?.size
+                        val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
+                        if (widthChild != null) {
+                            currentWidth = widthChild.toFloat()
+                        }
+                        if (heightChild != null) {
+                            currentHeight = heightChild.toFloat()
+                        }
+                        if (sizeChild != null) {
+                            currentWidth = sizeChild.toFloat()
+                            currentHeight = sizeChild.toFloat()
+                        }
+                        if (fillMaxHeightChild != null) {
+                            currentHeight = (childrenHeight - heightSmallChildren) / fillMaxHeightChildCount
+                        }
+                        if (fillMaxWidthChild != null) {
+                            currentWidth = x2 - x1
+                        }
+                        if (fillMaxSizeChild != null) {
+                            currentHeight = (childrenHeight - heightSmallChildren) / fillMaxHeightChildCount
+                            currentWidth = x2 - x1
+                        }
+                        when (view.horizontalAlignment) {
+                            is HorizontalAlignment.Left -> {
+                                currentx1 = x1
+                            }
+
+                            is HorizontalAlignment.Right -> {
+                                currentx1 = x2 - currentWidth
+                            }
+
+                            is HorizontalAlignment.Center -> {
+                                currentx1 = x1 + ((x2 - x1) - currentWidth) / 2
+                            }
+                        }
+                        calculate(
+                            it, currentx1, currenty1,
+                            x2, y2
+                        )
+                        currenty1 += currentHeight + gap
+                    }
+                }
+
+                //Row
+                is Row -> {
+                    var gap = 0.0f
+                    var currentx1 = 0.0f
+                    var childrenWidth = 0.0f
+                    var widthSmallChildren = 0.0f
+                    var fillMaxWidthChildCount = 0
+                    view.children.forEach {
+                        val widthChild = it.modifier.get<Width>()?.width
+                        val fillMaxWidthChild = it.modifier.get<FillMaxWidth>()
+                        val sizeChild = it.modifier.get<Size>()?.size
+                        val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
+                        if (widthChild != null) {
+                            childrenWidth += widthChild
+                            widthSmallChildren += widthChild
+                        } else if (fillMaxWidthChild != null) {
+                            childrenWidth = x2 - x1
+                            fillMaxWidthChildCount++
+                        } else if (sizeChild != null) {
+                            childrenWidth += sizeChild
+                            widthSmallChildren += sizeChild
+                        } else if (fillMaxSizeChild != null) {
+                            childrenWidth = x2 - x1
+                            fillMaxWidthChildCount++
+                        }
+                    }
+                    when (view.horizontalArrangement) {
+                        is HorizontalArrangement.Left -> {
+                            currentx1 = x1
+                        }
+
+                        is HorizontalArrangement.Right -> {
+                            currentx1 = x2 - childrenWidth
+                        }
+
+                        is HorizontalArrangement.Center -> {
+                            currentx1 = x1 + ((x2 - x1) - childrenWidth) / 2
+                        }
+
+                        is HorizontalArrangement.SpaceEvenly -> {
+                            gap = ((x2 - x1) - childrenWidth) / (view.children.size.toFloat() + 1.0f)
+                            currentx1 = x1 + gap
+                        }
+
+                    }
+                    view.children.forEach {
+                        var currenty1 = 0.0f
+                        var currentWidth = 0.0f
+                        var currentHeight = 0.0f
+                        val heightChild = it.modifier.get<Height>()?.height
+                        val widthChild = it.modifier.get<Width>()?.width
+                        val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
+                        val fillMaxWidthChild = it.modifier.get<FillMaxWidth>()
+                        val sizeChild = it.modifier.get<Size>()?.size
+                        val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
+                        if (widthChild != null) {
+                            currentWidth = widthChild.toFloat()
+                        }
+                        if (heightChild != null) {
+                            currentHeight = heightChild.toFloat()
+                        }
+                        if (sizeChild != null) {
+                            currentWidth = sizeChild.toFloat()
+                            currentHeight = sizeChild.toFloat()
+                        }
+                        if (fillMaxWidthChild != null) {
+                            currentWidth = (childrenWidth - widthSmallChildren) / fillMaxWidthChildCount
+                        }
+                        if (fillMaxHeightChild != null) {
+                            currentHeight = y2 - y1
+                        }
+                        if (fillMaxSizeChild != null) {
+                            currentHeight = x2 - x1
+                            currentWidth = (childrenWidth - widthSmallChildren) / fillMaxWidthChildCount
+                        }
+                        when (view.verticalAlignment) {
+                            is VerticalAlignment.Top -> {
+                                currenty1 = y1
+                            }
+
+                            is VerticalAlignment.Bottom -> {
+                                currenty1 = y2 - currentHeight
+                            }
+
+                            is VerticalAlignment.Center -> {
+                                currenty1 = y1 + ((y2 - y1) - currentHeight) / 2
+                            }
+                        }
+                        calculate(
+                            it, currentx1, currenty1,
+                            x2, y2
+                        )
+                        currentx1 += currentWidth + gap
+                    }
+                }
+
+                else -> {
+                    view.children.forEach {
+                        calculate(
+                            it, x1, y1,
+                            x2, y2
+                        )
+
+                    }
+                }
+            }
+        }
+    }
+
+    fun draw(canvas: Canvas, renderNode: RenderNodes) {
+        if (!initializedFonts) {
+            initializedFonts = true
+            fontColection = FontCollection().apply {
+                setDefaultFontManager(FontMgr.default)
+            }
+        }
+        var x1 = renderNode.x1
+        var y1 = renderNode.y1
+        var x2 = renderNode.x2
+        var y2 = renderNode.y2
+        val view = renderNode.view
+        val modifiers = view.modifier
+        val animator = modifiers.get<Animation>()?.animator
+        var backgroundColor = modifiers.get<Background>()?.color ?: Color.WHITE
+        val cornerRadius = modifiers.get<CornerRadius>()?.cornerRadius ?: 0
+        if (animator != null) {
+            val animators = animator.animators ?: arrayOf(animator)
+            animators.forEach { animator ->
+                if (currentAnimations[animator] == null) {
+                    startAnimation(animator,view)
+                }
+            }
+            animators.forEach { animator ->
+                val  progress = currentAnimations[animator]?.progress ?: return@forEach
+                when (animator.type) {
+                    NONE -> {}
+
+                    FADEOUT -> {
+                        backgroundColor = Color(
+                            backgroundColor.r,
+                            backgroundColor.g,
+                            backgroundColor.b,
+                            (backgroundColor.a * (1f - progress)).roundToInt()
+                        )
+                    }
+
+                    FADEIN -> {
+                        backgroundColor = Color(
+                            backgroundColor.r,
+                            backgroundColor.g,
+                            backgroundColor.b,
+                            (backgroundColor.a * progress).roundToInt()
+                        )
+                    }
+
+                    SLIDE_HORIZONTALLY -> {
+                        x1 = renderNode.x1 + animator.argument as Int * progress
+                        x2 = renderNode.x2 + animator.argument as Int * progress
+                    }
+
+                    SLIDE_VERTICALLY -> {
+                        y1 = renderNode.y1 + animator.argument as Int * progress
+                        y2 = renderNode.y2 + animator.argument as Int * progress
+                    }
+
+                    SCALE_X -> {
+                        if ((animator.argument as Int) < 0){
+                            x1 = renderNode.x1 + animator.argument as Int * progress
+                        }else{
+                            x2 = renderNode.x2 + animator.argument as Int * progress
+                        }
+                    }
+
+                    SCALE_Y -> {
+                        if ((animator.argument as Int) < 0){
+                            y1 = renderNode.y1 + animator.argument as Int * progress
+                        }else{
+                            y2 = renderNode.y2 + animator.argument as Int * progress
+                        }
+                    }
+
+                    ROTATE -> {}
+
+                    SHAKE -> {
+
+                    }
+                }
+            }
+        }
+
+
         when (view) {
             is Button, is Box, is Column, is Row, is LazyColumn -> {
                 canvas.drawRRect(
@@ -261,280 +652,12 @@ class Renderer(
                     )
                 } else if (view.image != null) {
                     canvas.drawImageRect(
-                        image = view.image!!as org.jetbrains.skia.Image,
+                        image = view.image!! as org.jetbrains.skia.Image,
                         dst = Rect.makeXYWH(x1, y1, x2 - x1, y2 - y1),
                     )
                 }
             }
         }
 
-        if (view.children.isEmpty()) {
-            return
-        } else {
-            when (view) {
-                is LazyColumn -> {
-                    //gl.glEnable(GL2.GL_SCISSOR_TEST)
-                    //gl.glScissor(x1.toInt(), screenHeight - y2.toInt(), (x2 - x1).toInt(), (y2 - y1).toInt())
-                    var currenty1 = y1 + view.offset.toFloat()
-
-                    view.children.forEach {
-                        var currentx1 = 0.0f
-                        var currentWidth = 0.0f
-                        var currentHeight = 0.0f
-                        val heightChild = it.modifier.get<Height>()?.height
-                        val widthChild = it.modifier.get<Width>()?.width
-                        val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
-                        val fillMaxWidthChild = it.modifier.get<FillMaxWidth>()
-                        val sizeChild = it.modifier.get<Size>()?.size
-                        val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
-                        if (widthChild != null) {
-                            currentWidth = widthChild.toFloat()
-                        }
-                        if (heightChild != null) {
-                            currentHeight = heightChild.toFloat()
-                        }
-                        if (fillMaxWidthChild != null) {
-                            currentWidth = x2 - x1
-                        }
-                        if (fillMaxHeightChild != null) {
-                            currentHeight = y2 - y1
-                        }
-                        if (sizeChild != null) {
-                            currentWidth = sizeChild.toFloat()
-                            currentHeight = sizeChild.toFloat()
-                        }
-                        if (fillMaxSizeChild != null) {
-                            currentHeight = x2 - x1
-                            currentWidth = x2 - x1
-                        }
-                        when (view.horizontalAlignment) {
-                            is HorizontalAlignment.Left -> {
-                                currentx1 = x1
-                            }
-
-                            is HorizontalAlignment.Right -> {
-                                currentx1 = x2 - currentWidth
-                            }
-
-                            is HorizontalAlignment.Center -> {
-                                currentx1 = x1 + ((x2 - x1) - currentWidth) / 2
-                            }
-                        }
-
-                        if ((currenty1 + currentHeight) < y1 || currenty1 > y2) {
-                            null
-                        } else {
-                            parse(
-                                canvas, it, currentx1, currenty1,
-                                x2, y2
-                            )
-                        }
-                        currenty1 += currentHeight
-                    }
-                    //gl.glDisable(GL2.GL_SCISSOR_TEST)
-                }
-
-                is Column -> {
-                    var currenty1 = 0.0f
-                    var gap = 0.0f
-                    var childrenHeight = 0.0f
-                    var heightSmallChildren = 0.0f
-                    var fillMaxHeightChildCount = 0
-                    view.children.forEach {
-                        val heightChild = it.modifier.get<Height>()?.height
-                        val sizeChild = it.modifier.get<Size>()?.size
-                        val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
-                        val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
-                        if (heightChild != null) {
-                            childrenHeight += heightChild.toFloat()
-                            heightSmallChildren += heightChild.toFloat()
-                        } else if (sizeChild != null) {
-                            childrenHeight += sizeChild.toFloat()
-                            heightSmallChildren += sizeChild.toFloat()
-                        } else if (fillMaxHeightChild != null) {
-                            childrenHeight = y2 - y1
-                            fillMaxHeightChildCount++
-                        } else if (fillMaxSizeChild != null) {
-                            childrenHeight = y2 - y1
-                            fillMaxHeightChildCount++
-                        }
-                    }
-                    when (view.verticalArrangement) {
-                        is VerticalArrangement.Bottom -> {
-                            currenty1 = y2 - childrenHeight
-                        }
-
-                        is VerticalArrangement.Top -> {
-                            currenty1 = y1
-                        }
-
-                        is VerticalArrangement.Center -> {
-                            currenty1 = y1 + ((y2 - y1) - childrenHeight) / 2
-                        }
-
-                        is VerticalArrangement.SpaceEvenly -> {
-                            gap = ((y2 - y1) - childrenHeight) / (view.children.size.toFloat() + 1.0f)
-                            currenty1 = y1 + gap
-                        }
-
-                    }
-                    view.children.forEach {
-                        var currentx1 = 0.0f
-                        var currentWidth = 0.0f
-                        var currentHeight = 0.0f
-                        val heightChild = it.modifier.get<Height>()?.height
-                        val widthChild = it.modifier.get<Width>()?.width
-                        val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
-                        val fillMaxWidthChild = it.modifier.get<FillMaxWidth>()
-                        val sizeChild = it.modifier.get<Size>()?.size
-                        val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
-                        if (widthChild != null) {
-                            currentWidth = widthChild.toFloat()
-                        }
-                        if (heightChild != null) {
-                            currentHeight = heightChild.toFloat()
-                        }
-                        if (sizeChild != null) {
-                            currentWidth = sizeChild.toFloat()
-                            currentHeight = sizeChild.toFloat()
-                        }
-                        if (fillMaxHeightChild != null) {
-                            currentHeight = (childrenHeight - heightSmallChildren) / fillMaxHeightChildCount
-                        }
-                        if (fillMaxWidthChild != null) {
-                            currentWidth = x2 - x1
-                        }
-                        if (fillMaxSizeChild != null) {
-                            currentHeight = (childrenHeight - heightSmallChildren) / fillMaxHeightChildCount
-                            currentWidth = x2 - x1
-                        }
-                        when (view.horizontalAlignment) {
-                            is HorizontalAlignment.Left -> {
-                                currentx1 = x1
-                            }
-
-                            is HorizontalAlignment.Right -> {
-                                currentx1 = x2 - currentWidth
-                            }
-
-                            is HorizontalAlignment.Center -> {
-                                currentx1 = x1 + ((x2 - x1) - currentWidth) / 2
-                            }
-                        }
-                        parse(
-                            canvas, it, currentx1, currenty1,
-                            x2, y2
-                        )
-                        currenty1 += currentHeight + gap
-                    }
-                }
-
-                //Row
-                is Row -> {
-                    var gap = 0.0f
-                    var currentx1 = 0.0f
-                    var childrenWidth = 0.0f
-                    var widthSmallChildren = 0.0f
-                    var fillMaxWidthChildCount = 0
-                    view.children.forEach {
-                        val widthChild = it.modifier.get<Width>()?.width
-                        val fillMaxWidthChild = it.modifier.get<FillMaxWidth>()
-                        val sizeChild = it.modifier.get<Size>()?.size
-                        val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
-                        if (widthChild != null) {
-                            childrenWidth += widthChild
-                            widthSmallChildren += widthChild
-                        } else if (fillMaxWidthChild != null) {
-                            childrenWidth = x2 - x1
-                            fillMaxWidthChildCount++
-                        } else if (sizeChild != null) {
-                            childrenWidth += sizeChild
-                            widthSmallChildren += sizeChild
-                        } else if (fillMaxSizeChild != null) {
-                            childrenWidth = x2 - x1
-                            fillMaxWidthChildCount++
-                        }
-                    }
-                    when (view.horizontalArrangement) {
-                        is HorizontalArrangement.Left -> {
-                            currentx1 = x1
-                        }
-
-                        is HorizontalArrangement.Right -> {
-                            currentx1 = x2 - childrenWidth
-                        }
-
-                        is HorizontalArrangement.Center -> {
-                            currentx1 = x1 + ((x2 - x1) - childrenWidth) / 2
-                        }
-
-                        is HorizontalArrangement.SpaceEvenly -> {
-                            gap = ((x2 - x1) - childrenWidth) / (view.children.size.toFloat() + 1.0f)
-                            currentx1 = x1 + gap
-                        }
-
-                    }
-                    view.children.forEach {
-                        var currenty1 = 0.0f
-                        var currentWidth = 0.0f
-                        var currentHeight = 0.0f
-                        val heightChild = it.modifier.get<Height>()?.height
-                        val widthChild = it.modifier.get<Width>()?.width
-                        val fillMaxHeightChild = it.modifier.get<FillMaxHeight>()
-                        val fillMaxWidthChild = it.modifier.get<FillMaxWidth>()
-                        val sizeChild = it.modifier.get<Size>()?.size
-                        val fillMaxSizeChild = it.modifier.get<FillMaxSize>()
-                        if (widthChild != null) {
-                            currentWidth = widthChild.toFloat()
-                        }
-                        if (heightChild != null) {
-                            currentHeight = heightChild.toFloat()
-                        }
-                        if (sizeChild != null) {
-                            currentWidth = sizeChild.toFloat()
-                            currentHeight = sizeChild.toFloat()
-                        }
-                        if (fillMaxWidthChild != null) {
-                            currentWidth = (childrenWidth - widthSmallChildren) / fillMaxWidthChildCount
-                        }
-                        if (fillMaxHeightChild != null) {
-                            currentHeight = y2 - y1
-                        }
-                        if (fillMaxSizeChild != null) {
-                            currentHeight = x2 - x1
-                            currentWidth = (childrenWidth - widthSmallChildren) / fillMaxWidthChildCount
-                        }
-                        when (view.verticalAlignment) {
-                            is VerticalAlignment.Top -> {
-                                currenty1 = y1
-                            }
-
-                            is VerticalAlignment.Bottom -> {
-                                currenty1 = y2 - currentHeight
-                            }
-
-                            is VerticalAlignment.Center -> {
-                                currenty1 = y1 + ((y2 - y1) - currentHeight) / 2
-                            }
-                        }
-                        parse(
-                            canvas, it, currentx1, currenty1,
-                            x2, y2
-                        )
-                        currentx1 += currentWidth + gap
-                    }
-                }
-
-                else -> {
-                    view.children.forEach {
-                        parse(
-                            canvas, it, x1, y1,
-                            x2, y2
-                        )
-
-                    }
-                }
-            }
-        }
     }
 }

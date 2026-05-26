@@ -50,15 +50,15 @@ class SystemLauncher(
         companion object {
             var Instance=LauncherConfig()
             fun save() {
-                val cfg = File("${Mother.systemPath}/data/launcher/config.json")
+                val cfg = File("${Mother.systemPath}/install/launcher/config.json")
                 cfg.writeText(Json.encodeToString<LauncherConfig>(Instance))
             }
             fun load() {
-                val cfg = File("${Mother.systemPath}/data/launcher/config.json")
+                val cfg = File("${Mother.systemPath}/install/launcher/config.json")
                 if(cfg.exists()) {
                     Instance=Json.decodeFromString<LauncherConfig>(cfg.readText())
                     //Check if background exists.
-                    if(!File("${Mother.systemPath}/data/launcher/${Instance.background}").exists())
+                    if(!File("${Mother.systemPath}/install/launcher/res/${Instance.background}").exists())
                         Instance.background="backgrounds/1.png"
                 }
             }
@@ -175,8 +175,8 @@ class SystemLauncher(
     }
 
     fun MutableList<View>.screen() {
-        Image(modifier = Modifier.fillMaxSize(), File(Mother.systemPath+"/data/launcher/${getBackground()}"), parent = this).layout {
-            Column(modifier = Modifier.fillMaxSize().background(Color.TRANSPARENT),
+        Image(modifier = Modifier.fillMaxSize(), File(getBackgroundPath()), parent = this).layout {
+            Column(modifier = Modifier.fillMaxSize().padding(10).background(Color.TRANSPARENT),
                 verticalArrangement = VerticalArrangement.SpaceEvenly(),
                 horizontalAlignment = HorizontalAlignment.Center(), parent = this).layout {
                 var count = 0
@@ -209,11 +209,18 @@ class SystemLauncher(
             modifier = Modifier.padding(20).height(130).width(110)
                 .onClick { click() }.onHold { hold.invoke() } .background(Color.TRANSPARENT), this
         ).layout {
-            Image(modifier = Modifier.size(70), icon ?: File("${Mother.systemPath}/data/launcher/basic.png"), parent = this)
+            Image(modifier = Modifier.size(70), icon ?: File("${Mother.installPath}/launcher/res/basic.png"), parent = this)
             if(getTextDisplay()) Text(modifier = Modifier.width(70).height(20), text = appName, textColor = textColor, textSize = 14, parent = this)
         }
     }
 
+    fun getBackgroundPath(): String {
+        return "${Mother.installPath}/launcher/res/${getBackgroundRaw()}"
+    }
+    fun getBackgroundRaw(): String {
+        return LauncherConfig.Instance.background
+    }
+    // Метод из второй версии, добавлен для совместимости
     fun getBackground(): String {
         return LauncherConfig.Instance.background
     }
