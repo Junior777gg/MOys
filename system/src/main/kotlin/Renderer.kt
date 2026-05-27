@@ -1,3 +1,4 @@
+import Animator.Companion.COLORFADE
 import Animator.Companion.FADEIN
 import Animator.Companion.FADEOUT
 import Animator.Companion.NONE
@@ -7,6 +8,7 @@ import Animator.Companion.SCALE_Y
 import Animator.Companion.SHAKE
 import Animator.Companion.SLIDE_HORIZONTALLY
 import Animator.Companion.SLIDE_VERTICALLY
+import Animator.Companion.SLIME
 import common.Bounds
 import common.Log
 import common.Color
@@ -56,6 +58,7 @@ import java.time.LocalTime
 import kotlin.math.E
 import kotlin.math.log
 import kotlin.math.log2
+import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
@@ -65,10 +68,10 @@ import kotlin.random.Random
  * Caches fonts and textures for performance.
  */
 data class RenderNodes(
-    val x1: Float,
-    val y1: Float,
-    val x2: Float,
-    val y2: Float,
+    var x1: Float,
+    var y1: Float,
+    var x2: Float,
+    var y2: Float,
     val view: View
 )
 
@@ -107,10 +110,9 @@ class Renderer(
      *  centeringHeight — the vertical alignment of children (TOP, CENTER, BOTTOM)
      */
     fun startAnimation(animator: Animator, view: View) {
-        currentAnimations[animator!!] = AnimationState(animator, System.nanoTime())
+        currentAnimations[animator] = AnimationState(animator, System.nanoTime())
         animator.parentView = view
         gs.redraw()
-        println(currentAnimations.values)
     }
 
     fun calculate(
@@ -471,11 +473,11 @@ class Renderer(
             val animators = animator.animators ?: arrayOf(animator)
             animators.forEach { animator ->
                 if (currentAnimations[animator] == null) {
-                    startAnimation(animator,view)
+                    startAnimation(animator, view)
                 }
             }
             animators.forEach { animator ->
-                val  progress = currentAnimations[animator]?.progress ?: return@forEach
+                val progress = currentAnimations[animator]?.progress ?: return@forEach
                 when (animator.type) {
                     NONE -> {}
 
@@ -508,25 +510,40 @@ class Renderer(
                     }
 
                     SCALE_X -> {
-                        if ((animator.argument as Int) < 0){
+                        if ((animator.argument as Int) < 0) {
                             x1 = renderNode.x1 + animator.argument as Int * progress
-                        }else{
+                        } else {
                             x2 = renderNode.x2 + animator.argument as Int * progress
                         }
                     }
 
                     SCALE_Y -> {
-                        if ((animator.argument as Int) < 0){
+                        if ((animator.argument as Int) < 0) {
                             y1 = renderNode.y1 + animator.argument as Int * progress
-                        }else{
+                        } else {
                             y2 = renderNode.y2 + animator.argument as Int * progress
                         }
                     }
 
-                    ROTATE -> {}
+                    ROTATE -> {
+
+                    }
 
                     SHAKE -> {
 
+                    }
+
+                    COLORFADE -> {
+                        val destinationColor = animator.argument as Color
+                        val baseColor = backgroundColor
+                        val deltaR = destinationColor.r - baseColor.r
+                        val deltaG = destinationColor.g - baseColor.g
+                        val deltaB = destinationColor.b - baseColor.b
+                        backgroundColor = Color(
+                            backgroundColor.r + (deltaR * progress).roundToInt(),
+                            backgroundColor.g + (deltaG * progress).roundToInt(),
+                            backgroundColor.b + (deltaB * progress).roundToInt()
+                        )
                     }
                 }
             }

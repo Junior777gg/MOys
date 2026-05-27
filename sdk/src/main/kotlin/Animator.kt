@@ -15,7 +15,8 @@ class Animator(
         const val SCALE_Y = 6
         const val ROTATE = 7
         const val SHAKE = 8
-
+        const val COLORFADE = 9
+        const val SLIME = 10
 
     }
 }

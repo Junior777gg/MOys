@@ -35,6 +35,7 @@ dependencies {
 
     //Window handling.
     implementation("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:0.7.97")
+    implementation("org.jetbrains.skiko:skiko-awt-runtime-linux-aarch64:0.7.97")
 
     //MP3 playback support.
     implementation("com.googlecode.soundlibs:mp3spi:1.9.5.4")

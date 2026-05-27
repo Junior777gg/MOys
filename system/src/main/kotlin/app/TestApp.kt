@@ -52,15 +52,14 @@ class TestApp(
                         Animator(
                             0, NONE,
                             animators = arrayOf(
-                                Animator(500, Animator.SLIDE_HORIZONTALLY, argument = 500),
-                                Animator(500, Animator.SLIDE_VERTICALLY, argument = 400),
+                                Animator(100, Animator.SLIDE_HORIZONTALLY, argument = 500),
                                 Animator(1000, Animator.SHAKE)
                             )
                         )
                     ), this
                 )
                 Column(
-                    modifier = Modifier.size(100).background(Color.RED).animation(Animator(4000, Animator.SCALE_X, argument = -1000)
+                    modifier = Modifier.size(100).background(Color.CYAN).animation(Animator(4000, Animator.COLORFADE, argument = Color.PINK)
 
 
                     ), this

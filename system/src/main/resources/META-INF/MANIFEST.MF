@@ -1,94 +1,93 @@
 Manifest-Version: 1.0
 Main-Class: MainSystemServiceKt
-Class-Path: javafx-graphics-21-linux.jar tesseract-5.3.4-1.5.10-android-
- x86_64.jar javacpp-1.5.10-ios-arm64.jar leptonica-platform-1.84.1-1.5.1
- 0.jar ffmpeg-6.1.1-1.5.10-linux-arm64.jar tesseract-5.3.4-1.5.10-linux-
- arm64.jar leptonica-1.84.1-1.5.10-macosx-x86_64.jar tesseract-platform-
- 5.3.4-1.5.10.jar libfreenect-0.5.7-1.5.9-linux-ppc64le.jar librealsense
- 2-2.53.1-1.5.9-linux-arm64.jar javacpp-1.5.10.jar ffmpeg-6.1.1-1.5.10-m
- acosx-arm64.jar libfreenect-platform-0.5.7-1.5.9.jar flycapture-2.13.3.
- 31-1.5.9-linux-armhf.jar ffmpeg-6.1.1-1.5.10-android-arm64.jar javafx-w
- eb-21-linux.jar opencv-4.9.0-1.5.10-ios-x86_64.jar librealsense-1.12.4-
- 1.5.9.jar libfreenect2-0.2.0-1.5.9-windows-x86_64.jar librealsense-1.12
- .4-1.5.9-windows-x86_64.jar leptonica-1.84.1-1.5.10-linux-x86_64.jar sl
- f4j-api-1.7.36.jar leptonica-1.84.1-1.5.10-android-x86_64.jar openblas-
- 0.3.26-1.5.10-windows-x86_64.jar flycapture-2.13.3.31-1.5.9-linux-x86_6
- 4.jar leptonica-1.84.1-1.5.10-linux-ppc64le.jar libfreenect-0.5.7-1.5.9
- -windows-x86.jar tesseract-5.3.4-1.5.10-android-arm64.jar tesseract-5.3
- .4-1.5.10-windows-x86_64.jar jna-platform-5.2.0.jar javafx-swing-21-lin
- ux.jar ffmpeg-6.1.1-1.5.10-macosx-x86_64.jar libdc1394-platform-2.2.6-1
- .5.9.jar artoolkitplus-2.3.1-1.5.9-linux-armhf.jar ktor-io-jvm-2.3.6.ja
- r kotlinx-coroutines-slf4j-1.9.0.jar libfreenect2-0.2.0-1.5.9-linux-x86
- .jar ktor-events-jvm-2.3.6.jar opencv-4.9.0-1.5.10.jar libfreenect-0.5.
- 7-1.5.9-linux-x86.jar tesseract-5.3.4-1.5.10-macosx-x86_64.jar javacpp-
- 1.5.10-android-x86_64.jar videoinput-0.200-1.5.9-windows-x86_64.jar art
- oolkitplus-2.3.1-1.5.9-linux-x86.jar ffmpeg-6.1.1-1.5.10-linux-ppc64le.
- jar javafx-media-21-linux.jar artoolkitplus-2.3.1-1.5.9-windows-x86.jar
-  libfreenect2-0.2.0-1.5.9-linux-x86_64.jar ktor-websocket-serialization
- -jvm-2.3.6.jar vlcj-natives-4.1.0.jar videoinput-platform-0.200-1.5.9.j
- ar libfreenect2-0.2.0-1.5.9-macosx-x86_64.jar kotlinx-serialization-jso
- n-jvm-1.9.0.jar opencv-4.9.0-1.5.10-android-arm64.jar leptonica-1.84.1-
- 1.5.10-macosx-arm64.jar javacpp-platform-1.5.10.jar openblas-0.3.26-1.5
- .10-linux-x86_64.jar javacpp-1.5.10-linux-ppc64le.jar javacpp-1.5.10-ma
- cosx-x86_64.jar libfreenect-0.5.7-1.5.9.jar librealsense2-2.53.1-1.5.9-
- windows-x86.jar librealsense2-2.53.1-1.5.9-linux-armhf.jar skiko-awt-0.
- 7.97.jar openblas-0.3.26-1.5.10-android-x86_64.jar opencv-4.9.0-1.5.10-
- linux-x86_64.jar flycapture-2.13.3.31-1.5.9-linux-arm64.jar tesseract-5
- .3.4-1.5.10.jar artoolkitplus-platform-2.3.1-1.5.9.jar librealsense-pla
- tform-1.12.4-1.5.9.jar libfreenect-0.5.7-1.5.9-windows-x86_64.jar ktor-
- client-cio-jvm-2.3.6.jar jsoup-1.17.2.jar librealsense-1.12.4-1.5.9-lin
- ux-arm64.jar ffmpeg-6.1.1-1.5.10-android-x86_64.jar kotlin-stdlib-jdk7-
- 1.8.22.jar skiko-awt-runtime-linux-x64-0.7.97.jar javacpp-1.5.10-androi
- d-arm64.jar libdc1394-2.2.6-1.5.9-linux-ppc64le.jar javafx-controls-21.
- jar videoinput-0.200-1.5.9-windows-x86.jar javafx-base-21-linux.jar jav
- acpp-1.5.10-linux-x86_64.jar openblas-0.3.26-1.5.10.jar javafx-controls
- -21-linux.jar ktor-websockets-jvm-2.3.6.jar vlcj-4.7.0.jar opencv-4.9.0
- -1.5.10-macosx-x86_64.jar openblas-0.3.26-1.5.10-ios-arm64.jar leptonic
- a-1.84.1-1.5.10.jar libdc1394-2.2.6-1.5.9-windows-x86_64.jar javafx-bas
- e-21.jar kotlinx-coroutines-jdk8-1.9.0.jar annotations-23.0.0.jar flyca
- pture-2.13.3.31-1.5.9-windows-x86.jar libfreenect-0.5.7-1.5.9-macosx-x8
- 6_64.jar artoolkitplus-2.3.1-1.5.9-windows-x86_64.jar ktor-network-jvm-
- 2.3.6.jar libdc1394-2.2.6-1.5.9-linux-armhf.jar libfreenect-0.5.7-1.5.9
- -linux-x86_64.jar openblas-0.3.26-1.5.10-linux-arm64.jar openblas-0.3.2
- 6-1.5.10-linux-ppc64le.jar libdc1394-2.2.6-1.5.9-linux-arm64.jar artool
- kitplus-2.3.1-1.5.9.jar javafx-media-21.jar kotlinx-coroutines-core-jvm
- -1.9.0.jar javacpp-1.5.10-linux-arm64.jar flycapture-2.13.3.31-1.5.9.ja
- r flycapture-2.13.3.31-1.5.9-linux-x86.jar jlayer-1.0.1.4.jar jna-5.2.0
- .jar javacpp-1.5.10-windows-x86_64.jar librealsense-1.12.4-1.5.9-linux-
- armhf.jar flycapture-platform-2.13.3.31-1.5.9.jar opencv-4.9.0-1.5.10-l
- inux-ppc64le.jar opencv-platform-4.9.0-1.5.10.jar tesseract-5.3.4-1.5.1
- 0-macosx-arm64.jar ffmpeg-platform-6.1.1-1.5.10.jar opencv-4.9.0-1.5.10
- -linux-arm64.jar javacv-platform-1.5.10.jar openblas-platform-0.3.26-1.
- 5.10.jar ktor-utils-jvm-2.3.6.jar librealsense2-2.53.1-1.5.9-linux-x86.
- jar artoolkitplus-2.3.1-1.5.9-android-x86_64.jar libdc1394-2.2.6-1.5.9-
- macosx-x86_64.jar javafx-graphics-21.jar opencv-4.9.0-1.5.10-windows-x8
- 6_64.jar openblas-0.3.26-1.5.10-android-arm64.jar ffmpeg-6.1.1-1.5.10.j
- ar librealsense2-2.53.1-1.5.9.jar librealsense2-platform-2.53.1-1.5.9.j
- ar librealsense-1.12.4-1.5.9-macosx-x86_64.jar libdc1394-2.2.6-1.5.9-li
- nux-x86_64.jar libfreenect-0.5.7-1.5.9-linux-armhf.jar ktor-http-cio-jv
- m-2.3.6.jar ffmpeg-6.1.1-1.5.10-windows-x86_64.jar librealsense-1.12.4-
- 1.5.9-windows-x86.jar kotlin-stdlib-2.2.20.jar kotlinx-serialization-co
- re-jvm-1.9.0.jar javacv-1.5.10.jar librealsense2-2.53.1-1.5.9-linux-x86
- _64.jar tesseract-5.3.4-1.5.10-linux-ppc64le.jar ktor-serialization-jvm
- -2.3.6.jar openblas-0.3.26-1.5.10-macosx-arm64.jar mp3spi-1.9.5.4.jar a
- rtoolkitplus-2.3.1-1.5.9-linux-x86_64.jar leptonica-1.84.1-1.5.10-andro
- id-arm64.jar jorbis-0.0.17.4.jar leptonica-1.84.1-1.5.10-windows-x86_64
- .jar opencv-4.9.0-1.5.10-android-x86_64.jar libdc1394-2.2.6-1.5.9-linux
- -x86.jar javacpp-1.5.10-macosx-arm64.jar libdc1394-2.2.6-1.5.9-windows-
- x86.jar openblas-0.3.26-1.5.10-macosx-x86_64.jar artoolkitplus-2.3.1-1.
- 5.9-linux-arm64.jar junit-3.8.2.jar openblas-0.3.26-1.5.10-ios-x86_64.j
- ar videoinput-0.200-1.5.9.jar librealsense-1.12.4-1.5.9-linux-x86.jar l
- ibfreenect-0.5.7-1.5.9-linux-arm64.jar tesseract-5.3.4-1.5.10-linux-x86
- _64.jar libfreenect2-0.2.0-1.5.9.jar artoolkitplus-2.3.1-1.5.9-android-
- arm64.jar vorbisspi-1.0.3.3.jar librealsense2-2.53.1-1.5.9-windows-x86_
- 64.jar leptonica-1.84.1-1.5.10-linux-arm64.jar javacpp-1.5.10-ios-x86_6
- 4.jar artoolkitplus-2.3.1-1.5.9-linux-ppc64le.jar kotlin-stdlib-jdk8-1.
- 8.22.jar flycapture-2.13.3.31-1.5.9-windows-x86_64.jar libdc1394-2.2.6-
- 1.5.9.jar librealsense2-2.53.1-1.5.9-macosx-x86_64.jar ktor-http-jvm-2.
- 3.6.jar ktor-client-core-jvm-2.3.6.jar ktor-network-tls-jvm-2.3.6.jar a
- rtoolkitplus-2.3.1-1.5.9-macosx-x86_64.jar opencv-4.9.0-1.5.10-macosx-a
- rm64.jar librealsense-1.12.4-1.5.9-linux-x86_64.jar tritonus-share-0.3.
- 7.4.jar opencv-4.9.0-1.5.10-ios-arm64.jar artoolkitplus-2.3.1-1.5.9-and
- roid-arm.jar artoolkitplus-2.3.1-1.5.9-android-x86.jar libfreenect2-pla
- tform-0.2.0-1.5.9.jar ffmpeg-6.1.1-1.5.10-linux-x86_64.jar
+Class-Path: kotlinx-coroutines-jdk8-1.9.0.jar librealsense2-2.53.1-1.5.9
+ -macosx-x86_64.jar leptonica-1.84.1-1.5.10-windows-x86_64.jar openblas-
+ 0.3.26-1.5.10-linux-arm64.jar librealsense-1.12.4-1.5.9-macosx-x86_64.j
+ ar libfreenect-0.5.7-1.5.9-macosx-x86_64.jar ktor-client-cio-jvm-2.3.6.
+ jar libfreenect2-0.2.0-1.5.9.jar javacpp-1.5.10-android-arm64.jar tesse
+ ract-5.3.4-1.5.10.jar openblas-0.3.26-1.5.10-ios-x86_64.jar libfreenect
+ -0.5.7-1.5.9-windows-x86.jar leptonica-platform-1.84.1-1.5.10.jar kotli
+ n-stdlib-jdk7-1.8.22.jar kotlin-stdlib-2.2.20.jar tritonus-share-0.3.7.
+ 4.jar opencv-4.9.0-1.5.10-android-arm64.jar librealsense2-2.53.1-1.5.9-
+ linux-x86_64.jar libdc1394-2.2.6-1.5.9-linux-ppc64le.jar artoolkitplus-
+ 2.3.1-1.5.9-linux-armhf.jar javafx-controls-21-linux.jar openblas-0.3.2
+ 6-1.5.10-macosx-x86_64.jar javacpp-1.5.10.jar artoolkitplus-platform-2.
+ 3.1-1.5.9.jar ktor-websockets-jvm-2.3.6.jar leptonica-1.84.1-1.5.10.jar
+  tesseract-5.3.4-1.5.10-android-arm64.jar libfreenect2-platform-0.2.0-1
+ .5.9.jar flycapture-2.13.3.31-1.5.9-windows-x86.jar ktor-serialization-
+ jvm-2.3.6.jar libfreenect-0.5.7-1.5.9-linux-ppc64le.jar javacv-platform
+ -1.5.10.jar libdc1394-2.2.6-1.5.9.jar leptonica-1.84.1-1.5.10-android-a
+ rm64.jar leptonica-1.84.1-1.5.10-linux-ppc64le.jar javacv-1.5.10.jar li
+ brealsense-1.12.4-1.5.9-linux-arm64.jar javacpp-1.5.10-android-x86_64.j
+ ar artoolkitplus-2.3.1-1.5.9-linux-ppc64le.jar flycapture-2.13.3.31-1.5
+ .9-windows-x86_64.jar libdc1394-2.2.6-1.5.9-linux-x86_64.jar artoolkitp
+ lus-2.3.1-1.5.9-android-arm.jar librealsense2-2.53.1-1.5.9-linux-arm64.
+ jar tesseract-platform-5.3.4-1.5.10.jar junit-3.8.2.jar librealsense2-2
+ .53.1-1.5.9-windows-x86.jar javafx-media-21-linux.jar opencv-4.9.0-1.5.
+ 10-ios-arm64.jar ktor-events-jvm-2.3.6.jar flycapture-platform-2.13.3.3
+ 1-1.5.9.jar flycapture-2.13.3.31-1.5.9-linux-x86_64.jar ffmpeg-platform
+ -6.1.1-1.5.10.jar librealsense-1.12.4-1.5.9-linux-armhf.jar kotlinx-ser
+ ialization-core-jvm-1.9.0.jar flycapture-2.13.3.31-1.5.9-linux-arm64.ja
+ r vorbisspi-1.0.3.3.jar ffmpeg-6.1.1-1.5.10-windows-x86_64.jar libfreen
+ ect-0.5.7-1.5.9-linux-armhf.jar artoolkitplus-2.3.1-1.5.9-linux-x86_64.
+ jar libfreenect-platform-0.5.7-1.5.9.jar libfreenect-0.5.7-1.5.9-linux-
+ x86_64.jar tesseract-5.3.4-1.5.10-macosx-x86_64.jar opencv-4.9.0-1.5.10
+ -android-x86_64.jar javacpp-1.5.10-macosx-x86_64.jar opencv-platform-4.
+ 9.0-1.5.10.jar leptonica-1.84.1-1.5.10-linux-arm64.jar librealsense-pla
+ tform-1.12.4-1.5.9.jar ffmpeg-6.1.1-1.5.10-android-arm64.jar ktor-webso
+ cket-serialization-jvm-2.3.6.jar librealsense2-2.53.1-1.5.9-linux-armhf
+ .jar javacpp-platform-1.5.10.jar libdc1394-2.2.6-1.5.9-windows-x86_64.j
+ ar librealsense-1.12.4-1.5.9-linux-x86.jar artoolkitplus-2.3.1-1.5.9.ja
+ r leptonica-1.84.1-1.5.10-android-x86_64.jar libfreenect2-0.2.0-1.5.9-w
+ indows-x86_64.jar libfreenect-0.5.7-1.5.9-windows-x86_64.jar tesseract-
+ 5.3.4-1.5.10-android-x86_64.jar librealsense-1.12.4-1.5.9-windows-x86_6
+ 4.jar tesseract-5.3.4-1.5.10-linux-ppc64le.jar ffmpeg-6.1.1-1.5.10-maco
+ sx-arm64.jar libdc1394-2.2.6-1.5.9-linux-armhf.jar tesseract-5.3.4-1.5.
+ 10-linux-arm64.jar mp3spi-1.9.5.4.jar artoolkitplus-2.3.1-1.5.9-windows
+ -x86_64.jar kotlin-stdlib-jdk8-1.8.22.jar javafx-base-21-linux.jar libd
+ c1394-platform-2.2.6-1.5.9.jar videoinput-0.200-1.5.9-windows-x86.jar j
+ avafx-swing-21-linux.jar ktor-client-core-jvm-2.3.6.jar jorbis-0.0.17.4
+ .jar skiko-awt-0.7.97.jar librealsense2-2.53.1-1.5.9.jar opencv-4.9.0-1
+ .5.10-linux-ppc64le.jar kotlinx-coroutines-core-jvm-1.9.0.jar javacpp-1
+ .5.10-linux-ppc64le.jar librealsense2-2.53.1-1.5.9-windows-x86_64.jar t
+ esseract-5.3.4-1.5.10-linux-x86_64.jar flycapture-2.13.3.31-1.5.9-linux
+ -x86.jar libfreenect2-0.2.0-1.5.9-macosx-x86_64.jar artoolkitplus-2.3.1
+ -1.5.9-android-x86.jar librealsense2-2.53.1-1.5.9-linux-x86.jar javafx-
+ base-21.jar javacpp-1.5.10-ios-x86_64.jar leptonica-1.84.1-1.5.10-macos
+ x-arm64.jar ffmpeg-6.1.1-1.5.10-linux-x86_64.jar videoinput-0.200-1.5.9
+ -windows-x86_64.jar javafx-graphics-21-linux.jar libdc1394-2.2.6-1.5.9-
+ macosx-x86_64.jar slf4j-api-1.7.36.jar openblas-0.3.26-1.5.10-android-x
+ 86_64.jar artoolkitplus-2.3.1-1.5.9-macosx-x86_64.jar opencv-4.9.0-1.5.
+ 10-macosx-arm64.jar libfreenect2-0.2.0-1.5.9-linux-x86.jar openblas-0.3
+ .26-1.5.10-linux-x86_64.jar ffmpeg-6.1.1-1.5.10.jar ktor-http-jvm-2.3.6
+ .jar leptonica-1.84.1-1.5.10-macosx-x86_64.jar leptonica-1.84.1-1.5.10-
+ linux-x86_64.jar flycapture-2.13.3.31-1.5.9.jar ffmpeg-6.1.1-1.5.10-mac
+ osx-x86_64.jar librealsense-1.12.4-1.5.9.jar openblas-0.3.26-1.5.10-mac
+ osx-arm64.jar openblas-0.3.26-1.5.10-ios-arm64.jar libfreenect-0.5.7-1.
+ 5.9-linux-x86.jar videoinput-0.200-1.5.9.jar kotlinx-coroutines-slf4j-1
+ .9.0.jar javafx-graphics-21.jar artoolkitplus-2.3.1-1.5.9-android-arm64
+ .jar javacpp-1.5.10-macosx-arm64.jar openblas-0.3.26-1.5.10-linux-ppc64
+ le.jar javacpp-1.5.10-linux-x86_64.jar artoolkitplus-2.3.1-1.5.9-androi
+ d-x86_64.jar javafx-controls-21.jar videoinput-platform-0.200-1.5.9.jar
+  tesseract-5.3.4-1.5.10-windows-x86_64.jar openblas-0.3.26-1.5.10-andro
+ id-arm64.jar openblas-0.3.26-1.5.10-windows-x86_64.jar javafx-media-21.
+ jar javacpp-1.5.10-ios-arm64.jar javacpp-1.5.10-windows-x86_64.jar arto
+ olkitplus-2.3.1-1.5.9-linux-x86.jar ktor-network-tls-jvm-2.3.6.jar flyc
+ apture-2.13.3.31-1.5.9-linux-armhf.jar artoolkitplus-2.3.1-1.5.9-linux-
+ arm64.jar jlayer-1.0.1.4.jar opencv-4.9.0-1.5.10-macosx-x86_64.jar open
+ cv-4.9.0-1.5.10-windows-x86_64.jar libfreenect2-0.2.0-1.5.9-linux-x86_6
+ 4.jar opencv-4.9.0-1.5.10-linux-arm64.jar skiko-awt-runtime-linux-x64-0
+ .7.97.jar opencv-4.9.0-1.5.10-linux-x86_64.jar ffmpeg-6.1.1-1.5.10-linu
+ x-arm64.jar libdc1394-2.2.6-1.5.9-windows-x86.jar ktor-network-jvm-2.3.
+ 6.jar ktor-io-jvm-2.3.6.jar annotations-23.0.0.jar libfreenect-0.5.7-1.
+ 5.9-linux-arm64.jar libdc1394-2.2.6-1.5.9-linux-arm64.jar artoolkitplus
+ -2.3.1-1.5.9-windows-x86.jar opencv-4.9.0-1.5.10-ios-x86_64.jar opencv-
+ 4.9.0-1.5.10.jar libdc1394-2.2.6-1.5.9-linux-x86.jar tesseract-5.3.4-1.
+ 5.10-macosx-arm64.jar ffmpeg-6.1.1-1.5.10-linux-ppc64le.jar javafx-web-
+ 21-linux.jar librealsense2-platform-2.53.1-1.5.9.jar librealsense-1.12.
+ 4-1.5.9-windows-x86.jar openblas-platform-0.3.26-1.5.10.jar ffmpeg-6.1.
+ 1-1.5.10-android-x86_64.jar javacpp-1.5.10-linux-arm64.jar ktor-http-ci
+ o-jvm-2.3.6.jar kotlinx-serialization-json-jvm-1.9.0.jar openblas-0.3.2
+ 6-1.5.10.jar libfreenect-0.5.7-1.5.9.jar ktor-utils-jvm-2.3.6.jar libre
+ alsense-1.12.4-1.5.9-linux-x86_64.jar
 
