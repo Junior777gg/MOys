@@ -57,7 +57,7 @@ class StorageServiceImpl : StorageService {
             newFile.createNewFile()
             return true
         } catch (e: Exception) {
-            Log.error(e.message.toString())
+            Log.error("Failed to create file with text \"$path\"",e)
             return false
         }
     }
@@ -69,7 +69,7 @@ class StorageServiceImpl : StorageService {
             newFile.writeText(content)
             return true
         } catch (e: Exception) {
-            Log.error(e.message.toString())
+            Log.error("Failed to write text to file \"$path\"",e)
             return false
         }
     }
@@ -81,7 +81,7 @@ class StorageServiceImpl : StorageService {
             newFile.writeBytes(content)
             return true
         } catch (e: Exception) {
-            Log.error(e.message.toString())
+            Log.error("Failed to write bytes to file \"$path\"",e)
             return false
         }
     }
@@ -92,7 +92,7 @@ class StorageServiceImpl : StorageService {
             File(filePath).delete()
             return true
         } catch (e: Exception) {
-            Log.error(e.message.toString())
+            Log.error("Failed to delete file \"$path\"",e)
             return false
         }
     }
@@ -108,7 +108,7 @@ class StorageServiceImpl : StorageService {
             newDir.mkdirs()
             return true
         } catch (e: Exception) {
-            Log.error(e.message.toString())
+            Log.error("Failed to create directory \"$path\"",e)
             return false
         }
     }
@@ -119,7 +119,7 @@ class StorageServiceImpl : StorageService {
             File(dirPath).deleteRecursively()
             return true
         } catch (e: Exception) {
-            Log.error(e.message.toString())
+            Log.error("Failed to delete directory \"$path\"",e)
             return false
         }
     }
@@ -130,7 +130,7 @@ class StorageServiceImpl : StorageService {
             val file = File(filePath)
             return file.readText()
         } catch (e: Exception) {
-            Log.error(e.message.toString())
+            Log.error("Failed to read text from file \"$path\"",e)
             return null
         }
     }
@@ -141,7 +141,7 @@ class StorageServiceImpl : StorageService {
             val file = File(filePath)
             return file.readBytes()
         } catch (e: Exception) {
-            Log.error(e.message.toString())
+            Log.error("Failed to read bytes from file \"$path\"",e)
             return null
         }
     }

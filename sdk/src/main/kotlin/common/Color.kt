@@ -100,6 +100,17 @@ class Color(var r: Int, var g: Int, var b: Int, var a: Int) {
     operator fun times(o: Color) = Color(floatRed()*o.floatRed(), floatGreen()*o.floatGreen(), floatBlue()*o.floatBlue(), floatAlpha()*o.floatAlpha())
     operator fun div(o: Color) = Color(floatRed()/o.floatRed(), floatGreen()/o.floatGreen(), floatBlue()/o.floatBlue(), floatAlpha()/o.floatAlpha())
     operator fun rem(o: Color) = Color(floatRed()%o.floatRed(), floatGreen()%o.floatGreen(), floatBlue()%o.floatBlue(), floatAlpha()%o.floatAlpha())
+    //Scalar operators.
+    operator fun times(o: Double) = Color(floatRed()*o.toFloat(), floatGreen()*o.toFloat(), floatBlue()*o.toFloat(), floatAlpha())
+    operator fun div(o: Double) = Color(floatRed()/o.toFloat(), floatGreen()/o.toFloat(), floatBlue()/o.toFloat(), floatAlpha())
+    operator fun rem(o: Double) = Color(floatRed()%o.toFloat(), floatGreen()%o.toFloat(), floatBlue()%o.toFloat(), floatAlpha())
+    operator fun times(o: Float) = Color(floatRed()*o, floatGreen()*o, floatBlue()*o, floatAlpha())
+    operator fun div(o: Float) = Color(floatRed()/o, floatGreen()/o, floatBlue()/o, floatAlpha())
+    operator fun rem(o: Float) = Color(floatRed()%o, floatGreen()%o, floatBlue()%o, floatAlpha())
+    operator fun times(o: Int) = Color(floatRed()*o.toFloat(), floatGreen()*o.toFloat(), floatBlue()*o.toFloat(), floatAlpha())
+    operator fun div(o: Int) = Color(floatRed()/o.toFloat(), floatGreen()/o.toFloat(), floatBlue()/o.toFloat(), floatAlpha())
+    operator fun rem(o: Int) = Color(floatRed()%o.toFloat(), floatGreen()%o.toFloat(), floatBlue()%o.toFloat(), floatAlpha())
+
     /**Converts this color to HEX-string.*/
     fun toHex(includeAlpha: Boolean = false): String {
         return if(includeAlpha) "#%02X%02X%02X%02X".format(r,g,b,a)
@@ -114,7 +125,7 @@ class Color(var r: Int, var g: Int, var b: Int, var a: Int) {
         if (G>K) K=G
         if (B>K) K=B
         K=1-K
-        return listOf<Float>((1-R-K)/(1-K),(1-G-K)/(1-K),(1-B-K)/(1-K),K)
+        return listOf((1-R-K)/(1-K),(1-G-K)/(1-K),(1-B-K)/(1-K),K)
     }
     /**Converts this color to HSV color list.*/
     fun toHSV(): List<Float> {
@@ -156,6 +167,10 @@ class Color(var r: Int, var g: Int, var b: Int, var a: Int) {
     fun floatAlpha(): Float=min(a/255f,1f)
     /**Converts all values to floats.*/
     fun toFloating(): List<Float> {
-        return listOf<Float>(floatRed(),floatGreen(),floatBlue(),floatAlpha())
+        return listOf(floatRed(),floatGreen(),floatBlue(),floatAlpha())
     }
 }
+//Handlers for "incorrect" operations.
+operator fun Double.times(o: Color) = Color(this.toFloat()*o.floatRed(), this.toFloat()*o.floatGreen(), this.toFloat()*o.floatBlue(), o.floatAlpha())
+operator fun Int.times(o: Color) = Color(this.toFloat()*o.floatRed(), this.toFloat()*o.floatGreen(), this.toFloat()*o.floatBlue(), o.floatAlpha())
+operator fun Float.times(o: Color) = Color(this*o.floatRed(), this*o.floatGreen(), this*o.floatBlue(), o.floatAlpha())

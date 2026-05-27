@@ -32,12 +32,13 @@ class CameraApp(
     override val deviceManager: DeviceManager, override var lastState: MutableList<View>?
 ) : Activity {
     val player = VideoPlayerImpl(gs)
+    var cameraAvailable = false
     init {
-        player.createVideoPlayer("http://192.168.0.15:8080/video")
+        player.create("http://192.168.0.15:8080/video")
     }
     override fun main() {
         DeviceManagerImpl.Camera.cameraPath = "http://192.168.0.15:8080/video"
-        DeviceManagerImpl.Camera.startCamera()
+        cameraAvailable=DeviceManagerImpl.Camera.start()
         gs.setContent(true){
             buildGeneralUI()
             buildPhotoUI()
@@ -45,8 +46,8 @@ class CameraApp(
         gs.redraw()
     }
 
-    fun MutableList<View>.buildGeneralUI(){
-        player.startVideoPlayer()
+    fun MutableList<View>.buildGeneralUI() {
+        if(cameraAvailable&&player.isInitialized()) player.start()
         Column(modifier = Modifier.fillMaxSize().background(Color.TRANSPARENT).paddingBottom(100), verticalArrangement = VerticalArrangement.Bottom(), parent = this).layout {
             Row(modifier = Modifier.fillMaxWidth().height(100).background(Color.WHITE), horizontalArrangement = HorizontalArrangement.SpaceEvenly(), parent = this).layout {
                 Button(modifier = Modifier.size(70).background(Color.RED).onClick {
@@ -95,7 +96,7 @@ class CameraApp(
     }
 
     fun takePhoto(){
-        val frame = DeviceManagerImpl.Camera.cameraDataFrame()
+        val frame = DeviceManagerImpl.Camera.getFrame()
         val converter = Java2DFrameConverter()
         val image = converter.convert(frame)
         val file = File("/mnt/c/Users/MSI/Desktop/image.png")
@@ -103,7 +104,7 @@ class CameraApp(
     }
 
     override fun onDestroy() {
-        player.removeVideoPlayer()
+        player.remove()
     }
 
     /*fun takeVideo(){

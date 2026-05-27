@@ -28,7 +28,7 @@ object MavenRepository {
             val inputStream = client.get(linkBuilder(packageName)).body<ByteArray>()
             libFile.writeBytes(inputStream)
         } catch (e: Exception) {
-            Log.warn("incorrect package name: $packageName, ${e.message}")
+            Log.warn("Incorrect package name: $packageName, ${e.message}")
         }
     }
 }

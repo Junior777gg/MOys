@@ -107,7 +107,6 @@ class GraphicServiceImpl : GraphicService {
 
                 if (viewTree.isEmpty()) return
 
-                // Изменения из V2: Новая система расчета дерева рендеринга и анимаций
                 renderer.currentRenderTree.clear()
                 lazyColumn.clear()
                 bounds.clear()
@@ -119,16 +118,13 @@ class GraphicServiceImpl : GraphicService {
                     renderer.draw(canvas, renderNodes)
                 }
 
-                renderer.currentAnimations.forEach { animator, state ->
-                    if (state.update()) {
-                        null
-                    } else {
+                renderer.currentAnimations.forEach { (animator, state) ->
+                    if (!state.update()) {
                         renderer.draw(canvas, renderer.mapOfNodes[animator.parentView]!!)
                         redraw()
                     }
                 }
 
-                // Логика создания скриншотов из V1 (сохранена строго как в V1)
                 if(saveScreenshot) {
                     saveScreenshot=false
                     val screenshotBuffer = skikoLayer.screenshot()
@@ -159,7 +155,7 @@ class GraphicServiceImpl : GraphicService {
                                 ImageIO.write(bufferedImage, "png", File(screenshotPath))
                                 Log.info("JFrame Image saved to $screenshotPath")
                             } catch (e: Exception) {
-                                Log.error("JFrame Image couldn't be captured")
+                                Log.error("JFrame Image couldn't be captured",e)
                                 e.printStackTrace()
                             }
                         }.start()
@@ -232,6 +228,7 @@ class GraphicServiceImpl : GraphicService {
         Log.info("Graphical service initialized")
     }
 
+    /**Destroys rendering service.*/
     fun shutdown(systemPath: String) {
         renderer.clearCacheFull()
 
@@ -240,7 +237,7 @@ class GraphicServiceImpl : GraphicService {
         Log.dbg("Saved graphical settings")
     }
 
-    //Set focus on given [newActivity]. All callbacks will be executed from it.
+    /**Set focus on given [newActivity]. All callbacks will be executed from it.*/
     fun setActivity(newActivity: Activity? = null) {
         val activityClass = newActivity?.javaClass
         val existingActivity = activityStack[activityClass]
@@ -258,7 +255,7 @@ class GraphicServiceImpl : GraphicService {
         }
     }
 
-    //Removes all stack elements aside from launcher.
+    /**Removes all stack elements aside from system navigation.*/
     fun clearStack() {
         if (runtimeStack.size() <= 1) return
         focusedActivity?.lastState = viewTree.toMutableList()
@@ -269,6 +266,7 @@ class GraphicServiceImpl : GraphicService {
         updateStack()
     }
 
+    /**Restores renderer context.*/
     fun restore() {
         SwingUtilities.invokeLater {
             frame.contentPane.removeAll()
@@ -278,7 +276,7 @@ class GraphicServiceImpl : GraphicService {
         }
     }
 
-    //Updates screen resolution and current screen.
+    /**Updates screen resolution and current screen.*/
     fun setScreenResolution(resolution: Vec2i) {
         val x = resolution.x
         val y = resolution.y
@@ -300,7 +298,7 @@ class GraphicServiceImpl : GraphicService {
         updateStack()
     }
 
-    //Resets view tree and redraws current screen.
+    /**Resets view tree and redraws current screen.*/
     fun updateStack() {
         SwingUtilities.invokeLater {
             viewTree.clear()
@@ -313,16 +311,15 @@ class GraphicServiceImpl : GraphicService {
         }
     }
 
-    //Basically does a screenshot.
+    /**Basically does a screenshot.*/
     fun takeScreenshot(path: String) {
         screenshotPath=path
         saveScreenshot=true
         skikoLayer.needRedraw()
     }
 
-    //Sets the content of the screen. If itIsNewScreen=true, adds the screen to the navigation stack
+    /**Sets the content of the screen. If itIsNewScreen=true, adds the screen to the navigation stack*/
     override fun setContent(itIsNewScreen: Boolean, lambda: MutableList<View>.() -> Unit) {
-        // Изменение из V2: очистка анимаций
         renderer.currentAnimations.clear()
 
         viewTree.clear()
@@ -335,21 +332,21 @@ class GraphicServiceImpl : GraphicService {
         }
     }
 
-    //Adds UI on top of the current screen (such as a keyboard). Preserves the previous state
+    /**Adds UI on top of the current screen (such as a keyboard). Preserves the previous state*/
     override fun injectUI(lambda: MutableList<View>.() -> Unit) {
         viewTreeUntilInject.clear()
         viewTreeUntilInject.addAll(viewTree)
         viewTree.lambda()
     }
 
-    //Removes the injected UI and restores the previous state
+    /**Removes the injected UI and restores the previous state.*/
     override fun cancelInject() {
         viewTree.clear()
         bounds.clear()
         viewTree.addAll(viewTreeUntilInject)
     }
 
-    //Return to the previous screen in the navigation stack
+    /**Return to the previous screen in the navigation stack*/
     override fun popBackStack() {
         if (runtimeStack.size() <= 1) return
         if (viewTreeUntilInject.isNotEmpty()) {
@@ -369,14 +366,14 @@ class GraphicServiceImpl : GraphicService {
         }
     }
 
-    //Rerender screen must call after setContent or injectUI
+    /**Rerender screen must call after [setContent] or [injectUI].*/
     override fun redraw() {
         SwingUtilities.invokeLater {
             skikoLayer.needRedraw()
         }
     }
 
-    //Searches for a clickable area by coordinates and calls onClick
+    /**Searches for a clickable area by coordinates and calls onClick*/
     private fun handleClick(x: Double, y: Double) {
         val holdDuration = System.currentTimeMillis() - cursorHoldTimestamp
         for (bound in bounds.reversed()) {

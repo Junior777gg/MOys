@@ -1,34 +1,39 @@
 package impl
 
 import common.Log
-import org.bytedeco.ffmpeg.global.avutil
 import org.bytedeco.javacv.FFmpegFrameGrabber
 import org.bytedeco.javacv.Frame
 import service.DeviceManager
-import java.io.InputStream
-import java.nio.Buffer
 
 class DeviceManagerImpl: DeviceManager {
     fun initialize() {
         Log.info("Device manager initialized")
     }
-    object Camera{
+    object Camera {
         var cameraPath = "/dev/video0"
         var grabber: FFmpegFrameGrabber? = null
 
-        fun startCamera(){
-            grabber?.stop()
-            grabber = FFmpegFrameGrabber.createDefault(cameraPath)
-            grabber?.start()
+        fun start(): Boolean {
+            try {
+                if(!NetworkServiceImpl.isAddressReachable(cameraPath,1000)) throw Exception("$cameraPath not reachable")
+                grabber?.stop()
+                grabber = FFmpegFrameGrabber.createDefault(cameraPath)
+                grabber?.start()
+                return true
+            } catch (e: Exception) {
+                Log.error("Failed to start camera",e)
+                return false
             }
-        fun cameraDataFrame(path: String = cameraPath): Frame? {
+
+        }
+        fun getFrame(path: String = cameraPath): Frame? {
             return grabber?.grab()
         }
     }
     @Deprecated("not done yet")
     object Microphone{
         var microphonePath = "pulse://default"
-        fun microphoneDataFrame(path: String = microphonePath){
+        fun getFrame(path: String = microphonePath) {
 
         }
     }

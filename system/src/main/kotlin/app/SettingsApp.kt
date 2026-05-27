@@ -66,53 +66,53 @@ class SettingsApp(
                 if(!GraphicServiceImpl.isDesktopResolution()) {
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/1.png") },
-                        file = File("${Mother.systemPath}/data/launcher/backgrounds/mobile/1.png"),
+                        file = File("${Mother.systemPath}/install/launcher/res/backgrounds/mobile/1.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/2.png") },
-                        file = File("${Mother.systemPath}/data/launcher/backgrounds/mobile/2.png"),
+                        file = File("${Mother.systemPath}/install/launcher/res/backgroundsmobile/2.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/3.png") },
-                        file = File("${Mother.systemPath}/data/launcher/backgrounds/mobile/3.png"),
+                        file = File("${Mother.systemPath}/install/launcher/res/backgrounds/mobile/3.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/4.png") },
-                        file = File("${Mother.systemPath}/data/launcher/backgrounds/mobile/4.png"),
+                        file = File("${Mother.systemPath}/install/launcher/res/backgrounds/mobile/4.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/5.png") },
-                        file = File("${Mother.systemPath}/data/launcher/backgrounds/mobile/5.png"),
+                        file = File("${Mother.systemPath}/install/launcher/res/backgrounds/mobile/5.png"),
                         parent = this
                     )
                 } else {
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/1.png") },
-                        file = File("${Mother.systemPath}/data/launcher/backgrounds/desktop/1.png"),
+                        file = File("${Mother.systemPath}/install/launcher/res/backgrounds/desktop/1.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/2.png") },
-                        file = File("${Mother.systemPath}/data/launcher/backgrounds/desktop/2.png"),
+                        file = File("${Mother.systemPath}/install/launcher/res/backgrounds/desktop/2.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/3.png") },
-                        file = File("${Mother.systemPath}/data/launcher/backgrounds/desktop/3.png"),
+                        file = File("${Mother.systemPath}/install/launcher/res/backgrounds/desktop/3.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/4.png") },
-                        file = File("${Mother.systemPath}/data/launcher/backgrounds/desktop/4.png"),
+                        file = File("${Mother.systemPath}/install/launcher/res/backgrounds/desktop/4.png"),
                         parent = this
                     )
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/desktop/5.png") },
-                        file = File("${Mother.systemPath}/data/launcher/backgrounds/desktop/5.png"),
+                        file = File("${Mother.systemPath}/install/launcher/res/backgrounds/desktop/5.png"),
                         parent = this
                     )
                 }

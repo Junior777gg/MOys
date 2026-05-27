@@ -4,6 +4,7 @@ import impl.GraphicServiceImpl
 import impl.StorageServiceImpl
 
 fun main() {
+    Log.initialize("${Mother.systemPath}/logs")
     Log.info("Initialization")
 
     val deviceManagerInstance = DeviceManagerImpl()

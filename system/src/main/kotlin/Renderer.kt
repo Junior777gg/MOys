@@ -8,17 +8,11 @@ import Animator.Companion.SCALE_Y
 import Animator.Companion.SHAKE
 import Animator.Companion.SLIDE_HORIZONTALLY
 import Animator.Companion.SLIDE_VERTICALLY
-import Animator.Companion.SLIME
+import common.AnimationState
 import common.Bounds
 import common.Log
 import common.Color
 import impl.GraphicServiceImpl
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import modifier.Animation
 import modifier.Background
 import modifier.CornerRadius
@@ -40,7 +34,7 @@ import modifier.TextAlignment
 import modifier.VerticalAlignment
 import modifier.VerticalArrangement
 import modifier.Width
-import modifier.background
+import navigation.SystemKeyboard
 import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.FontMgr
 import org.jetbrains.skia.Paint
@@ -53,14 +47,7 @@ import org.jetbrains.skia.paragraph.FontCollection
 import org.jetbrains.skia.paragraph.ParagraphBuilder
 import org.jetbrains.skia.paragraph.ParagraphStyle
 import org.jetbrains.skia.paragraph.TextStyle
-import org.jetbrains.skia.svg.SVGCanvas
-import java.time.LocalTime
-import kotlin.math.E
-import kotlin.math.log
-import kotlin.math.log2
-import kotlin.math.pow
 import kotlin.math.roundToInt
-import kotlin.random.Random
 
 
 /**

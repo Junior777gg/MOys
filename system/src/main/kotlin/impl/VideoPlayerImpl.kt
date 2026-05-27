@@ -6,12 +6,7 @@ import Row
 import Text
 import View
 import common.Color
-import javafx.scene.Parent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import common.Log
 import modifier.HorizontalArrangement
 import modifier.Modifier
 import modifier.VerticalAlignment
@@ -25,26 +20,21 @@ import modifier.width
 import org.bytedeco.ffmpeg.global.avutil
 import org.bytedeco.javacv.FFmpegFrameGrabber
 import org.bytedeco.javacv.Java2DFrameConverter
-import org.bytedeco.librealsense.frame
-import org.jetbrains.skiko.toBitmap
 import org.jetbrains.skiko.toImage
 import service.GraphicService
-import java.awt.BorderLayout
 import java.awt.image.BufferedImage
-import java.nio.ByteBuffer
 import java.nio.ShortBuffer
 import javax.sound.sampled.AudioFormat
-import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.SourceDataLine
-import javax.swing.JFrame
 
 class VideoPlayerImpl(val gs: GraphicService) {
     lateinit var grabber: FFmpegFrameGrabber
 
     private var line: SourceDataLine? = null
-    private var audioFormat: AudioFormat? = null
+    private var initialized = false
 
+    private var audioFormat: AudioFormat? = null
     var stopped = false
 
     var currentTimestamp = 0L
@@ -53,26 +43,34 @@ class VideoPlayerImpl(val gs: GraphicService) {
     var image: Image? = null
     var lastImage: BufferedImage? = null
 
-    fun createVideoPlayer(path: String) {
-        grabber = FFmpegFrameGrabber.createDefault(path)
-        grabber.sampleFormat = avutil.AV_SAMPLE_FMT_S16
-        grabber.audioChannels = 2
-        grabber.sampleRate = 44100
-        grabber.start()
-        currentTimestamp = currentTimestamp.coerceIn(0, grabber.lengthInTime)
-        audioFormat = AudioFormat(
-            AudioFormat.Encoding.PCM_SIGNED,
-            grabber.sampleRate.toFloat(),
-            16,
-            grabber.audioChannels,
-            grabber.audioChannels * 2,
-            grabber.sampleRate.toFloat(),
-            false
-        )
+    fun isInitialized(): Boolean = initialized
 
-        line = AudioSystem.getSourceDataLine(audioFormat)
-        line!!.open(audioFormat)
-        line!!.start()
+    fun create(path: String) {
+        try {
+            grabber = FFmpegFrameGrabber.createDefault(path)
+            grabber.sampleFormat = avutil.AV_SAMPLE_FMT_S16
+            grabber.audioChannels = 2
+            grabber.sampleRate = 44100
+            grabber.start()
+            currentTimestamp = currentTimestamp.coerceIn(0, grabber.lengthInTime)
+            audioFormat = AudioFormat(
+                AudioFormat.Encoding.PCM_SIGNED,
+                grabber.sampleRate.toFloat(),
+                16,
+                grabber.audioChannels,
+                grabber.audioChannels * 2,
+                grabber.sampleRate.toFloat(),
+                false
+            )
+
+            line = AudioSystem.getSourceDataLine(audioFormat)
+            line!!.open(audioFormat)
+            line!!.start()
+            initialized=true
+        } catch (e: Exception) {
+            initialized=false
+            Log.error("Failed to initialize video player from \"$path\"",e)
+        }
     }
 
     fun playerUI(parent: MutableList<View>) {
@@ -100,10 +98,10 @@ class VideoPlayerImpl(val gs: GraphicService) {
         }
     }
 
-    fun startVideoPlayer() {
+    fun start() {
         gs.injectUI {
             image = Image(modifier = Modifier.fillMaxSize().onClick {
-                stopPlayer()
+                stop()
                 image!!.layout {
                     if (stopped) {
                         playerUI(this)
@@ -151,7 +149,7 @@ class VideoPlayerImpl(val gs: GraphicService) {
         }.start()
     }
 
-    fun stopPlayer() {
+    fun stop() {
         stopped = !stopped
         if (stopped) {
             line!!.stop()
@@ -165,7 +163,7 @@ class VideoPlayerImpl(val gs: GraphicService) {
 
     }
 
-    fun removeVideoPlayer() {
+    fun remove() {
         grabber.stop()
         line!!.stop()
         line!!.close()

@@ -64,7 +64,7 @@ object AudioServiceImpl : AudioService {
             convertedStream!!.close()
             stream!!.close()
         } catch (e: Exception) {
-            Log.error(e.toString())
+            Log.error("Failed to build AudioService coroutine",e)
         } finally {
             convertedStream!!.close()
             stream!!.close()

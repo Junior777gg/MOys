@@ -1,6 +1,9 @@
+import common.Easing
+
 class Animator(
     val durationMillis: Long,
     val type: Int,
+    val easing: Easing = Easing.LINEAR,
     val argument: Any? = null,
     val animators: Array<Animator>? = null,
 ) {
