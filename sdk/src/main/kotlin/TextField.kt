@@ -9,22 +9,25 @@ class TextField(
     var textColor: Color = Color.BLACK,
     val textAlign: Int = TextAlignment.Center(),
     override val parent: MutableList<View>,
-) : View, IKeyboard {
+) : View, IKeyboardContract {
     override val children: MutableList<View> = mutableListOf()
     init {
         parent.add(this)
     }
 
-    override fun layout(lambda: MutableList<View>.() -> Unit) {
-        super.layout(lambda)
+    override fun onKey(key: Char): Boolean {
+        text += key
+        return true
     }
 
-    override fun onKeyPress(key: String): Boolean {
-        if (key == "<") {
-            text = text.dropLast(1)
-        } else {
-            text += key
-        }
+    override fun onText(text: String): Boolean {
+        this.text += text
+        return true
+    }
+
+    override fun onErase(amount: Int): Boolean {
+        if(text.isEmpty()) return false
+        text=text.dropLast(amount)
         return true
     }
 }

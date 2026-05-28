@@ -2,7 +2,7 @@ package navigation
 
 import Button
 import Column
-import IKeyboard
+import IKeyboardContract
 import Row
 import Text
 import View
@@ -20,7 +20,7 @@ import service.GraphicService
 
 class SystemKeyboard(
     val gs: GraphicService,
-    val contract: IKeyboard
+    val contract: IKeyboardContract
 ) {
     private val russianAlphabet= listOf("Й", "Ц", "У", "К", "Е", "Н", "Г", "Ш", "Щ", "З", "Х","Ф", "Ы", "В", "А", "П", "Р",
         "О", "Л", "Д", "Ж", "Э","^", "Я", "Ч", "С", "М", "И", "Т", "Ь", "Б", "Ю", "<","123", "ABC", ",", " ", ".", "ОК",)
@@ -122,25 +122,29 @@ class SystemKeyboard(
                         gs.redraw()
                         return@onClick
                     }
-                    if(label=="ABC"||label=="abc"){
+                    if (label=="ABC"||label=="abc"){
                         gs.cancelInject()
                         gs.redraw()
                         currentAlphabet = englishAlphabet
                         main()
                         return@onClick
                     }
-                    if(label=="АБВ"||label=="абв"){
+                    if (label=="АБВ"||label=="абв"){
                         gs.cancelInject()
                         gs.redraw()
                         currentAlphabet = russianAlphabet
                         main()
                         return@onClick
                     }
-                    if(label=="123"){
+                    if (label=="123"){
                         gs.cancelInject()
                         gs.redraw()
                         currentAlphabet = specialSymbols
                         main()
+                        return@onClick
+                    }
+                    if (label=="<") {
+                        if(contract.onErase(1)) gs.redraw()
                         return@onClick
                     }
                     if (label=="^"){
@@ -167,10 +171,7 @@ class SystemKeyboard(
                             return@onClick
                         }
                     }
-                    val needUpdate = contract.onKeyPress(label)
-                    if (needUpdate) {
-                        gs.redraw()
-                    }
+                    if(contract.onKey(label[0])) gs.redraw()
                 },
             parent = this
         ).layout {

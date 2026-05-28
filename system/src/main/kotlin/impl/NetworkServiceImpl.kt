@@ -8,7 +8,7 @@ object NetworkServiceImpl : NetworkService {
         try {
             val inet=InetAddress.getByName(address)
             return inet.isReachable(timeOut)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return false
         }
     }

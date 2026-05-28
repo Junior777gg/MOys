@@ -62,6 +62,9 @@ class SystemLauncher(
                         Instance.background="backgrounds/1.png"
                 }
             }
+            fun getBackgroundPath(): String {
+                return "${Mother.installPath}/launcher/res/${Instance.background}"
+            }
         }
     }
 
@@ -119,7 +122,7 @@ class SystemLauncher(
             label(
                 icon = File("${Mother.systemPath}/install/terminal/icon.png"),
                 click = {
-                    val act= TerminalApp(mother, graphicService, StorageServiceImpl(), deviceManager, null)
+                    val act=TerminalApp(mother, graphicService, StorageServiceImpl(), deviceManager, null)
                     act.main()
                     graphicService.setActivity(act)
                 },
@@ -130,11 +133,9 @@ class SystemLauncher(
             label(
                 icon = File("${Mother.systemPath}/install/browser/icon.png"),
                 click = {
-                    Thread {
-                        val browserApp = BrowserApp()
-                        browserApp.init()
-                        browserApp.createBrowser(graphicService)
-                    }.start()
+                    val act=BrowserApp(graphicService, StorageServiceImpl(), deviceManager, null)
+                    act.main()
+                    graphicService.setActivity(act)
                 },
                 appName = "Браузер"
             )
@@ -175,7 +176,7 @@ class SystemLauncher(
     }
 
     fun MutableList<View>.screen() {
-        Image(modifier = Modifier.fillMaxSize(), File(getBackgroundPath()), parent = this).layout {
+        Image(modifier = Modifier.fillMaxSize(), File(LauncherConfig.getBackgroundPath()), parent = this).layout {
             Column(modifier = Modifier.fillMaxSize().padding(10).background(Color.TRANSPARENT),
                 verticalArrangement = VerticalArrangement.SpaceEvenly(),
                 horizontalAlignment = HorizontalAlignment.Center(), parent = this).layout {
@@ -214,16 +215,6 @@ class SystemLauncher(
         }
     }
 
-    fun getBackgroundPath(): String {
-        return "${Mother.installPath}/launcher/res/${getBackgroundRaw()}"
-    }
-    fun getBackgroundRaw(): String {
-        return LauncherConfig.Instance.background
-    }
-    // Метод из второй версии, добавлен для совместимости
-    fun getBackground(): String {
-        return LauncherConfig.Instance.background
-    }
     fun setBackground(path: String) {
         Log.dbg("Set launcher background as: \"$path\"")
         LauncherConfig.Instance.background=path

@@ -27,5 +27,6 @@ fun main() {
     Runtime.getRuntime().addShutdownHook(Thread {
         motherInstance.shutdown()
         Log.info("System shut down")
+        Log.saveLog("${Mother.systemPath}/logs")
     })
 }

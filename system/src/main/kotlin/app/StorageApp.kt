@@ -14,7 +14,6 @@ import Row
 import Text
 import common.Color
 import common.Log
-import impl.GraphicServiceImpl
 import modifier.HorizontalArrangement
 import modifier.Modifier
 import modifier.TextAlignment
@@ -50,7 +49,7 @@ class StorageApp(
     }
     fun MutableList<View>.buildUI() {
         val files = File(currentPath).listFiles()
-        LazyColumn(modifier = Modifier.fillMaxSize().paddingBottom(60), this).layout {
+        LazyColumn(modifier = Modifier.fillMaxSize(), this).layout {
             files.forEach {
                 file(it)
             }
@@ -115,7 +114,7 @@ class StorageApp(
         fileViewOpen = true
         gs.setContent(true) {
             Column(modifier = Modifier.fillMaxSize().background(Color.BLACK), parent = this). layout {
-                val calcSize=GraphicServiceImpl.getScreenSize()/3
+                val calcSize=gs.getScreenSize()/3
                 Image(modifier = Modifier.size(calcSize.x), file = img, parent = this)
             }
         }

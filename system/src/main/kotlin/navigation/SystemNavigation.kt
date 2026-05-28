@@ -110,43 +110,58 @@ class SystemNavigation(val graphicService: GraphicServiceImpl) {
     }
 
     fun MutableList<View>.showTabs() {
-        Column(modifier = Modifier.fillMaxSize().background(Color.PINK), parent = this).layout {
-            LazyColumn(modifier = Modifier.fillMaxSize().background(Color.TRANSPARENT),this).layout {
-                graphicService.activityStack.values.forEach{activity ->
-                    Column(modifier = Modifier.size(400).padding(10).onClick {
-                        onTabs = false
-                        if(graphicService.focusedActivity?.javaClass!=activity.javaClass) {
-                            graphicService.clearStack()
-                            graphicService.focusedActivity = activity
-                            graphicService.setContent(true) {
-                                this.addAll(activity.lastState!!.toMutableList())
+        Image(Modifier.fillMaxSize(),file=File(SystemLauncher.LauncherConfig.getBackgroundPath()), parent=this)
+        Column(Modifier.fillMaxSize().background(Color(0,0,0,180)), parent = this).layout {
+            if(graphicService.activityStack.isEmpty()) {
+                Text(Modifier.fillMaxSize().background(Color.TRANSPARENT),text="No apps open", textSize=20, parent=this)
+            } else {
+                LazyColumn(Modifier.fillMaxSize().background(Color.TRANSPARENT), parent=this).layout {
+                    graphicService.activityStack.values.forEach { activity ->
+                        Column(Modifier.size(400).padding(10).onClick {
+                            onTabs = false
+                            if (graphicService.focusedActivity?.javaClass != activity.javaClass) {
+                                graphicService.clearStack()
+                                graphicService.focusedActivity = activity
+                                graphicService.setContent(true) {
+                                    this.addAll(activity.lastState!!.toMutableList())
+                                }
+                            } else graphicService.popBackStack()
+                            graphicService.redraw()
+                        }.onHold {
+                            graphicService.activityStack.remove(activity.javaClass)
+                            if (graphicService.focusedActivity?.javaClass == activity.javaClass) {
+                                graphicService.clearStack()
+                            } else {
+                                graphicService.popBackStack()
+                                graphicService.setContent(true) {
+                                    this.showTabs()
+                                }
                             }
-                        } else graphicService.popBackStack()
-                        graphicService.redraw()
-                    }.onHold {
-                        graphicService.activityStack.remove(activity.javaClass)
-                        if(graphicService.focusedActivity?.javaClass==activity.javaClass) {
-                            graphicService.clearStack()
-                        } else {
-                            graphicService.popBackStack()
-                            graphicService.setContent(true) {
-                                this.showTabs()
-                            }
+                            graphicService.redraw()
+                        }, parent = this).layout {
+                            Text(
+                                modifier = Modifier.fillMaxSize(),
+                                text = activity.javaClass.name,
+                                textSize = 19,
+                                textColor = Color.BLACK,
+                                parent = this
+                            )
                         }
+                    }
+                    Column(Modifier.width(400).height(100).padding(10).onClick {
+                        onTabs = false
+                        graphicService.activityStack.clear()
+                        graphicService.clearStack()
                         graphicService.redraw()
                     }, parent = this).layout {
-                        // Изменение из 2 варианта: textSize увеличен с 17 до 19
-                        Text(modifier = Modifier.fillMaxSize(), text = activity.javaClass.name, textSize = 19 , textColor = Color.BLACK ,parent = this)
+                        Text(
+                            modifier = Modifier.fillMaxSize(),
+                            text = "Close all",
+                            textSize = 19,
+                            textColor = Color.BLACK,
+                            parent = this
+                        )
                     }
-                }
-                Column(modifier = Modifier.width(400).height(100).padding(10).onClick {
-                    onTabs = false
-                    graphicService.activityStack.clear()
-                    graphicService.clearStack()
-                    graphicService.redraw()
-                }, parent = this).layout {
-                    // Изменение из 2 варианта: textSize увеличен с 17 до 19 для единообразия
-                    Text(modifier = Modifier.fillMaxSize(), text="Close all", textSize = 19 , textColor = Color.BLACK ,parent = this)
                 }
             }
         }

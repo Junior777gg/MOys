@@ -5,6 +5,7 @@ import LazyColumn
 import Renderer
 import navigation.SystemNavigation
 import View
+import WebView
 import common.Bounds
 import common.Log
 import common.Stack
@@ -13,13 +14,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import modifier.FillMaxHeight
 import modifier.Height
-import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Canvas
-import org.jetbrains.skia.ColorAlphaType
-import org.jetbrains.skia.ColorType
-import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skiko.SkiaLayer
 import org.jetbrains.skiko.SkikoView
+import web.WebViewEngine
 import service.GraphicService
 import java.awt.Dimension
 import java.awt.event.KeyEvent
@@ -30,7 +28,6 @@ import java.awt.event.MouseMotionAdapter
 import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt
 import java.io.File
-import java.nio.ByteBuffer
 import javax.imageio.ImageIO
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
@@ -45,32 +42,21 @@ class GraphicServiceImpl : GraphicService {
 
     companion object {
         var config: GraphicalConfig = GraphicalConfig(1920, 1080)
-
-        fun getScreenSize(): Vec2i = Vec2i(config.width, config.height)
-        fun getScreenHeight(): Int = config.height
-        fun getScreenWidth(): Int = config.width
-        fun isDesktopResolution(): Boolean = config.width > config.height
     }
 
+    //Rendering backend.
     lateinit var frame: JFrame
     private lateinit var skikoLayer: SkiaLayer
 
-    //The current View-element tree that is rendered on the screen
+    //UI trees & stacks.
     private val viewTree = mutableListOf<View>()
-
-    //Stack of screens for navigating "back"
+    private val viewTreeUntilInject = mutableListOf<View>()
+    private val lazyColumns = mutableListOf<LazyColumn>()
     val runtimeStack = Stack<MutableList<View>.() -> Unit>()
     val activityStack = mutableMapOf<Class<Activity>, Activity>()
 
-    //The list of clickable areas on the current frame
+    //After how much time click counts as hold.
     private val bounds = mutableListOf<Bounds>()
-
-    //Saved tree before calling injectUI (for restoration when cancelInject is called)
-    private val viewTreeUntilInject = mutableListOf<View>()
-
-    private val lazyColumn = mutableListOf<LazyColumn>()
-
-    //After how much time click counts as hold (comment from V2)
     private val cursorHoldThreshold = 400L
     private var cursorHoldTimestamp = 0L
     private var isMouseDragged = false
@@ -81,9 +67,9 @@ class GraphicServiceImpl : GraphicService {
     private var saveScreenshot = false
     private var screenshotPath = ""
 
-    private val renderer = Renderer(this, bounds, lazyColumn, getScreenHeight(), getScreenWidth())
+    //renderer.Renderer holders.
+    private val renderer = Renderer(this, bounds, lazyColumns, getScreenHeight(), getScreenWidth())
     private val navigation = SystemNavigation(this)
-
 
     fun initialize(systemPath: String) {
         Log.dbg("Getting config")
@@ -108,7 +94,7 @@ class GraphicServiceImpl : GraphicService {
                 if (viewTree.isEmpty()) return
 
                 renderer.currentRenderTree.clear()
-                lazyColumn.clear()
+                lazyColumns.clear()
                 bounds.clear()
                 viewTree.forEach {
                     renderer.calculate(it)
@@ -177,11 +163,18 @@ class GraphicServiceImpl : GraphicService {
 
         skikoLayer.addMouseMotionListener(object : MouseMotionAdapter() {
             override fun mouseDragged(e: MouseEvent) {
-                if (lazyColumn.isNotEmpty()) {
+                val deltaY = e.y.toDouble() - lastMouseY
+                lastMouseY = e.y.toDouble()
+
+                if (fireScrollToWebViews(deltaY, e.x.toDouble(), e.y.toDouble(), false)) {
                     isMouseDragged = true
-                    val deltaY = e.y.toDouble() - lastMouseY
-                    lastMouseY = e.y.toDouble()
-                    val list = lazyColumn[0]
+                    redraw()
+                    return
+                }
+
+                if (lazyColumns.isNotEmpty()) {
+                    isMouseDragged = true
+                    val list = lazyColumns[0]
                     list.offset += deltaY
                     val containerHeight = list.modifier.get<Height>()?.height?.toDouble()
                         ?: list.modifier.get<FillMaxHeight>()?.let { getScreenHeight().toDouble() }
@@ -190,7 +183,28 @@ class GraphicServiceImpl : GraphicService {
                     redraw()
                 }
             }
+
+            override fun mouseMoved(e: MouseEvent) {
+                fireHoverToWebViews(e.x.toDouble(), e.y.toDouble())
+            }
         })
+        skikoLayer.addMouseWheelListener { e ->
+            val deltaY = e.wheelRotation.toDouble()
+
+            if (fireScrollToWebViews(deltaY, e.x.toDouble(), e.y.toDouble(), true)) {
+                redraw()
+                return@addMouseWheelListener
+            }
+            if (lazyColumns.isNotEmpty()) {
+                val list = lazyColumns[0]
+                list.offset += -deltaY * 25
+                val containerHeight = list.modifier.get<Height>()?.height?.toDouble()
+                    ?: list.modifier.get<FillMaxHeight>()?.let { getScreenHeight().toDouble() }
+                    ?: getScreenHeight().toDouble()
+                list.updateScrollBound(containerHeight)
+                redraw()
+            }
+        }
         skikoLayer.addMouseListener(object : MouseAdapter() {
             override fun mouseReleased(e: MouseEvent?) {
                 super.mouseReleased(e)
@@ -211,17 +225,29 @@ class GraphicServiceImpl : GraphicService {
         })
         skikoLayer.addKeyListener(object : KeyListener {
             override fun keyTyped(e: KeyEvent?) {}
-            override fun keyReleased(e: KeyEvent?) {}
+
+            override fun keyReleased(e: KeyEvent?) {
+                if (e == null) return
+                forwardKeyToWebViews(e.keyChar, e.keyCode, false)
+            }
 
             override fun keyPressed(e: KeyEvent?) {
-                if (e?.keyChar == null) return
-                val key = e.keyChar
-                when (key) {
-                    'q' -> popBackStack()
-                    'w' -> clearStack()
-                    'h' -> takeScreenshot("${systemPath}/screenshot.png")
+                if (e == null) return
+
+                if (e.isControlDown) {
+                    when (e.keyCode) {
+                        KeyEvent.VK_Q -> { popBackStack(); return }
+                        KeyEvent.VK_W -> { clearStack(); return }
+                        KeyEvent.VK_H -> { takeScreenshot("${systemPath}/screenshot.png"); return }
+                    }
                 }
-                Log.dbg("Pressed key '$key'")
+
+                if (forwardKeyToWebViews(e.keyChar, e.keyCode, true)) {
+                    redraw()
+                    return
+                }
+
+                Log.dbg("Pressed key '${e.keyChar}'")
             }
         })
 
@@ -262,6 +288,7 @@ class GraphicServiceImpl : GraphicService {
         focusedActivity?.onDestroy()
         focusedActivity = null
         while (runtimeStack.size() > 1) runtimeStack.popBack()
+        WebViewEngine.disposeAll()
         renderer.clearCacheFull()
         updateStack()
     }
@@ -318,12 +345,16 @@ class GraphicServiceImpl : GraphicService {
         skikoLayer.needRedraw()
     }
 
+    /**Screen resolution helpers.*/
+    override fun getScreenHeight(): Int = config.height
+    override fun getScreenWidth(): Int = config.width
+
     /**Sets the content of the screen. If itIsNewScreen=true, adds the screen to the navigation stack*/
     override fun setContent(itIsNewScreen: Boolean, lambda: MutableList<View>.() -> Unit) {
         renderer.currentAnimations.clear()
 
         viewTree.clear()
-        lazyColumn.clear()
+        lazyColumns.clear()
         viewTree.lambda()
         focusedActivity?.lastState = viewTree.toMutableList()
         navigation.setUpNavigation(viewTree)
@@ -358,6 +389,7 @@ class GraphicServiceImpl : GraphicService {
         } else {
             focusedActivity?.onDestroy()
             runtimeStack.popBack()
+            WebViewEngine.disposeAll()
             updateStack()
         }
         if (runtimeStack.size() <= 1) {
@@ -383,5 +415,79 @@ class GraphicServiceImpl : GraphicService {
                 return
             }
         }
+        fireClickToWebViews(x,y)
+    }
+    /**Communicates given key to all WebViews*/
+    private fun forwardKeyToWebViews(char: Char, code: Int, down: Boolean): Boolean {
+        val webViews = collectWebViews(viewTree)
+        if (webViews.isEmpty()) return false
+        webViews.first().pendingInputs.add(
+            WebViewInputEvent.Key(char, code, down)
+        )
+        return true
+    }
+    /**Communicates given scroll to all WebViews*/
+    private fun fireScrollToWebViews(
+        delta: Double,
+        x: Double,
+        y: Double,
+        isWheelEvent: Boolean = false
+    ): Boolean {
+        val webViews = collectWebViews(viewTree)
+        for (webView in webViews) {
+            val bounds = webView.lastBounds ?: continue
+            if (x >= bounds[0] && x <= bounds[2] &&
+                y >= bounds[1] && y <= bounds[3]
+            ) {
+                isMouseDragged = true
+                WebViewEngine.dispatchScroll(
+                    webView,
+                    (x - bounds[0]).toFloat(),
+                    (y - bounds[1]).toFloat(),
+                    delta.toFloat(),
+                    isWheelEvent
+                )
+                return true
+            }
+        }
+        return false
+    }
+    /**Communicates given hover position to all WebViews*/
+    private fun fireHoverToWebViews(x: Double, y: Double) {
+        val webViews = collectWebViews(viewTree)
+        for (webView in webViews) {
+            val bounds = webView.lastBounds ?: continue
+            if (x >= bounds[0] && x <= bounds[2] && y >= bounds[1] && y <= bounds[3]) {
+                val lx = (x - bounds[0]).toFloat()
+                val ly = (y - bounds[1]).toFloat()
+                //Queue a lightweight JS mousemove.
+                javafx.application.Platform.runLater {
+                    val holder = WebViewEngine.getHolder(webView) ?: return@runLater
+                    holder.executeMouseMove(lx, ly)
+                }
+                return
+            }
+        }
+    }
+    /**Communicates given click position to all WebViews*/
+    private fun fireClickToWebViews(x: Double, y: Double): Boolean {
+        val webViews = collectWebViews(viewTree)
+        if (webViews.isEmpty()) return false
+        for (webView in webViews) {
+            val bounds = webView.lastBounds ?: continue
+            if (x >= bounds[0] && x <= bounds[2] && y >= bounds[1] && y <= bounds[3]) {
+                WebViewEngine.dispatchClick(webView,
+                    (x - bounds[0]).toFloat(),
+                    (y - bounds[1]).toFloat())
+                return true
+            }
+        }
+        return false
+    }
+    /**Returns list of all WebViews*/
+    private fun collectWebViews(roots: List<View>): List<WebView> {
+        val out = mutableListOf<WebView>()
+        fun walk(v: View) { if (v is WebView) out += v; v.children.forEach(::walk) }
+        roots.forEach(::walk); return out
     }
 }

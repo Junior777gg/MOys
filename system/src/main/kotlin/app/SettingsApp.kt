@@ -63,7 +63,7 @@ class SettingsApp(
                 horizontalArrangement = HorizontalArrangement.Left(),
                 parent = this
             ).layout {
-                if(!GraphicServiceImpl.isDesktopResolution()) {
+                if(!gs.isDesktopResolution()) {
                     Image(
                         modifier = Modifier.size(135).padding(5).onClick { setBG("backgrounds/mobile/1.png") },
                         file = File("${Mother.systemPath}/install/launcher/res/backgrounds/mobile/1.png"),

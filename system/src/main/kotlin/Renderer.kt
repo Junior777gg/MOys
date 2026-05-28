@@ -47,11 +47,13 @@ import org.jetbrains.skia.paragraph.FontCollection
 import org.jetbrains.skia.paragraph.ParagraphBuilder
 import org.jetbrains.skia.paragraph.ParagraphStyle
 import org.jetbrains.skia.paragraph.TextStyle
+import web.WebViewEngine
+import java.io.File
 import kotlin.math.roundToInt
 
 
 /**
- * Renderer. Traverses the View tree and renders elements using OpenGL.
+ * renderer.Renderer. Traverses the View tree and renders elements using OpenGL.
  * Caches fonts and textures for performance.
  */
 data class RenderNodes(
@@ -65,12 +67,12 @@ data class RenderNodes(
 class Renderer(
     val gs: GraphicServiceImpl,
     val bounds: MutableList<Bounds>,
-    val lazyColumn: MutableList<LazyColumn>,
+    val lazyColumns: MutableList<LazyColumn>,
     var screenHeight: Int,
     var screenWidth: Int,
 ) {
     private val imageCache = HashMap<String, org.jetbrains.skia.Image>()
-    private fun getImage(file: java.io.File): org.jetbrains.skia.Image {
+    private fun getImage(file: File): org.jetbrains.skia.Image {
         return imageCache.getOrPut(file.absolutePath) {
             org.jetbrains.skia.Image.makeFromEncoded(file.readBytes())
         }
@@ -129,7 +131,7 @@ class Renderer(
         }
 
         if (view is LazyColumn) {
-            lazyColumn.add(view)
+            lazyColumns.add(view)
         }
 
         var x1 = avx1
@@ -166,6 +168,11 @@ class Renderer(
                 onClick?.invoke()
                 SystemKeyboard(gs, view).main()
             }, null))
+        } else if (view is WebView) {
+            bounds.add(Bounds(x1, y1, x2, y2, {
+                // dispatch handled separately; keep a no-op so the area is treated as interactive
+            }, null))
+            view.lastBounds = floatArrayOf(x1, y1, x2, y2)
         } else if (onClick != null) {
             bounds.add(Bounds(x1, y1, x2, y2, onClick, onHold))
         } else if (onHold != null) {
@@ -235,7 +242,6 @@ class Renderer(
                         currenty1 += currentHeight
                     }
                 }
-
                 is Column -> {
                     var currenty1 = 0.0f
                     var gap = 0.0f
@@ -330,8 +336,6 @@ class Renderer(
                         currenty1 += currentHeight + gap
                     }
                 }
-
-                //Row
                 is Row -> {
                     var gap = 0.0f
                     var currentx1 = 0.0f
@@ -659,6 +663,34 @@ class Renderer(
                         image = view.image!! as org.jetbrains.skia.Image,
                         dst = Rect.makeXYWH(x1, y1, x2 - x1, y2 - y1),
                     )
+                }
+            }
+
+            is WebView -> {
+                val w = (x2 - x1).toInt()
+                val h = (y2 - y1).toInt()
+                view.lastBounds = floatArrayOf(x1, y1, x2, y2)
+
+                if (w <= 0 || h <= 0) return
+
+                try {
+                    val img = WebViewEngine.frame(view, gs, w, h)
+                    if (img != null) {
+                        canvas.drawImageRect(
+                            img,
+                            Rect.makeXYWH(x1, y1, w.toFloat(), h.toFloat())
+                        )
+                    } else {
+                        canvas.drawRRect(
+                            RRect.makeXYWH(x1, y1, w.toFloat(), h.toFloat(), 0f),
+                            Paint().apply {
+                                color = org.jetbrains.skia.Color.makeRGB(240, 240, 240)
+                                mode = PaintMode.FILL
+                            }
+                        )
+                    }
+                } catch (e: Exception) {
+                    Log.error("Error drawing WebView", e)
                 }
             }
         }

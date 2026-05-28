@@ -1,53 +1,36 @@
 package app
 
-import impl.GraphicServiceImpl
-import javafx.embed.swing.JFXPanel
-import javafx.scene.Scene
-import javafx.scene.web.WebView
-import java.awt.Dimension
-import javax.swing.JButton
-import javax.swing.SwingUtilities
+import Activity
+import Column
+import Text
+import View
+import WebView
+import common.Color
+import modifier.Modifier
+import modifier.background
+import modifier.fillMaxSize
+import modifier.fillMaxWidth
+import modifier.height
+import service.DeviceManager
+import service.GraphicService
+import service.StorageService
 
-
-class BrowserApp : JFXPanel() {
-    init {
-        javafx.application.Platform.setImplicitExit(false)
+class BrowserApp(
+    override val gs: GraphicService,
+    override val storage: StorageService,
+    override val deviceManager: DeviceManager,
+    override var lastState: MutableList<View>?
+) : Activity {
+    override fun main() {
+        gs.setContent(itIsNewScreen = true) { buildUI() }
+        gs.redraw()
     }
-    private lateinit var webView: WebView
-
-    fun init() {
-        javafx.application.Platform.runLater {
-            webView = WebView()
-            val webEngine = webView.engine
-            webEngine.load("http://yandex.ru")
-
-            val scene = Scene(webView)
-            setScene(scene)
+    private fun MutableList<View>.buildUI() {
+        WebView(Modifier.fillMaxSize(),this, "https://yandex.ru/")
+        //WebView(Modifier.fillMaxSize(), this, "data:text/html,<html><body style='background:red'><h1>Hello</h1></body></html>")
+        Column(Modifier.fillMaxWidth().height(40).background(Color.TRANSPARENT), parent=this).layout {
+            Text(Modifier.fillMaxWidth().height(15),text="Clicking currently doesn't work", textColor=Color.BLACK, parent=this)
+            Text(Modifier.fillMaxWidth().height(15),text="Because of this Keyboard won't open too", textColor=Color.BLACK, parent=this)
         }
     }
-
-    fun createBrowser(gs: GraphicServiceImpl) {
-        val button = JButton("[eq[eq")
-        button.apply {
-            size = Dimension(50, 50)
-            addActionListener {
-                javafx.application.Platform.runLater {
-                    try {
-                        webView.engine.history.go(-1)
-                    }catch (e: IndexOutOfBoundsException) {
-                        gs.restore()
-                    }
-                }
-            }
-        }
-
-        val frame = gs.frame
-        SwingUtilities.invokeLater {
-            frame.contentPane.removeAll()
-            this.add(button)
-            frame.add(this)
-            frame.revalidate()
-        }
-    }
-
 }

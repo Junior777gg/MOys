@@ -23,13 +23,23 @@ interface GraphicService {
         val R_5K = Vec2i(5120, 2880)
         val R_8K = Vec2i(7680, 4320)
 
-        //All default resolutions in a list.
+        //All generic resolutions in a list.
         val R_ALL = listOf(R_360p, R_480p, R_960p, R_HD, R_720p, R_HD_PLUS, R_FULL_HD, R_WUXGA, R_2K)
     }
 
+    fun getScreenHeight(): Int
+    fun getScreenWidth(): Int
+    fun getScreenSize(): Vec2i = Vec2i(getScreenWidth(), getScreenHeight())
+    fun isDesktopResolution(): Boolean = getScreenWidth() > getScreenHeight()
+
+    /**Sets the content of the screen. If itIsNewScreen=true, adds the screen to the navigation stack*/
     fun setContent(itIsNewScreen: Boolean = false, lambda: MutableList<View>.() -> Unit)
+    /**Return to the previous screen in the navigation stack*/
     fun popBackStack()
+    /**Rerender screen must call after [setContent] or [injectUI].*/
     fun redraw()
+    /**Adds UI on top of the current screen (such as a keyboard). Preserves the previous state*/
     fun injectUI(lambda: MutableList<View>.() -> Unit)
+    /**Removes the injected UI and restores the previous state.*/
     fun cancelInject()
 }
